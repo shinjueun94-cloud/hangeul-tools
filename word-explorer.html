@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦄 한글 단어 탐험! Word Explorer 🔍</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #FFF0F6 0%, #F8F0FF 50%, #F0F8FF 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #2D2D2D;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  border-radius: 20px;
+  padding: 22px 28px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 6px 20px rgba(199, 125, 255, 0.25);
+  margin-bottom: 18px;
+}
+.header h1 { font-size: 28px; margin-bottom: 4px; font-weight: 700; }
+.header p { font-size: 14px; opacity: 0.95; }
+
+/* TOOLBAR */
+.toolbar {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.add-word-form {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  min-width: 280px;
+  align-items: center;
+}
+.add-word-form label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #C77DFF;
+  white-space: nowrap;
+}
+.add-word-form input {
+  flex: 1;
+  padding: 9px 14px;
+  border: 2px solid #E5E5E5;
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.add-word-form input:focus { border-color: #C77DFF; }
+.add-word-form .emoji-input {
+  width: 60px;
+  text-align: center;
+  font-size: 22px;
+  padding: 9px 6px;
+}
+.btn {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-add {
+  background: linear-gradient(135deg, #6BCB77 0%, #4D96FF 100%);
+  color: white;
+  box-shadow: 0 3px 8px rgba(107, 203, 119, 0.3);
+}
+.btn-add:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgba(107, 203, 119, 0.4); }
+.btn-back {
+  background: #F0F0F0;
+  color: #666;
+}
+.btn-back:hover { background: #E0E0E0; }
+
+/* CATEGORIES */
+.category {
+  background: white;
+  border-radius: 18px;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+.category-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #F0F0F0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.category-title .ko { color: #2D2D2D; }
+.category-title .en { font-size: 12px; color: #888; font-weight: 500; }
+
+/* WORD CARDS */
+.word-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.word-card {
+  background: linear-gradient(135deg, #FFF8FF 0%, #FFFFFF 100%);
+  border: 2px solid #E8D0FF;
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+}
+.word-card:hover {
+  transform: translateY(-4px);
+  border-color: #C77DFF;
+  box-shadow: 0 6px 14px rgba(199, 125, 255, 0.25);
+  background: linear-gradient(135deg, #F8F0FF 0%, #FFF0FF 100%);
+}
+.word-card.user-added {
+  background: linear-gradient(135deg, #FFFCE8 0%, #FFF8E0 100%);
+  border-color: #FFD93D;
+}
+.word-card.user-added:hover {
+  border-color: #FFA500;
+  box-shadow: 0 6px 14px rgba(255, 165, 0, 0.25);
+}
+.word-card .emoji { font-size: 38px; display: block; margin-bottom: 4px; }
+.word-card .kor {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 2px;
+}
+.word-card .rom { font-size: 10px; color: #888; font-style: italic; }
+.word-card .delete-x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  background: #FF6B6B;
+  color: white;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  border: 2px solid white;
+  cursor: pointer;
+}
+.word-card.user-added:hover .delete-x { display: flex; }
+
+/* DETAIL VIEW */
+.detail {
+  display: none;
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  animation: fadeIn 0.3s ease;
+}
+.detail.show { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.detail-header {
+  text-align: center;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid #F0F0F0;
+}
+.detail-emoji { font-size: 70px; display: block; margin-bottom: 6px; }
+.detail-word {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  color: #C77DFF;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.detail-rom {
+  font-size: 18px;
+  color: #888;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.detail-meaning { font-size: 16px; color: #2D2D2D; font-weight: 600; margin-bottom: 14px; }
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-speak {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  color: white;
+  font-size: 15px;
+  padding: 11px 22px;
+  box-shadow: 0 3px 8px rgba(199,125,255,0.3);
+}
+.btn-speak:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(199,125,255,0.4); }
+
+/* SYLLABLES (글자별 분해) */
+.section-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #C77DFF;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.syllables {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.syllable-card {
+  background: linear-gradient(135deg, #FFF8E0 0%, #FFFDE0 100%);
+  border: 2px solid #FFD93D;
+  border-radius: 14px;
+  padding: 14px 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  min-width: 100px;
+}
+.syllable-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgba(255, 217, 61, 0.35);
+}
+.syllable-card .syl {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #2D2D2D;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.syllable-card .syl-rom {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+}
+
+/* JAMO BLOCKS (자모음 분해) */
+.jamo-section {
+  background: linear-gradient(135deg, #FAFAFF 0%, #FFF8FF 100%);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.jamo-blocks {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.jamo-block {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.jamo-block.consonant { background: #FF6B6B; }
+.jamo-block.vowel { background: #4D96FF; }
+.jamo-block.batchim { background: #6BCB77; }
+.jamo-block::before, .jamo-block::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.jamo-block::before { left: 30%; transform: translateX(-50%); }
+.jamo-block::after { right: 30%; transform: translateX(50%); }
+.jamo-block:hover {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+.jamo-block.selected {
+  outline: 4px solid #FFD93D;
+  outline-offset: 3px;
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { outline-color: #FFD93D; }
+  50% { outline-color: #FFA500; }
+}
+.jamo-label {
+  font-size: 10px;
+  color: #888;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* RELATED WORDS */
+.related-section {
+  background: linear-gradient(135deg, #F0F8FF 0%, #FFF8FF 100%);
+  border-radius: 16px;
+  padding: 18px;
+  border: 2px dashed #C77DFF;
+  display: none;
+}
+.related-section.show { display: block; animation: fadeIn 0.3s ease; }
+.related-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: #C77DFF;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.related-header strong {
+  background: white;
+  padding: 2px 10px;
+  border-radius: 8px;
+  font-size: 22px;
+  font-family: 'Malgun Gothic', sans-serif;
+}
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+  gap: 8px;
+}
+.related-card {
+  background: white;
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1.5px solid transparent;
+}
+.related-card:hover {
+  transform: translateY(-2px);
+  border-color: #C77DFF;
+  box-shadow: 0 4px 8px rgba(199, 125, 255, 0.2);
+}
+.related-card .emoji { font-size: 28px; display: block; }
+.related-card .kor {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2D2D2D;
+}
+.related-card .kor .highlight {
+  color: #FF6B6B;
+  background: #FFF0F0;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+.related-card .kor .highlight.vowel { color: #4D96FF; background: #F0F6FF; }
+.no-related {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  font-size: 13px;
+  padding: 14px;
+}
+
+/* TOAST */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: min(520px, 92vw);
+}
+.toast {
+  background: #2D2D2D;
+  color: #FFFFFF;
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  animation: toastIn 0.4s ease, toastOut 0.4s ease 3.6s forwards;
+  pointer-events: auto;
+}
+.toast .toast-icon {
+  width: 28px;
+  height: 28px;
+  background: #6BCB77;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.toast .toast-icon.warn { background: #FF6B6B; }
+.toast .toast-body { flex: 1; line-height: 1.4; }
+.toast .toast-close {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+@keyframes toastIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-30px); opacity: 0; }
+}
+
+/* PRACTICE STACKING */
+.practice-section {
+  background: linear-gradient(135deg, #F0FFF0 0%, #F0F8FF 100%);
+  border-radius: 18px;
+  padding: 22px;
+  margin-top: 22px;
+  border: 2px dashed #6BCB77;
+}
+.practice-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.practice-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 6px;
+}
+.practice-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+.practice-subtitle strong {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 22px;
+  color: #C77DFF;
+  background: white;
+  padding: 2px 10px;
+  border-radius: 8px;
+  margin: 0 4px;
+}
+
+.pool-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.practice-pool-wrap, .practice-canvas-wrap { margin-bottom: 14px; }
+
+/* CANVAS — holds syllable boxes side-by-side */
+.practice-canvas {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  min-height: 180px;
+  padding: 22px 16px 16px;
+  background: linear-gradient(135deg, #FFFCE0 0%, #FFF8E5 100%);
+  border-radius: 12px;
+  border: 2.5px dashed #FFD93D;
+}
+
+/* SYLLABLE BOX (fixed-width, like the LEGO builder) */
+.syllable-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 8px 8px;
+  width: 130px;
+  min-height: 140px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 12px;
+  border: 2.5px dashed #FFB347;
+  transition: all 0.18s ease;
+  position: relative;
+}
+.syllable-box.drag-over {
+  background: rgba(255, 217, 61, 0.3);
+  border-color: #FFA500;
+  border-style: solid;
+}
+.syllable-box.active {
+  border-color: #C77DFF;
+  border-style: solid;
+  background: rgba(199, 125, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.15);
+}
+.syllable-box.complete {
+  border-color: #6BCB77;
+  border-style: solid;
+  background: rgba(107, 203, 119, 0.06);
+}
+
+.syllable-box-label {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  background: white;
+  padding: 2px 10px;
+  border-radius: 8px;
+  border: 1.5px solid #DDD;
+  white-space: nowrap;
+}
+.syllable-box.active .syllable-box-label {
+  color: #C77DFF;
+  border-color: #C77DFF;
+}
+.syllable-box.complete .syllable-box-label {
+  color: #1A8B3A;
+  border-color: #6BCB77;
+}
+
+/* Top row: C+V */
+.sb-top {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+.sb-top.layout-side { flex-direction: row; }
+.sb-top.layout-side .sb-slot { flex: 1; height: 60px; }
+.sb-top.layout-stack { flex-direction: column; }
+.sb-top.layout-stack .sb-slot { width: 100%; height: 42px; }
+
+/* Bottom row: 받침 */
+.sb-bottom {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+}
+.sb-bottom .sb-slot { flex: 1; height: 36px; }
+
+/* Slot — empty placeholder or filled block */
+.sb-slot {
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Malgun Gothic', sans-serif;
+  font-weight: 700;
+  color: white;
+  position: relative;
+  transition: all 0.15s ease;
+}
+.sb-slot.empty {
+  background: #F2F2F5;
+  color: #C5C5CC;
+  border: 2px dashed #DDD;
+  font-size: 16px;
+  cursor: default;
+}
+.sb-slot.empty.subtle {
+  background: rgba(242, 242, 245, 0.5);
+  color: #D5D5DC;
+  border-style: dotted;
+  font-size: 14px;
+}
+.sb-slot.filled {
+  cursor: pointer;
+  font-size: 22px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+  animation: blockPop 0.3s ease;
+}
+.sb-slot.filled.consonant { background: #FF6B6B; }
+.sb-slot.filled.vowel { background: #4D96FF; }
+.sb-slot.filled.batchim { background: #6BCB77; }
+.sb-slot.filled::before, .sb-slot.filled::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.sb-slot.filled::before { left: 30%; transform: translateX(-50%); }
+.sb-slot.filled::after { right: 30%; transform: translateX(50%); }
+.sb-slot.filled:hover { transform: scale(1.05); }
+
+/* POOL */
+.practice-pool {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 70px;
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #E8E8E8;
+}
+
+.practice-block {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  cursor: grab;
+  transition: all 0.15s ease;
+  position: relative;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+.practice-block.consonant { background: #FF6B6B; }
+.practice-block.vowel { background: #4D96FF; }
+.practice-block.batchim { background: #6BCB77; }
+.practice-block::before, .practice-block::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.practice-block::before { left: 30%; transform: translateX(-50%); }
+.practice-block::after { right: 30%; transform: translateX(50%); }
+.practice-block:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+.practice-block.dragging { opacity: 0.4; }
+.practice-block.used {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@keyframes blockPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.practice-feedback {
+  text-align: center;
+  margin: 14px 0;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feedback-message {
+  display: inline-block;
+  padding: 14px 26px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 700;
+  animation: feedbackIn 0.4s ease;
+}
+.feedback-message.success {
+  background: linear-gradient(135deg, #6BCB77 0%, #4D96FF 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(107, 203, 119, 0.4);
+}
+.feedback-message.error {
+  background: linear-gradient(135deg, #FFB347 0%, #FF8C42 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(255, 140, 66, 0.4);
+}
+.feedback-message .small {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+@keyframes feedbackIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.practice-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.btn-check {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  color: white;
+  font-size: 14px;
+  padding: 10px 22px;
+  box-shadow: 0 3px 8px rgba(199, 125, 255, 0.3);
+}
+.btn-check:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgba(199, 125, 255, 0.4); }
+.btn-check:disabled {
+  background: #DDD;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .header h1 { font-size: 22px; }
+  .detail-word { font-size: 44px; }
+  .jamo-block { width: 46px; height: 46px; font-size: 22px; }
+  .word-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🦄  한글 단어 탐험!  Word Explorer  🔍</h1>
+    <p>Click a word you know — see how it's made of LEGO blocks!</p>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbarMain">
+    <div class="add-word-form">
+      <label for="newWord">✏️ Add word:</label>
+      <input type="text" id="newEmoji" class="emoji-input" placeholder="🦄" maxlength="2" />
+      <input type="text" id="newWord" placeholder="한국어 단어 입력  (e.g. 무지개)" maxlength="20" />
+      <input type="text" id="newMeaning" placeholder="meaning (optional)" maxlength="30" style="flex:0 0 140px;font-size:13px;font-family:inherit;font-weight:500;" />
+      <button class="btn btn-add" onclick="addWord()">+ Add</button>
+    </div>
+  </div>
+
+  <!-- WORD GALLERY (main view) -->
+  <div id="galleryView">
+    <div id="categoriesContainer"></div>
+  </div>
+
+  <!-- DETAIL VIEW -->
+  <div id="detailView" class="detail">
+    <button class="btn btn-back" onclick="closeDetail()" style="margin-bottom:14px;">← Back to all words</button>
+    <div class="detail-header">
+      <span class="detail-emoji" id="detailEmoji">🦄</span>
+      <div class="detail-word" id="detailWord">한나</div>
+      <div class="detail-rom" id="detailRom">han-na</div>
+      <div class="detail-meaning" id="detailMeaning">Hannah</div>
+      <div class="detail-actions">
+        <button class="btn btn-speak" onclick="speakDetailWord()">🔊 Listen to the word</button>
+      </div>
+    </div>
+
+    <div class="section-label">📝 Syllables (글자) — click to hear each one</div>
+    <div class="syllables" id="syllablesContainer"></div>
+
+    <div class="jamo-section">
+      <div class="section-label">🧱 LEGO Blocks (자모음) — click to hear & explore</div>
+      <div class="jamo-blocks" id="jamoBlocksContainer"></div>
+    </div>
+
+    <div class="related-section" id="relatedSection">
+      <div class="related-header" id="relatedHeader">Other words with <strong>?</strong></div>
+      <div class="related-grid" id="relatedGrid"></div>
+    </div>
+
+    <!-- STACKING PRACTICE -->
+    <div class="practice-section" id="practiceSection">
+      <div class="practice-header">
+        <div class="practice-title">🧱 Build it yourself!  직접 만들어봐!</div>
+        <div class="practice-subtitle">Fill the syllable boxes to spell <strong id="practiceTargetWord">한나</strong></div>
+      </div>
+
+      <!-- Shuffled blocks to pick from (TOP) -->
+      <div class="practice-pool-wrap">
+        <div class="pool-label">📦 Pick blocks from here:</div>
+        <div class="practice-pool" id="practicePool"></div>
+      </div>
+
+      <!-- Syllable boxes — drag blocks DOWN into here -->
+      <div class="practice-canvas-wrap">
+        <div class="pool-label">⬇️ Drag the blocks down here to build syllables:</div>
+        <div class="practice-canvas" id="practiceCanvas"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="practice-feedback" id="practiceFeedback"></div>
+
+      <!-- Actions -->
+      <div class="practice-actions">
+        <button class="btn btn-back" onclick="resetPractice()">↺ Try Again  다시</button>
+        <button class="btn btn-check" id="practiceCheckBtn" onclick="checkPractice()">✓ Check!  확인</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+const DEFAULT_WORDS = [
+  // 가족 / 사람
+  {cat:'family', kor:'한나',   emoji:'✨', meaning:'Hannah'},
+  {cat:'family', kor:'엄마',   emoji:'👩', meaning:'mum'},
+  {cat:'family', kor:'아빠',   emoji:'👨', meaning:'dad'},
+  {cat:'family', kor:'아영',   emoji:'💕', meaning:"mum's name"},
+  {cat:'family', kor:'톰',     emoji:'💙', meaning:"dad's name"},
+  {cat:'family', kor:'친구',   emoji:'🤝', meaning:'friend'},
+  // 국가
+  {cat:'country', kor:'영국',  emoji:'🇬🇧', meaning:'UK'},
+  {cat:'country', kor:'한국',  emoji:'🇰🇷', meaning:'Korea'},
+  // 음식
+  {cat:'food', kor:'밥',       emoji:'🍚', meaning:'rice'},
+  {cat:'food', kor:'김',       emoji:'🌿', meaning:'seaweed'},
+  {cat:'food', kor:'빵',       emoji:'🍞', meaning:'bread'},
+  {cat:'food', kor:'라면',     emoji:'🍜', meaning:'ramen'},
+  {cat:'food', kor:'우유',     emoji:'🥛', meaning:'milk'},
+  {cat:'food', kor:'사과',     emoji:'🍎', meaning:'apple'},
+  {cat:'food', kor:'피자',     emoji:'🍕', meaning:'pizza'},
+  {cat:'food', kor:'바나나',   emoji:'🍌', meaning:'banana'},
+  {cat:'food', kor:'김밥',     emoji:'🍙', meaning:'kimbap'},
+  // 동물 / 캐릭터
+  {cat:'animal', kor:'강아지', emoji:'🐶', meaning:'puppy'},
+  {cat:'animal', kor:'고양이', emoji:'🐱', meaning:'cat'},
+  {cat:'animal', kor:'유니콘', emoji:'🦄', meaning:'unicorn'},
+  {cat:'animal', kor:'곰',     emoji:'🐻', meaning:'bear'},
+  {cat:'animal', kor:'토끼',   emoji:'🐰', meaning:'rabbit'},
+  {cat:'animal', kor:'너굴',   emoji:'🦝', meaning:'Tom Nook'},
+  {cat:'animal', kor:'여울',   emoji:'🐶', meaning:'Isabelle'},
+  // 신체
+  {cat:'body', kor:'머리',     emoji:'🧠', meaning:'head'},
+  {cat:'body', kor:'눈',       emoji:'👁️', meaning:'eye'},
+  {cat:'body', kor:'코',       emoji:'👃', meaning:'nose'},
+  {cat:'body', kor:'입',       emoji:'👄', meaning:'mouth'},
+  {cat:'body', kor:'손',       emoji:'✋', meaning:'hand'},
+  {cat:'body', kor:'발',       emoji:'🦶', meaning:'foot'},
+  {cat:'body', kor:'다리',     emoji:'🦵', meaning:'leg'},
+  // 자주 쓰는 말
+  {cat:'phrase', kor:'안녕',   emoji:'👋', meaning:'hello'},
+  {cat:'phrase', kor:'좋아',   emoji:'❤️', meaning:'I like it'},
+  {cat:'phrase', kor:'싫어',   emoji:'😤', meaning:"I don't like it"},
+  {cat:'phrase', kor:'배고파', emoji:'😋', meaning:"I'm hungry"},
+  {cat:'phrase', kor:'네',     emoji:'✅', meaning:'yes'},
+  {cat:'phrase', kor:'아니야', emoji:'🙅', meaning:'no'},
+  {cat:'phrase', kor:'알아',   emoji:'💡', meaning:'I know'},
+  {cat:'phrase', kor:'몰라',   emoji:'🤷', meaning:"I don't know"},
+  {cat:'phrase', kor:'배불러', emoji:'🤰', meaning:"I'm full"},
+  {cat:'phrase', kor:'주세요', emoji:'🙏', meaning:'please give me'},
+  // 한나 관심사
+  {cat:'fun', kor:'무지개',    emoji:'🌈', meaning:'rainbow'},
+  {cat:'fun', kor:'별',        emoji:'⭐', meaning:'star'},
+  {cat:'fun', kor:'마법',      emoji:'✨', meaning:'magic'},
+  {cat:'fun', kor:'공주',      emoji:'👸', meaning:'princess'},
+];
+
+const CATEGORIES = [
+  {id:'family',  ko:'👨‍👩‍👧 가족 & 사람',   en:'Family & People'},
+  {id:'country', ko:'🌍 국가',             en:'Countries'},
+  {id:'food',    ko:'🍕 음식',             en:'Food'},
+  {id:'animal',  ko:'🐾 동물 & 캐릭터',    en:'Animals & Characters'},
+  {id:'body',    ko:'👂 몸',               en:'Body Parts'},
+  {id:'phrase',  ko:'🗣️ 자주 쓰는 말',     en:'Common Phrases'},
+  {id:'fun',     ko:'🦄 좋아하는 것',      en:'Favourite Things'},
+  {id:'custom',  ko:'✏️ 새로 추가한 단어', en:'Added Words'},
+];
+
+// Hangul Unicode composition
+const INITIALS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const MEDIALS = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const FINALS = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+const ROM_INITIAL = {'ㄱ':'g','ㄲ':'kk','ㄴ':'n','ㄷ':'d','ㄸ':'tt','ㄹ':'r','ㅁ':'m','ㅂ':'b','ㅃ':'pp','ㅅ':'s','ㅆ':'ss','ㅇ':'','ㅈ':'j','ㅉ':'jj','ㅊ':'ch','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+const ROM_MEDIAL = {'ㅏ':'a','ㅐ':'ae','ㅑ':'ya','ㅒ':'yae','ㅓ':'eo','ㅔ':'e','ㅕ':'yeo','ㅖ':'ye','ㅗ':'o','ㅘ':'wa','ㅙ':'wae','ㅚ':'oe','ㅛ':'yo','ㅜ':'u','ㅝ':'wo','ㅞ':'we','ㅟ':'wi','ㅠ':'yu','ㅡ':'eu','ㅢ':'ui','ㅣ':'i'};
+const ROM_FINAL = {'':'','ㄱ':'k','ㄲ':'k','ㄴ':'n','ㄷ':'t','ㄹ':'l','ㅁ':'m','ㅂ':'p','ㅅ':'t','ㅆ':'t','ㅇ':'ng','ㅈ':'t','ㅊ':'t','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+
+// State
+let allWords = [...DEFAULT_WORDS];
+let userWords = [];
+try {
+  const saved = sessionStorage.getItem('userWords');
+  if (saved) {
+    userWords = JSON.parse(saved);
+    allWords = [...DEFAULT_WORDS, ...userWords];
+  }
+} catch(e) {}
+
+let currentWord = null;
+
+// ══════════════════════════════════════════════════════════════
+// HANGUL DECOMPOSITION
+// ══════════════════════════════════════════════════════════════
+function decomposeSyllable(char) {
+  const code = char.charCodeAt(0) - 0xAC00;
+  if (code < 0 || code > 11171) return null;
+  const iIdx = Math.floor(code / 588);
+  const mIdx = Math.floor((code % 588) / 28);
+  const fIdx = code % 28;
+  return {
+    initial: INITIALS[iIdx],
+    medial: MEDIALS[mIdx],
+    final: fIdx > 0 ? FINALS[fIdx] : null,
+  };
+}
+
+function decomposeWord(word) {
+  const syllables = [];
+  for (const ch of word) {
+    const d = decomposeSyllable(ch);
+    if (d) {
+      syllables.push({char: ch, ...d});
+    }
+  }
+  return syllables;
+}
+
+function romanizeSyllable(syl) {
+  let r = (ROM_INITIAL[syl.initial] || '') + (ROM_MEDIAL[syl.medial] || '');
+  if (syl.final) r += (ROM_FINAL[syl.final] || '');
+  return r;
+}
+
+function romanizeWord(word) {
+  return decomposeWord(word).map(romanizeSyllable).join('-');
+}
+
+// Get all unique jamos in a word, in order
+function getAllJamos(word) {
+  const jamos = [];
+  for (const syl of decomposeWord(word)) {
+    jamos.push({jamo: syl.initial, type: 'consonant'});
+    jamos.push({jamo: syl.medial, type: 'vowel'});
+    if (syl.final) jamos.push({jamo: syl.final, type: 'batchim'});
+  }
+  return jamos;
+}
+
+// Check if a word contains a given jamo
+function wordContainsJamo(word, jamo) {
+  for (const syl of decomposeWord(word)) {
+    if (syl.initial === jamo || syl.medial === jamo || syl.final === jamo) return true;
+  }
+  return false;
+}
+
+// Highlight jamo in a word (for displaying related words)
+function highlightJamoInWord(word, targetJamo, type) {
+  const syllables = decomposeWord(word);
+  return syllables.map(syl => {
+    const has = syl.initial === targetJamo || syl.medial === targetJamo || syl.final === targetJamo;
+    const cls = type === 'vowel' ? 'highlight vowel' : 'highlight';
+    return has ? `<span class="${cls}">${syl.char}</span>` : syl.char;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER GALLERY
+// ══════════════════════════════════════════════════════════════
+function renderGallery() {
+  const container = document.getElementById('categoriesContainer');
+  container.innerHTML = CATEGORIES.map(cat => {
+    const words = allWords.filter(w => w.cat === cat.id);
+    if (words.length === 0 && cat.id !== 'custom') return '';
+    if (cat.id === 'custom' && words.length === 0) {
+      return `
+        <div class="category">
+          <div class="category-title">
+            <span class="ko">${cat.ko}</span>
+            <span class="en">${cat.en}</span>
+          </div>
+          <p style="color:#AAA;font-style:italic;font-size:13px;text-align:center;padding:10px;">No words added yet. Use the form above to add a word!</p>
+        </div>`;
+    }
+    return `
+      <div class="category">
+        <div class="category-title">
+          <span class="ko">${cat.ko}</span>
+          <span class="en">${cat.en}</span>
+        </div>
+        <div class="word-grid">
+          ${words.map(w => `
+            <div class="word-card ${w.cat === 'custom' ? 'user-added' : ''}" data-word="${escapeHtml(w.kor)}">
+              ${w.cat === 'custom' ? `<span class="delete-x" data-word="${escapeHtml(w.kor)}">×</span>` : ''}
+              <span class="emoji">${w.emoji}</span>
+              <div class="kor">${w.kor}</div>
+              <div class="rom">${romanizeWord(w.kor)}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Attach event handlers via delegation (more robust for special chars)
+  container.querySelectorAll('.word-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // If user clicked the delete X, handle delete instead
+      if (e.target.classList.contains('delete-x')) {
+        e.stopPropagation();
+        deleteWord(e.target.dataset.word);
+        return;
+      }
+      openWord(card.dataset.word);
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ══════════════════════════════════════════════════════════════
+// DETAIL VIEW
+// ══════════════════════════════════════════════════════════════
+function openWord(kor) {
+  const w = allWords.find(x => x.kor === kor);
+  if (!w) return;
+  currentWord = w;
+
+  document.getElementById('detailEmoji').textContent = w.emoji;
+  document.getElementById('detailWord').textContent = w.kor;
+  document.getElementById('detailRom').textContent = romanizeWord(w.kor);
+  document.getElementById('detailMeaning').textContent = w.meaning || '';
+
+  // Render syllables
+  const syllables = decomposeWord(w.kor);
+  document.getElementById('syllablesContainer').innerHTML = syllables.map(syl => `
+    <div class="syllable-card" onclick="speakText('${syl.char}')">
+      <div class="syl">${syl.char}</div>
+      <div class="syl-rom">${romanizeSyllable(syl)}</div>
+    </div>
+  `).join('');
+
+  // Render jamo blocks
+  const jamos = getAllJamos(w.kor);
+  document.getElementById('jamoBlocksContainer').innerHTML = jamos.map((j, idx) => `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div class="jamo-block ${j.type}" data-jamo="${j.jamo}" data-type="${j.type}" onclick="selectJamo(this, '${j.jamo}', '${j.type}')">${j.jamo}</div>
+      <div class="jamo-label">${j.type === 'consonant' ? '자음' : j.type === 'vowel' ? '모음' : '받침'}</div>
+    </div>
+  `).join('');
+
+  // Hide related section initially
+  document.getElementById('relatedSection').classList.remove('show');
+
+  // Initialize stacking practice
+  initPractice(w.kor);
+
+  // Switch views
+  document.getElementById('galleryView').style.display = 'none';
+  document.getElementById('detailView').classList.add('show');
+  document.getElementById('toolbarMain').style.display = 'none';
+
+  // Scroll to top
+  window.scrollTo({top: 0, behavior: 'smooth'});
+
+  // Auto-speak the word
+  setTimeout(() => speakText(w.kor), 300);
+}
+
+function closeDetail() {
+  document.getElementById('galleryView').style.display = 'block';
+  document.getElementById('detailView').classList.remove('show');
+  document.getElementById('toolbarMain').style.display = 'flex';
+  currentWord = null;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+// ══════════════════════════════════════════════════════════════
+// JAMO INTERACTION — show related words
+// ══════════════════════════════════════════════════════════════
+function selectJamo(el, jamo, type) {
+  // Toggle selection visually
+  document.querySelectorAll('.jamo-block.selected').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+
+  // Speak the jamo
+  speakText(jamo);
+
+  // Find related words (containing this jamo, excluding current word)
+  const related = allWords.filter(w =>
+    w.kor !== currentWord.kor && wordContainsJamo(w.kor, jamo)
+  );
+
+  const section = document.getElementById('relatedSection');
+  const header = document.getElementById('relatedHeader');
+  const grid = document.getElementById('relatedGrid');
+
+  const typeKo = type === 'consonant' ? '자음' : type === 'vowel' ? '모음' : '받침';
+  header.innerHTML = `Other words with the ${type === 'vowel' ? 'vowel' : 'consonant'} <strong>${jamo}</strong> (${typeKo}):`;
+
+  if (related.length === 0) {
+    grid.innerHTML = `<div class="no-related" style="grid-column:1/-1;">No other words yet. Try adding more!</div>`;
+  } else {
+    grid.innerHTML = related.slice(0, 12).map(w => `
+      <div class="related-card" onclick="openWord('${w.kor}')">
+        <span class="emoji">${w.emoji}</span>
+        <div class="kor">${highlightJamoInWord(w.kor, jamo, type)}</div>
+      </div>
+    `).join('');
+  }
+
+  section.classList.add('show');
+
+  // Scroll to related section
+  setTimeout(() => {
+    section.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }, 100);
+}
+
+// ══════════════════════════════════════════════════════════════
+// TTS
+// ══════════════════════════════════════════════════════════════
+let cachedKoreanVoice = null;
+function pickKoreanVoice() {
+  if (cachedKoreanVoice) return cachedKoreanVoice;
+  const voices = speechSynthesis.getVoices();
+  const koVoices = voices.filter(v => v.lang && (v.lang.startsWith('ko') || v.lang === 'ko_KR'));
+  if (koVoices.length === 0) return null;
+  const score = (v) => {
+    const name = (v.name || '').toLowerCase();
+    let s = 0;
+    if (/google/.test(name)) s += 100;
+    if (/female|여|woman|sunhi|선희|yuna|유나|heami/.test(name)) s += 50;
+    if (/neural|natural|premium|enhanced|wavenet/.test(name)) s += 40;
+    if (/microsoft/.test(name)) s += 30;
+    if (!v.localService) s += 25;
+    return s;
+  };
+  const sorted = [...koVoices].sort((a, b) => score(b) - score(a));
+  cachedKoreanVoice = sorted[0];
+  return cachedKoreanVoice;
+}
+
+function speakText(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  utter.rate = text.length <= 2 ? 0.55 : 0.7;
+  utter.pitch = 1.0;
+  const voice = pickKoreanVoice();
+  if (voice) utter.voice = voice;
+  speechSynthesis.speak(utter);
+}
+
+function speakDetailWord() {
+  if (currentWord) speakText(currentWord.kor);
+}
+
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => {
+    cachedKoreanVoice = null;
+    pickKoreanVoice();
+  };
+  speechSynthesis.getVoices();
+}
+
+// ══════════════════════════════════════════════════════════════
+// STACKING PRACTICE
+// ══════════════════════════════════════════════════════════════
+// State for the stacking practice
+let practiceState = {
+  targetWord: '',          // e.g. '친구'
+  targetSyllables: [],     // [{initial, medial, final}] decomposed from word
+  syllableSlots: [],       // mutable: same length as targetSyllables, each {initial, medial, final} with current placements
+  poolBlocks: [],          // shuffled blocks the user picks from: [{id, jamo, type, used}]
+  activeSyllableIdx: 0,    // which syllable box the next block will go into
+};
+
+// Vowel classification (vertical = side-by-side, horizontal = stack)
+const VERTICAL_VOWELS_PRACTICE = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅣ'];
+const HORIZONTAL_VOWELS_PRACTICE = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initPractice(word) {
+  practiceState.targetWord = word;
+  practiceState.targetSyllables = decomposeWord(word).map(s => ({
+    initial: s.initial,
+    medial: s.medial,
+    final: s.final || null,
+  }));
+  // One mutable slot per target syllable, starts empty
+  practiceState.syllableSlots = practiceState.targetSyllables.map(() => ({
+    initial: null, medial: null, final: null,
+  }));
+  // Build pool from all needed jamos, shuffled
+  // IMPORTANT: All consonants are 'consonant' type (including those that end up as 받침)
+  // — position determines whether they're rendered as initial or final, not type
+  const blocks = [];
+  let blockId = 0;
+  practiceState.targetSyllables.forEach(syl => {
+    blocks.push({id: 'b' + (blockId++), jamo: syl.initial, type: 'consonant', used: false});
+    blocks.push({id: 'b' + (blockId++), jamo: syl.medial, type: 'vowel', used: false});
+    if (syl.final) {
+      blocks.push({id: 'b' + (blockId++), jamo: syl.final, type: 'consonant', used: false});
+    }
+  });
+  practiceState.poolBlocks = shuffle(blocks);
+  practiceState.activeSyllableIdx = 0;
+  document.getElementById('practiceTargetWord').textContent = word;
+  document.getElementById('practiceFeedback').innerHTML = '';
+  renderPractice();
+}
+
+function renderPractice() {
+  // CANVAS — render each syllable box
+  const canvasEl = document.getElementById('practiceCanvas');
+  canvasEl.innerHTML = practiceState.syllableSlots.map((slot, idx) => {
+    const target = practiceState.targetSyllables[idx];
+    const isActive = idx === practiceState.activeSyllableIdx;
+    const isComplete = isSyllableComplete(slot, target);
+
+    // Decide layout based on the medial vowel (use target's medial as hint if user hasn't placed yet)
+    const refMedial = slot.medial || target.medial;
+    let topLayout = 'layout-side';
+    if (refMedial && HORIZONTAL_VOWELS_PRACTICE.includes(refMedial)) {
+      topLayout = 'layout-stack';
+    }
+
+    // Top row: initial + medial
+    let topHTML = '';
+    if (slot.initial) {
+      topHTML += `<div class="sb-slot filled consonant" data-syl="${idx}" data-pos="initial">${slot.initial}</div>`;
+    } else {
+      topHTML += `<div class="sb-slot empty">?</div>`;
+    }
+    if (slot.medial) {
+      topHTML += `<div class="sb-slot filled vowel" data-syl="${idx}" data-pos="medial">${slot.medial}</div>`;
+    } else {
+      topHTML += `<div class="sb-slot empty">?</div>`;
+    }
+
+    // Bottom row: show batchim slot ONLY if target syllable has 받침
+    // The placeholder ? appears in the exact positions where letters need to go
+    let bottomHTML = '';
+    if (target.final) {
+      if (slot.final) {
+        bottomHTML = `<div class="sb-bottom"><div class="sb-slot filled batchim" data-syl="${idx}" data-pos="final">${slot.final}</div></div>`;
+      } else {
+        bottomHTML = `<div class="sb-bottom"><div class="sb-slot empty">?</div></div>`;
+      }
+    }
+
+    let stateClass = '';
+    if (isComplete) stateClass = 'complete';
+    else if (isActive) stateClass = 'active';
+
+    const labelText = isComplete ? '✓ Complete' : (isActive ? '✏️ Building' : `Box ${idx + 1}`);
+
+    return `
+      <div class="syllable-box ${stateClass}" data-syl="${idx}">
+        <div class="syllable-box-label">${labelText}</div>
+        <div class="sb-top ${topLayout}">${topHTML}</div>
+        ${bottomHTML}
+      </div>
+    `;
+  }).join('');
+
+  // POOL — shuffled blocks
+  const poolEl = document.getElementById('practicePool');
+  poolEl.innerHTML = practiceState.poolBlocks.map(b => `
+    <div class="practice-block ${b.type} ${b.used ? 'used' : ''}"
+         draggable="${!b.used}"
+         data-id="${b.id}">${b.jamo}</div>
+  `).join('');
+
+  attachPracticeHandlers();
+
+  // Enable check button only when ALL syllables are complete
+  const allComplete = practiceState.syllableSlots.every((slot, i) =>
+    isSyllableComplete(slot, practiceState.targetSyllables[i])
+  );
+  document.getElementById('practiceCheckBtn').disabled = !allComplete;
+}
+
+function isSyllableComplete(slot, target) {
+  if (!slot.initial || !slot.medial) return false;
+  if (target.final && !slot.final) return false;
+  if (!target.final && slot.final) return false; // shouldn't happen but defensive
+  return true;
+}
+
+// Invalid 받침 — these jamos can never be a final consonant
+const INVALID_BATCHIM_PRACTICE = ['ㄸ', 'ㅃ', 'ㅉ'];
+
+// Determine the next slot position within a syllable based on Korean ordering rules
+// AND the target syllable structure (no batchim slot if target has no final).
+// Returns: { pos: 'initial' | 'medial' | 'final', invalid?: string } | null
+function nextSlotForSyllable(slotIdx, blockType, jamo) {
+  const slot = practiceState.syllableSlots[slotIdx];
+  const target = practiceState.targetSyllables[slotIdx];
+
+  if (blockType === 'consonant') {
+    // 1) No initial yet → initial
+    if (!slot.initial) return {pos: 'initial'};
+    // 2) Has initial but no vowel → can't add another consonant yet (needs vowel first)
+    if (!slot.medial) return null;
+    // 3) Has initial + vowel, target has 받침, slot has no final → batchim spot is open
+    if (target.final && !slot.final) {
+      // Check INVALID_BATCHIM (ㄸ/ㅃ/ㅉ)
+      if (INVALID_BATCHIM_PRACTICE.includes(jamo)) {
+        return {invalid: 'batchim'};
+      }
+      return {pos: 'final'};
+    }
+    // 4) All target slots full, OR target has no 받침
+    return null;
+  } else if (blockType === 'vowel') {
+    if (slot.initial && !slot.medial) return {pos: 'medial'};
+    return null;
+  }
+  return null;
+}
+
+function attachPracticeHandlers() {
+  // Pool blocks — drag start + click to place
+  document.querySelectorAll('#practicePool .practice-block').forEach(el => {
+    if (el.classList.contains('used')) return;
+    el.addEventListener('dragstart', (e) => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', el.dataset.id);
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    // Click = place into active syllable
+    el.addEventListener('click', () => tryPlaceBlock(el.dataset.id));
+    // Touch
+    el.addEventListener('touchstart', (e) => practiceTouchStart(e, el), {passive: false});
+  });
+
+  // Syllable boxes — drop targets + click to make active
+  document.querySelectorAll('#practiceCanvas .syllable-box').forEach(box => {
+    const idx = parseInt(box.dataset.syl, 10);
+
+    box.addEventListener('click', (e) => {
+      // Don't react to clicks on filled slots (those are handled below)
+      if (e.target.closest('.sb-slot.filled')) return;
+      practiceState.activeSyllableIdx = idx;
+      renderPractice();
+    });
+
+    box.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      box.classList.add('drag-over');
+    });
+    box.addEventListener('dragleave', () => box.classList.remove('drag-over'));
+    box.addEventListener('drop', (e) => {
+      e.preventDefault();
+      box.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain');
+      if (id) tryPlaceBlock(id, idx);
+    });
+  });
+
+  // Filled slots — click to remove
+  document.querySelectorAll('#practiceCanvas .sb-slot.filled').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const sylIdx = parseInt(el.dataset.syl, 10);
+      const pos = el.dataset.pos;
+      removeFromSlot(sylIdx, pos);
+    });
+  });
+}
+
+// Touch support
+let practiceTouchClone = null;
+let practiceTouchStartPos = null;
+let practiceTouchBlock = null;
+let practiceTouchMoved = false;
+
+function practiceTouchStart(e, el) {
+  const t = e.touches[0];
+  practiceTouchStartPos = {x: t.clientX, y: t.clientY};
+  practiceTouchBlock = el;
+  practiceTouchMoved = false;
+}
+
+document.addEventListener('touchmove', (e) => {
+  if (!practiceTouchStartPos || !practiceTouchBlock) return;
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - practiceTouchStartPos.x);
+  const dy = Math.abs(t.clientY - practiceTouchStartPos.y);
+  if (!practiceTouchMoved && (dx > 8 || dy > 8)) {
+    practiceTouchMoved = true;
+    practiceTouchClone = practiceTouchBlock.cloneNode(true);
+    practiceTouchClone.style.position = 'fixed';
+    practiceTouchClone.style.pointerEvents = 'none';
+    practiceTouchClone.style.zIndex = 9999;
+    practiceTouchClone.style.opacity = '0.85';
+    document.body.appendChild(practiceTouchClone);
+  }
+  if (practiceTouchMoved && practiceTouchClone) {
+    e.preventDefault();
+    practiceTouchClone.style.left = (t.clientX - 25) + 'px';
+    practiceTouchClone.style.top = (t.clientY - 25) + 'px';
+  }
+}, {passive: false});
+
+document.addEventListener('touchend', (e) => {
+  if (!practiceTouchBlock) return;
+  if (practiceTouchMoved) {
+    const t = e.changedTouches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el) {
+      const box = el.closest('.syllable-box');
+      if (box) {
+        const idx = parseInt(box.dataset.syl, 10);
+        tryPlaceBlock(practiceTouchBlock.dataset.id, idx);
+      }
+    }
+    if (practiceTouchClone) practiceTouchClone.remove();
+    practiceTouchClone = null;
+  }
+  practiceTouchStartPos = null;
+  practiceTouchBlock = null;
+  practiceTouchMoved = false;
+});
+
+// Place a block. If targetSylIdx is given, try that syllable; otherwise use the active one.
+// Validates against Korean ordering rules (consonant → vowel → optional batchim).
+function tryPlaceBlock(blockId, targetSylIdx = null) {
+  const block = practiceState.poolBlocks.find(b => b.id === blockId);
+  if (!block || block.used) return;
+
+  const sylIdx = targetSylIdx !== null ? targetSylIdx : practiceState.activeSyllableIdx;
+  if (sylIdx < 0 || sylIdx >= practiceState.syllableSlots.length) return;
+
+  const result = nextSlotForSyllable(sylIdx, block.type, block.jamo);
+  if (!result) {
+    // Invalid placement (e.g. two consonants before any vowel, vowel without consonant, slot full)
+    flashInvalidSyllable(sylIdx);
+    playErrorTinySound();
+    return;
+  }
+  if (result.invalid === 'batchim') {
+    // ㄸ/ㅃ/ㅉ tried to go into batchim position
+    flashInvalidSyllable(sylIdx);
+    playErrorTinySound();
+    showPracticeToast(
+      `<strong>${block.jamo}</strong> can\'t be used as a 받침 (ending sound).`,
+      '!'
+    );
+    return;
+  }
+
+  // Place
+  practiceState.syllableSlots[sylIdx][result.pos] = block.jamo;
+  block.used = true;
+  document.getElementById('practiceFeedback').innerHTML = '';
+  playClickSound();
+
+  // After placement, decide where to set active focus:
+  // - If this syllable now has initial+medial (and target doesn't have 받침 OR we placed into final), it can be considered "filled enough"
+  // - But we don't auto-jump; keep active on the same syllable so user can add 받침 if desired.
+  // - Only jump to the next syllable if THIS syllable is fully complete (matches target shape).
+  if (isSyllableComplete(practiceState.syllableSlots[sylIdx], practiceState.targetSyllables[sylIdx])) {
+    for (let i = 0; i < practiceState.syllableSlots.length; i++) {
+      if (!isSyllableComplete(practiceState.syllableSlots[i], practiceState.targetSyllables[i])) {
+        practiceState.activeSyllableIdx = i;
+        break;
+      }
+    }
+  } else {
+    practiceState.activeSyllableIdx = sylIdx;
+  }
+
+  renderPractice();
+}
+
+// Small toast helper for practice (uses the page-level toast container)
+function showPracticeToast(message, icon = '!') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <span class="toast-icon warn">${icon}</span>
+    <span class="toast-body">${message}</span>
+    <button class="toast-close" aria-label="Close">×</button>
+  `;
+  toast.querySelector('.toast-close').addEventListener('click', () => {
+    toast.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  });
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+}
+
+function flashInvalidSyllable(idx) {
+  const box = document.querySelector(`.syllable-box[data-syl="${idx}"]`);
+  if (!box) return;
+  box.style.animation = 'none';
+  void box.offsetWidth; // reflow
+  box.style.animation = 'shake 0.4s ease';
+  setTimeout(() => { box.style.animation = ''; }, 400);
+}
+
+function removeFromSlot(sylIdx, pos) {
+  const slot = practiceState.syllableSlots[sylIdx];
+  const removedJamo = slot[pos];
+  if (!removedJamo) return;
+
+  // When removing a position, also remove later positions in the same syllable
+  // (since order matters: removing the consonant means medial/final no longer make sense)
+  const removeOrder = ['initial', 'medial', 'final'];
+  const startIdx = removeOrder.indexOf(pos);
+  for (let i = startIdx; i < removeOrder.length; i++) {
+    const p = removeOrder[i];
+    if (slot[p]) {
+      // initial/final → consonant, medial → vowel
+      const type = (p === 'medial') ? 'vowel' : 'consonant';
+      const block = findUnusedPoolBlock(slot[p], type, true);
+      if (block) block.used = false;
+      slot[p] = null;
+    }
+  }
+
+  document.getElementById('practiceFeedback').innerHTML = '';
+  practiceState.activeSyllableIdx = sylIdx;
+  renderPractice();
+}
+
+// Find a pool block that was used and matches the jamo/type (to mark unused)
+function findUnusedPoolBlock(jamo, type, mustBeUsed = true) {
+  return practiceState.poolBlocks.find(b => b.jamo === jamo && b.type === type && b.used === mustBeUsed);
+}
+
+function checkPractice() {
+  // Compare each syllable
+  let allCorrect = true;
+  for (let i = 0; i < practiceState.targetSyllables.length; i++) {
+    const target = practiceState.targetSyllables[i];
+    const slot = practiceState.syllableSlots[i];
+    if (slot.initial !== target.initial ||
+        slot.medial !== target.medial ||
+        (slot.final || null) !== (target.final || null)) {
+      allCorrect = false;
+      break;
+    }
+  }
+
+  const feedbackEl = document.getElementById('practiceFeedback');
+  if (allCorrect) {
+    feedbackEl.innerHTML = `
+      <div class="feedback-message success">
+        🎉 정답!  Correct!
+        <span class="small">잘했어!  Well done — you built "${practiceState.targetWord}"!</span>
+      </div>
+    `;
+    playSuccessSound();
+    setTimeout(() => speakText(practiceState.targetWord), 600);
+    burstSparklesOnFeedback();
+  } else {
+    feedbackEl.innerHTML = `
+      <div class="feedback-message error">
+        💪 괜찮아요, 다시 해볼까요?
+        <span class="small">It's okay — let's try again!</span>
+      </div>
+    `;
+    playErrorSound();
+    setTimeout(resetPractice, 1800);
+  }
+}
+
+function resetPractice() {
+  if (!practiceState.targetWord) return;
+  initPractice(practiceState.targetWord);
+}
+
+function burstSparklesOnFeedback() {
+  const feedback = document.querySelector('.feedback-message.success');
+  if (!feedback) return;
+  const sparkleChars = ['✨','⭐','🌟','💫','🎉'];
+  for (let i = 0; i < 8; i++) {
+    const s = document.createElement('span');
+    s.style.position = 'absolute';
+    s.style.fontSize = '24px';
+    s.style.pointerEvents = 'none';
+    s.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+    const dx = (Math.random() - 0.5) * 240;
+    const dy = -80 - Math.random() * 100;
+    s.style.left = '50%';
+    s.style.top = '50%';
+    s.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
+    feedback.style.position = 'relative';
+    feedback.appendChild(s);
+    requestAnimationFrame(() => {
+      s.style.transform = `translate(${dx}px, ${dy}px) scale(1.6)`;
+      s.style.opacity = '0';
+    });
+    setTimeout(() => s.remove(), 1100);
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// SOUND EFFECTS (Web Audio API — no external files needed)
+// ══════════════════════════════════════════════════════════════
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {
+      return null;
+    }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type = 'sine', volume = 0.15) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(volume, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + duration);
+}
+
+function playClickSound() {
+  playTone(800, 0.08, 'sine', 0.1);
+}
+
+function playSuccessSound() {
+  // Ascending happy chime: C5 - E5 - G5 - C6
+  const notes = [523.25, 659.25, 783.99, 1046.5];
+  notes.forEach((f, i) => {
+    setTimeout(() => playTone(f, 0.25, 'sine', 0.18), i * 120);
+  });
+}
+
+function playErrorSound() {
+  // Gentle "uh oh" — two soft descending notes
+  playTone(440, 0.2, 'sine', 0.12);
+  setTimeout(() => playTone(330, 0.3, 'sine', 0.12), 180);
+}
+
+function playErrorTinySound() {
+  // Very short "nope" — single soft low note
+  playTone(220, 0.12, 'sine', 0.1);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADD / DELETE WORDS
+// ══════════════════════════════════════════════════════════════
+function addWord() {
+  const emojiInput = document.getElementById('newEmoji');
+  const wordInput = document.getElementById('newWord');
+  const meaningInput = document.getElementById('newMeaning');
+
+  // Force IME composition to finalize by blurring then refocusing
+  wordInput.blur();
+
+  // Get the raw value
+  let kor = (wordInput.value || '').trim();
+  // Strip any whitespace inside (e.g. accidental space)
+  kor = kor.replace(/\s+/g, '');
+  // Keep only complete Hangul syllables (filter out stray jamo and other chars)
+  const koreanOnly = Array.from(kor).filter(ch => {
+    const code = ch.charCodeAt(0);
+    return code >= 0xAC00 && code <= 0xD7A3; // complete Hangul syllables only
+  }).join('');
+
+  // Use emoji as-is but ensure single emoji (could be multi-codepoint)
+  let emoji = (emojiInput.value || '').trim();
+  if (!emoji) emoji = '⭐';
+
+  const meaning = (meaningInput.value || '').trim();
+
+  if (!koreanOnly) {
+    showToast('Please enter a Korean word (complete syllables, e.g. 사랑해)', '!', true);
+    return;
+  }
+
+  // Check for duplicates (case-sensitive exact match)
+  if (allWords.some(w => w.kor === koreanOnly)) {
+    showToast(`"${koreanOnly}" is already in the list!`, '!', true);
+    return;
+  }
+
+  const newWord = {cat: 'custom', kor: koreanOnly, emoji, meaning};
+  userWords.push(newWord);
+  allWords.push(newWord);
+  try { sessionStorage.setItem('userWords', JSON.stringify(userWords)); } catch(e) {}
+
+  // Clear inputs
+  emojiInput.value = '';
+  wordInput.value = '';
+  meaningInput.value = '';
+
+  showToast(`Added "${koreanOnly}"! 🎉`, '✓');
+  renderGallery();
+}
+
+function deleteWord(kor) {
+  if (!kor) return;
+  if (!confirm(`Delete "${kor}"?`)) return;
+  userWords = userWords.filter(w => w.kor !== kor);
+  allWords = allWords.filter(w => !(w.cat === 'custom' && w.kor === kor));
+  try { sessionStorage.setItem('userWords', JSON.stringify(userWords)); } catch(e) {}
+  renderGallery();
+  showToast(`Removed "${kor}"`, '✓');
+}
+
+// ══════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════
+function showToast(message, icon = '✓', isWarn = false) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <span class="toast-icon ${isWarn ? 'warn' : ''}">${icon}</span>
+    <span class="toast-body">${message}</span>
+    <button class="toast-close" aria-label="Close">×</button>
+  `;
+  toast.querySelector('.toast-close').addEventListener('click', () => {
+    toast.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  });
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+}
+
+// Enter key in word input submits (but only after IME composition is complete)
+let imeComposing = false;
+const wordInputEl = document.getElementById('newWord');
+wordInputEl.addEventListener('compositionstart', () => { imeComposing = true; });
+wordInputEl.addEventListener('compositionend', () => { imeComposing = false; });
+wordInputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !imeComposing && !e.isComposing) {
+    e.preventDefault();
+    addWord();
+  }
+});
+document.getElementById('newEmoji').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('newWord').focus();
+  }
+});
+const meaningInputEl = document.getElementById('newMeaning');
+meaningInputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.isComposing) {
+    e.preventDefault();
+    addWord();
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+renderGallery();
+</script>
+</body>
+</html>

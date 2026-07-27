@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 Let's Talk! — Korean Conversation Practice</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #FFF0F6 0%, #F8F0FF 50%, #F0F8FF 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #2D2D2D;
+}
+.container { max-width: 900px; margin: 0 auto; }
+
+/* ─── HEADER ─── */
+.header {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  border-radius: 20px;
+  padding: 20px 26px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 6px 20px rgba(199, 125, 255, 0.25);
+  margin-bottom: 18px;
+}
+.header h1 { font-size: 24px; margin-bottom: 4px; font-weight: 700; }
+.header p { font-size: 13px; opacity: 0.95; }
+
+/* ─── SCENARIO PICKER ─── */
+.picker-view {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.picker-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D2D2D;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.picker-subtitle {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  margin-bottom: 22px;
+  font-style: italic;
+}
+
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.scenario-card {
+  background: linear-gradient(135deg, #FFF8FF 0%, #FFFFFF 100%);
+  border: 2px solid #E8D0FF;
+  border-radius: 16px;
+  padding: 18px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  position: relative;
+}
+.scenario-card:hover {
+  transform: translateY(-4px);
+  border-color: #C77DFF;
+  box-shadow: 0 8px 20px rgba(199, 125, 255, 0.2);
+  background: linear-gradient(135deg, #F8F0FF 0%, #FFF0FF 100%);
+}
+.scenario-card.completed {
+  border-color: #6BCB77;
+  background: linear-gradient(135deg, #F0FFF0 0%, #FFFFFF 100%);
+}
+.scenario-card .badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
+  background: #6BCB77;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.scenario-emoji { font-size: 44px; margin-bottom: 8px; }
+.scenario-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 4px;
+}
+.scenario-title-ko {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 6px;
+}
+.scenario-turns {
+  display: inline-block;
+  font-size: 10px;
+  color: #999;
+  background: #F5F5F5;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ─── MODE PICKER ─── */
+.mode-view {
+  background: white;
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+.mode-scenario-info {
+  margin-bottom: 22px;
+}
+.mode-scenario-info .emoji { font-size: 60px; margin-bottom: 8px; }
+.mode-scenario-info .title { font-size: 20px; font-weight: 700; color: #2D2D2D; }
+.mode-scenario-info .subtitle { font-size: 13px; color: #888; margin-top: 4px; }
+
+.mode-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  max-width: 500px;
+  margin: 0 auto 18px;
+}
+.mode-card {
+  padding: 22px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 3px solid transparent;
+  text-align: center;
+}
+.mode-card.learn {
+  background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+  color: #2D2D2D;
+}
+.mode-card.quiz {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  color: white;
+}
+.mode-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+.mode-card .mode-emoji { font-size: 40px; margin-bottom: 8px; }
+.mode-card .mode-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.mode-card .mode-desc { font-size: 12px; opacity: 0.9; }
+
+.back-btn {
+  background: #F0F0F0;
+  color: #666;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.back-btn:hover { background: #E0E0E0; color: #2D2D2D; }
+
+/* ─── DIALOGUE VIEW ─── */
+.dialogue-view {
+  background: white;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.dialogue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #F0F0F0;
+}
+.dialogue-title-block { display: flex; align-items: center; gap: 12px; }
+.dialogue-title-emoji { font-size: 36px; }
+.dialogue-title-text .title { font-size: 16px; font-weight: 700; color: #2D2D2D; }
+.dialogue-title-text .mode {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+.dialogue-progress {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #DDD;
+  transition: all 0.3s;
+}
+.progress-dot.active { background: #C77DFF; transform: scale(1.3); }
+.progress-dot.done { background: #6BCB77; }
+
+/* Chat area */
+.chat-area {
+  background: linear-gradient(135deg, #FAFAFF 0%, #FFF8FF 100%);
+  border-radius: 16px;
+  padding: 18px;
+  min-height: 320px;
+  max-height: 55vh;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+/* Messages */
+.message {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  animation: msgIn 0.4s ease;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.message.user { flex-direction: row-reverse; }
+.message-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+.message-bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+.message.user .message-bubble {
+  background: linear-gradient(135deg, #C77DFF 0%, #B47EFF 100%);
+  color: white;
+}
+.message-bubble .name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 4px;
+}
+.message.user .message-bubble .name { color: rgba(255, 255, 255, 0.8); }
+.message-bubble .text-ko {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.message-bubble .actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;
+}
+.msg-btn {
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  color: #666;
+}
+.message.user .msg-btn { background: rgba(255, 255, 255, 0.25); color: white; }
+.msg-btn:hover { background: rgba(0, 0, 0, 0.12); }
+.message.user .msg-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+.hint-block {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 217, 61, 0.15);
+  border-left: 3px solid #FFD93D;
+  border-radius: 6px;
+  font-size: 12px;
+  display: none;
+}
+.hint-block.show { display: block; }
+.hint-block .rom {
+  font-style: italic;
+  color: #8B7000;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.hint-block .en {
+  color: #666;
+  font-size: 11px;
+}
+.message.user .hint-block {
+  background: rgba(255, 255, 255, 0.2);
+  border-left-color: #FFD93D;
+}
+.message.user .hint-block .rom { color: #FFF8E0; }
+.message.user .hint-block .en { color: rgba(255, 255, 255, 0.85); }
+
+/* ─── LEARN MODE: response preview ─── */
+.learn-preview {
+  background: linear-gradient(135deg, #FFF8E0 0%, #FFFCE8 100%);
+  border: 2.5px dashed #FFA500;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 10px;
+}
+.learn-preview .learn-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8B7000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.learn-preview .text-ko {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 6px;
+}
+.learn-preview .actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+/* ─── QUIZ MODE: option buttons ─── */
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.quiz-option {
+  background: white;
+  border: 2.5px solid #E5E5E5;
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: left;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.quiz-option:hover {
+  border-color: #C77DFF;
+  background: #FAF0FF;
+  transform: translateX(4px);
+}
+.quiz-option .letter {
+  width: 34px;
+  height: 34px;
+  background: #F0F0F0;
+  color: #666;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.quiz-option:hover .letter { background: #C77DFF; color: white; }
+.quiz-option .text-ko {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D2D2D;
+  flex: 1;
+}
+.quiz-option.correct {
+  background: linear-gradient(135deg, #F0FFF0 0%, #E8FFE8 100%);
+  border-color: #6BCB77;
+  animation: pulseCorrect 0.5s ease;
+}
+.quiz-option.correct .letter { background: #6BCB77; color: white; }
+.quiz-option.wrong {
+  background: linear-gradient(135deg, #FFF0E0 0%, #FFE8D0 100%);
+  border-color: #FFA500;
+  animation: shake 0.4s ease;
+}
+@keyframes pulseCorrect {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); box-shadow: 0 0 0 4px rgba(107, 203, 119, 0.3); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-4px); }
+}
+
+/* Feedback message */
+.feedback {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 700;
+  animation: fbIn 0.4s ease;
+}
+@keyframes fbIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.feedback.correct {
+  background: linear-gradient(135deg, #6BCB77 0%, #4D96FF 100%);
+  color: white;
+}
+.feedback.wrong {
+  background: linear-gradient(135deg, #FFB347 0%, #FF8C42 100%);
+  color: white;
+}
+
+/* Dialogue action buttons */
+.dialogue-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.action-btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.action-btn.primary {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(199, 125, 255, 0.3);
+}
+.action-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(199, 125, 255, 0.4); }
+.action-btn.secondary {
+  background: #F0F0F0;
+  color: #666;
+}
+.action-btn.secondary:hover { background: #E0E0E0; color: #2D2D2D; }
+
+/* ─── COMPLETION ─── */
+.completion-view {
+  text-align: center;
+  padding: 20px;
+}
+.completion-emoji { font-size: 80px; margin-bottom: 12px; animation: bounce 0.6s ease; }
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.2) rotate(-5deg); }
+  50% { transform: scale(1.15) rotate(5deg); }
+  75% { transform: scale(1.1) rotate(-3deg); }
+}
+.completion-title {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.completion-subtitle { font-size: 14px; color: #666; margin-bottom: 20px; }
+.completion-stars {
+  font-size: 32px;
+  margin-bottom: 22px;
+  letter-spacing: 6px;
+}
+.completion-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ─── UTILITIES ─── */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>💬 Let's Talk!  대화 연습</h1>
+    <p>Practice real Korean conversations — one situation at a time!</p>
+  </div>
+
+  <!-- View 1: Scenario Picker -->
+  <div id="pickerView" class="picker-view">
+    <div class="picker-title">🎬 Pick a situation!</div>
+    <div class="picker-subtitle">어떤 상황에서 대화해볼까?</div>
+    <div class="scenario-grid" id="scenarioGrid"></div>
+  </div>
+
+  <!-- View 2: Mode Picker -->
+  <div id="modeView" class="mode-view hidden">
+    <div class="mode-scenario-info">
+      <div class="emoji" id="modeEmoji"></div>
+      <div class="title" id="modeTitle"></div>
+      <div class="subtitle" id="modeSubtitle"></div>
+    </div>
+    <div class="mode-options">
+      <div class="mode-card learn" onclick="startDialogue('learn')">
+        <div class="mode-emoji">📖</div>
+        <div class="mode-title">Learn Mode</div>
+        <div class="mode-desc">See answers, practice with hints</div>
+      </div>
+      <div class="mode-card quiz" onclick="startDialogue('quiz')">
+        <div class="mode-emoji">🎯</div>
+        <div class="mode-title">Quiz Mode</div>
+        <div class="mode-desc">Pick the right answer yourself!</div>
+      </div>
+    </div>
+    <button class="back-btn" onclick="showPicker()">← Back to situations</button>
+  </div>
+
+  <!-- View 3: Dialogue -->
+  <div id="dialogueView" class="dialogue-view hidden">
+    <div class="dialogue-header">
+      <div class="dialogue-title-block">
+        <span class="dialogue-title-emoji" id="dlgEmoji"></span>
+        <div class="dialogue-title-text">
+          <div class="title" id="dlgTitle"></div>
+          <div class="mode" id="dlgMode"></div>
+        </div>
+      </div>
+      <div class="dialogue-progress" id="dlgProgress"></div>
+    </div>
+    <div class="chat-area" id="chatArea"></div>
+    <div class="dialogue-actions" id="dlgActions"></div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// SCENARIOS DATA
+// ══════════════════════════════════════════════════════════════
+// Each scenario: turns[] — alternating NPC / USER messages
+// npc: { name, avatar, ko, rom, en }
+// user: { ko, rom, en, alternatives: [{ko, rom, en}] }  ← for quiz distractors
+const SCENARIOS = [
+  // 1. Animal Crossing (너굴/여울)
+  {
+    id: 'animal-crossing',
+    title: 'Meet Animal Friends',
+    titleKo: '동물 친구 만나기',
+    emoji: '🦝',
+    subtitle: 'Chat with 너굴 (Tom Nook) and 여울 (Isabelle)!',
+    turns: [
+      { role:'npc',  name:'너굴', avatar:'🦝', ko:'안녕! 나는 너굴이야.', rom:'an-nyeong! na-neun neo-gu-ri-ya.', en:"Hi! I'm Tom Nook." },
+      { role:'user', ko:'안녕! 나는 한나야.', rom:'an-nyeong! na-neun han-na-ya.', en:"Hi! I'm Hannah.",
+        alternatives:[
+          {ko:'안녕히 계세요.', rom:'an-nyeong-hi gye-se-yo.', en:'Goodbye (formal).'},
+          {ko:'배고파!', rom:'bae-go-pa!', en:"I'm hungry!"},
+        ] },
+      { role:'npc',  name:'너굴', avatar:'🦝', ko:'만나서 반가워, 한나!', rom:'man-na-seo ban-ga-wo, han-na!', en:'Nice to meet you, Hannah!' },
+      { role:'user', ko:'나도 반가워!', rom:'na-do ban-ga-wo!', en:'Nice to meet you too!',
+        alternatives:[
+          {ko:'싫어!', rom:'si-reo!', en:"I don't like it!"},
+          {ko:'졸려요.', rom:'jol-lyeo-yo.', en:"I'm sleepy."},
+        ] },
+      { role:'npc',  name:'여울', avatar:'🐶', ko:'같이 놀자!', rom:'ga-chi nol-ja!', en:"Let's play together!" },
+      { role:'user', ko:'좋아!', rom:'jo-a!', en:'Yes! (I like it!)',
+        alternatives:[
+          {ko:'미안해.', rom:'mi-an-hae.', en:'Sorry.'},
+          {ko:'아니야.', rom:'a-ni-ya.', en:'No.'},
+        ] },
+    ],
+  },
+
+  // 2. Birthday Party
+  {
+    id: 'birthday',
+    title: 'Birthday Party!',
+    titleKo: '생일 파티',
+    emoji: '🎂',
+    subtitle: 'Celebrate a birthday with friends!',
+    turns: [
+      { role:'npc',  name:'엄마', avatar:'👩', ko:'한나야, 생일 축하해!', rom:'han-na-ya, saeng-il chuk-ha-hae!', en:'Hannah, happy birthday!' },
+      { role:'user', ko:'고마워, 엄마!', rom:'go-ma-wo, eom-ma!', en:'Thank you, mum!',
+        alternatives:[
+          {ko:'싫어!', rom:'si-reo!', en:"I don't like it!"},
+          {ko:'배고파.', rom:'bae-go-pa.', en:"I'm hungry."},
+        ] },
+      { role:'npc',  name:'엄마', avatar:'👩', ko:'선물이야. 자!', rom:'seon-mul-i-ya. ja!', en:"It's a present. Here you go!" },
+      { role:'user', ko:'우와! 예뻐!', rom:'u-wa! ye-ppeo!', en:'Wow! Pretty!',
+        alternatives:[
+          {ko:'졸려요.', rom:'jol-lyeo-yo.', en:"I'm sleepy."},
+          {ko:'아니야.', rom:'a-ni-ya.', en:'No.'},
+        ] },
+      { role:'npc',  name:'친구', avatar:'👧', ko:'케이크 먹자!', rom:'ke-i-keu meok-ja!', en:"Let's eat cake!" },
+      { role:'user', ko:'좋아! 맛있겠다!', rom:'jo-a! ma-si-tget-da!', en:'Yes! Looks delicious!',
+        alternatives:[
+          {ko:'싫어!', rom:'si-reo!', en:"I don't like it!"},
+          {ko:'배불러.', rom:'bae-bul-leo.', en:"I'm full."},
+        ] },
+    ],
+  },
+
+  // 3. Meeting a Friend
+  {
+    id: 'friend',
+    title: 'Meet a Friend',
+    titleKo: '친구 만나기',
+    emoji: '🤝',
+    subtitle: 'Say hi and make a new friend!',
+    turns: [
+      { role:'npc',  name:'친구', avatar:'👧', ko:'안녕!', rom:'an-nyeong!', en:'Hi!' },
+      { role:'user', ko:'안녕!', rom:'an-nyeong!', en:'Hi!',
+        alternatives:[
+          {ko:'졸려요.', rom:'jol-lyeo-yo.', en:"I'm sleepy."},
+          {ko:'아니요.', rom:'a-ni-yo.', en:'No.'},
+        ] },
+      { role:'npc',  name:'친구', avatar:'👧', ko:'이름이 뭐야?', rom:'i-reum-i mwo-ya?', en:"What's your name?" },
+      { role:'user', ko:'나는 한나야. 너는?', rom:'na-neun han-na-ya. neo-neun?', en:"I'm Hannah. You?",
+        alternatives:[
+          {ko:'배고파.', rom:'bae-go-pa.', en:"I'm hungry."},
+          {ko:'싫어.', rom:'si-reo.', en:"I don't like it."},
+        ] },
+      { role:'npc',  name:'친구', avatar:'👧', ko:'나는 지민이야. 같이 놀자!', rom:'na-neun ji-min-i-ya. ga-chi nol-ja!', en:"I'm Jimin. Let's play!" },
+      { role:'user', ko:'좋아!', rom:'jo-a!', en:'Yes!',
+        alternatives:[
+          {ko:'미안해.', rom:'mi-an-hae.', en:'Sorry.'},
+          {ko:'아니야.', rom:'a-ni-ya.', en:'No.'},
+        ] },
+    ],
+  },
+
+  // 4. Restaurant/Cafe
+  {
+    id: 'restaurant',
+    title: 'At a Restaurant',
+    titleKo: '식당에서',
+    emoji: '🍽️',
+    subtitle: 'Order food and drinks politely!',
+    turns: [
+      { role:'npc',  name:'직원', avatar:'🧑‍🍳', ko:'안녕하세요! 뭐 드릴까요?', rom:'an-nyeong-ha-se-yo! mwo deu-ril-kka-yo?', en:'Hello! What would you like?' },
+      { role:'user', ko:'피자 주세요.', rom:'pi-ja ju-se-yo.', en:'Pizza, please.',
+        alternatives:[
+          {ko:'싫어요.', rom:'si-reo-yo.', en:"I don't like it."},
+          {ko:'졸려요.', rom:'jol-lyeo-yo.', en:"I'm sleepy."},
+        ] },
+      { role:'npc',  name:'직원', avatar:'🧑‍🍳', ko:'네! 음료수는요?', rom:'ne! eum-nyo-su-neun-yo?', en:'Okay! And a drink?' },
+      { role:'user', ko:'우유 주세요.', rom:'u-yu ju-se-yo.', en:'Milk, please.',
+        alternatives:[
+          {ko:'배불러요.', rom:'bae-bul-leo-yo.', en:"I'm full."},
+          {ko:'아니요.', rom:'a-ni-yo.', en:'No.'},
+        ] },
+      { role:'npc',  name:'직원', avatar:'🧑‍🍳', ko:'여기 있어요!', rom:'yeo-gi i-sseo-yo!', en:'Here you go!' },
+      { role:'user', ko:'감사합니다!', rom:'gam-sa-ham-ni-da!', en:'Thank you!',
+        alternatives:[
+          {ko:'싫어요.', rom:'si-reo-yo.', en:"I don't like it."},
+          {ko:'몰라요.', rom:'mol-la-yo.', en:"I don't know."},
+        ] },
+    ],
+  },
+
+  // 5. Home / Morning / Asking parents
+  {
+    id: 'home',
+    title: 'At Home',
+    titleKo: '집에서',
+    emoji: '🏠',
+    subtitle: 'Morning greetings and asking mum & dad for things!',
+    turns: [
+      { role:'npc',  name:'엄마', avatar:'👩', ko:'한나야, 일어나!', rom:'han-na-ya, i-reo-na!', en:'Hannah, wake up!' },
+      { role:'user', ko:'네, 엄마!', rom:'ne, eom-ma!', en:'Yes, mum!',
+        alternatives:[
+          {ko:'싫어!', rom:'si-reo!', en:"I don't want to!"},
+          {ko:'졸려...', rom:'jol-lyeo...', en:"I'm sleepy..."},
+        ] },
+      { role:'npc',  name:'아빠', avatar:'👨', ko:'배고파?', rom:'bae-go-pa?', en:'Are you hungry?' },
+      { role:'user', ko:'네, 배고파요!', rom:'ne, bae-go-pa-yo!', en:"Yes, I'm hungry!",
+        alternatives:[
+          {ko:'배불러요.', rom:'bae-bul-leo-yo.', en:"I'm full."},
+          {ko:'아니요, 괜찮아요.', rom:'a-ni-yo, gwaen-chan-a-yo.', en:"No, I'm fine."},
+        ] },
+      { role:'npc',  name:'엄마', avatar:'👩', ko:'뭐 먹을래?', rom:'mwo meo-geul-lae?', en:"What do you want to eat?" },
+      { role:'user', ko:'밥 주세요!', rom:'bap ju-se-yo!', en:'Rice, please!',
+        alternatives:[
+          {ko:'싫어요.', rom:'si-reo-yo.', en:"I don't like it."},
+          {ko:'몰라요.', rom:'mol-la-yo.', en:"I don't know."},
+        ] },
+      { role:'npc',  name:'엄마', avatar:'👩', ko:'자, 여기!', rom:'ja, yeo-gi!', en:'Here you go!' },
+      { role:'user', ko:'감사합니다!', rom:'gam-sa-ham-ni-da!', en:'Thank you!',
+        alternatives:[
+          {ko:'미안해요.', rom:'mi-an-hae-yo.', en:'Sorry.'},
+          {ko:'싫어요.', rom:'si-reo-yo.', en:"I don't like it."},
+        ] },
+    ],
+  },
+];
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let currentScenario = null;
+let currentMode = null; // 'learn' or 'quiz'
+let currentTurnIdx = 0;
+let awaitingUser = false; // waiting for user to respond
+let completions = {}; // { scenarioId: { learn: bool, quiz: bool } }
+
+try {
+  const saved = sessionStorage.getItem('dialogueCompletions');
+  if (saved) completions = JSON.parse(saved);
+} catch(e) {}
+
+// ══════════════════════════════════════════════════════════════
+// TTS
+// ══════════════════════════════════════════════════════════════
+let cachedKoreanVoice = null;
+function pickKoreanVoice() {
+  if (cachedKoreanVoice) return cachedKoreanVoice;
+  const voices = speechSynthesis.getVoices();
+  const koVoices = voices.filter(v => v.lang && (v.lang.startsWith('ko') || v.lang === 'ko_KR'));
+  if (koVoices.length === 0) return null;
+  const score = (v) => {
+    const name = (v.name || '').toLowerCase();
+    let s = 0;
+    if (/google/.test(name)) s += 100;
+    if (/female|여|woman|sunhi|선희|yuna|유나|heami/.test(name)) s += 50;
+    if (/neural|natural|premium|enhanced|wavenet/.test(name)) s += 40;
+    if (/microsoft/.test(name)) s += 30;
+    if (!v.localService) s += 25;
+    return s;
+  };
+  const sorted = [...koVoices].sort((a, b) => score(b) - score(a));
+  cachedKoreanVoice = sorted[0];
+  return cachedKoreanVoice;
+}
+function speakText(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  utter.rate = 0.75;
+  utter.pitch = 1.0;
+  const voice = pickKoreanVoice();
+  if (voice) utter.voice = voice;
+  speechSynthesis.speak(utter);
+}
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => { cachedKoreanVoice = null; pickKoreanVoice(); };
+  speechSynthesis.getVoices();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PICKER VIEW
+// ══════════════════════════════════════════════════════════════
+function renderPicker() {
+  const grid = document.getElementById('scenarioGrid');
+  grid.innerHTML = SCENARIOS.map(sc => {
+    const c = completions[sc.id] || {};
+    const bothDone = c.learn && c.quiz;
+    const partialDone = c.learn || c.quiz;
+    const badge = bothDone ? '🌟' : (partialDone ? '⭐' : '');
+    const cls = bothDone ? ' completed' : '';
+    return `
+      <div class="scenario-card${cls}" onclick="selectScenario('${sc.id}')">
+        ${badge ? `<div class="badge">${badge}</div>` : ''}
+        <div class="scenario-emoji">${sc.emoji}</div>
+        <div class="scenario-title">${sc.title}</div>
+        <div class="scenario-title-ko">${sc.titleKo}</div>
+        <div class="scenario-turns">${sc.turns.length} messages</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showPicker() {
+  document.getElementById('pickerView').classList.remove('hidden');
+  document.getElementById('modeView').classList.add('hidden');
+  document.getElementById('dialogueView').classList.add('hidden');
+  currentScenario = null;
+  currentMode = null;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  renderPicker();
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODE VIEW
+// ══════════════════════════════════════════════════════════════
+function selectScenario(id) {
+  currentScenario = SCENARIOS.find(s => s.id === id);
+  if (!currentScenario) return;
+  document.getElementById('modeEmoji').textContent = currentScenario.emoji;
+  document.getElementById('modeTitle').textContent = currentScenario.title + '  ·  ' + currentScenario.titleKo;
+  document.getElementById('modeSubtitle').textContent = currentScenario.subtitle;
+  document.getElementById('pickerView').classList.add('hidden');
+  document.getElementById('modeView').classList.remove('hidden');
+  document.getElementById('dialogueView').classList.add('hidden');
+}
+
+// ══════════════════════════════════════════════════════════════
+// DIALOGUE VIEW
+// ══════════════════════════════════════════════════════════════
+function startDialogue(mode) {
+  currentMode = mode;
+  currentTurnIdx = 0;
+  awaitingUser = false;
+  document.getElementById('pickerView').classList.add('hidden');
+  document.getElementById('modeView').classList.add('hidden');
+  document.getElementById('dialogueView').classList.remove('hidden');
+  document.getElementById('dlgEmoji').textContent = currentScenario.emoji;
+  document.getElementById('dlgTitle').textContent = currentScenario.title;
+  document.getElementById('dlgMode').textContent = mode === 'learn' ? '📖 Learn Mode' : '🎯 Quiz Mode';
+  document.getElementById('chatArea').innerHTML = '';
+  document.getElementById('dlgActions').innerHTML = '';
+  renderProgress();
+  nextTurn();
+}
+
+function renderProgress() {
+  const total = currentScenario.turns.length;
+  const dots = [];
+  for (let i = 0; i < total; i++) {
+    let cls = 'progress-dot';
+    if (i < currentTurnIdx) cls += ' done';
+    else if (i === currentTurnIdx) cls += ' active';
+    dots.push(`<div class="${cls}"></div>`);
+  }
+  document.getElementById('dlgProgress').innerHTML = dots.join('');
+}
+
+function nextTurn() {
+  // Check if dialogue is complete
+  if (currentTurnIdx >= currentScenario.turns.length) {
+    showCompletion();
+    return;
+  }
+  const turn = currentScenario.turns[currentTurnIdx];
+  if (turn.role === 'npc') {
+    // Show NPC message, auto-speak, then advance
+    appendNPCMessage(turn);
+    setTimeout(() => speakText(turn.ko), 300);
+    setTimeout(() => {
+      currentTurnIdx++;
+      renderProgress();
+      nextTurn();
+    }, 2200);
+  } else {
+    // User turn — show preview (learn) or options (quiz)
+    awaitingUser = true;
+    if (currentMode === 'learn') {
+      showLearnPreview(turn);
+    } else {
+      showQuizOptions(turn);
+    }
+    renderProgress();
+  }
+}
+
+function appendNPCMessage(turn) {
+  const chat = document.getElementById('chatArea');
+  const msg = document.createElement('div');
+  msg.className = 'message npc';
+  msg.innerHTML = `
+    <div class="message-avatar">${turn.avatar}</div>
+    <div class="message-bubble">
+      <div class="name">${turn.name}</div>
+      <div class="text-ko">${escapeHtml(turn.ko)}</div>
+      <div class="actions">
+        <button class="msg-btn" onclick="speakText('${escapeAttr(turn.ko)}')">🔊 Listen</button>
+        <button class="msg-btn" onclick="toggleHint(this)">💡 Hint</button>
+      </div>
+      <div class="hint-block">
+        <div class="rom">🔤 ${escapeHtml(turn.rom)}</div>
+        <div class="en">${escapeHtml(turn.en)}</div>
+      </div>
+    </div>
+  `;
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function appendUserMessage(turn) {
+  const chat = document.getElementById('chatArea');
+  const msg = document.createElement('div');
+  msg.className = 'message user';
+  msg.innerHTML = `
+    <div class="message-avatar">👧</div>
+    <div class="message-bubble">
+      <div class="name">You  한나</div>
+      <div class="text-ko">${escapeHtml(turn.ko)}</div>
+      <div class="actions">
+        <button class="msg-btn" onclick="speakText('${escapeAttr(turn.ko)}')">🔊 Listen</button>
+        <button class="msg-btn" onclick="toggleHint(this)">💡 Hint</button>
+      </div>
+      <div class="hint-block">
+        <div class="rom">🔤 ${escapeHtml(turn.rom)}</div>
+        <div class="en">${escapeHtml(turn.en)}</div>
+      </div>
+    </div>
+  `;
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ─── LEARN MODE ───
+function showLearnPreview(turn) {
+  const chat = document.getElementById('chatArea');
+  const preview = document.createElement('div');
+  preview.className = 'message user';
+  preview.id = 'learnPreview';
+  preview.innerHTML = `
+    <div class="message-avatar" style="opacity:0.4;">👧</div>
+    <div style="flex:1;">
+      <div class="learn-preview">
+        <div class="learn-label">📖 Your turn — try saying this!</div>
+        <div class="text-ko">${escapeHtml(turn.ko)}</div>
+        <div class="actions">
+          <button class="msg-btn" style="background:#FFA500;color:white;" onclick="speakText('${escapeAttr(turn.ko)}')">🔊 Listen</button>
+          <button class="msg-btn" style="background:#FFA500;color:white;" onclick="toggleHintLearn(this)">💡 Hint</button>
+        </div>
+        <div class="hint-block">
+          <div class="rom">🔤 ${escapeHtml(turn.rom)}</div>
+          <div class="en">${escapeHtml(turn.en)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  chat.appendChild(preview);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Auto-speak the user's line
+  setTimeout(() => speakText(turn.ko), 400);
+
+  // Show "Say it!" button
+  document.getElementById('dlgActions').innerHTML = `
+    <button class="action-btn primary" onclick="confirmLearnTurn()">✓  I said it! Next</button>
+    <button class="action-btn secondary" onclick="speakText('${escapeAttr(turn.ko)}')">🔊 Hear again</button>
+  `;
+}
+
+function confirmLearnTurn() {
+  // Replace preview with the actual user message
+  const preview = document.getElementById('learnPreview');
+  if (preview) preview.remove();
+  const turn = currentScenario.turns[currentTurnIdx];
+  appendUserMessage(turn);
+  document.getElementById('dlgActions').innerHTML = '';
+  currentTurnIdx++;
+  awaitingUser = false;
+  renderProgress();
+  setTimeout(nextTurn, 800);
+}
+
+// ─── QUIZ MODE ───
+function showQuizOptions(turn) {
+  // Build shuffled options: correct + alternatives
+  const options = [
+    {...turn, correct: true},
+    ...turn.alternatives.map(a => ({...a, correct: false})),
+  ];
+  shuffleInPlace(options);
+
+  const chat = document.getElementById('chatArea');
+  const quizBlock = document.createElement('div');
+  quizBlock.className = 'message user';
+  quizBlock.id = 'quizBlock';
+  const letters = ['A', 'B', 'C', 'D'];
+  quizBlock.innerHTML = `
+    <div class="message-avatar" style="opacity:0.4;">👧</div>
+    <div style="flex:1;">
+      <div class="learn-preview" style="background:linear-gradient(135deg,#F8F0FF 0%,#FFF0F6 100%);border-color:#C77DFF;">
+        <div class="learn-label" style="color:#8B4FBF;">🎯 Your turn — pick the right answer!</div>
+        <div class="quiz-options">
+          ${options.map((opt, i) => `
+            <button class="quiz-option" data-idx="${i}" data-correct="${opt.correct}">
+              <div class="letter">${letters[i]}</div>
+              <div class="text-ko">${escapeHtml(opt.ko)}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  chat.appendChild(quizBlock);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Wire clicks
+  quizBlock.querySelectorAll('.quiz-option').forEach(btn => {
+    btn.addEventListener('click', () => handleQuizAnswer(btn, options));
+  });
+
+  document.getElementById('dlgActions').innerHTML = '';
+}
+
+function handleQuizAnswer(btnEl, options) {
+  const isCorrect = btnEl.dataset.correct === 'true';
+  const idx = parseInt(btnEl.dataset.idx, 10);
+  const chosen = options[idx];
+
+  // Speak what user "said"
+  speakText(chosen.ko);
+
+  if (isCorrect) {
+    btnEl.classList.add('correct');
+    // Disable all buttons
+    const allBtns = btnEl.parentElement.querySelectorAll('.quiz-option');
+    allBtns.forEach(b => b.disabled = true);
+
+    // Show feedback
+    const chat = document.getElementById('chatArea');
+    const fb = document.createElement('div');
+    fb.className = 'feedback correct';
+    fb.innerHTML = '🎉 정답!  Correct!  Well done!';
+    chat.appendChild(fb);
+    chat.scrollTop = chat.scrollHeight;
+
+    // Play success sound
+    playSuccessSound();
+
+    setTimeout(() => {
+      // Remove quiz block, add real user message
+      document.getElementById('quizBlock')?.remove();
+      fb.remove();
+      const turn = currentScenario.turns[currentTurnIdx];
+      appendUserMessage(turn);
+      currentTurnIdx++;
+      awaitingUser = false;
+      renderProgress();
+      setTimeout(nextTurn, 600);
+    }, 1600);
+  } else {
+    btnEl.classList.add('wrong');
+    playErrorSound();
+
+    // Show feedback message
+    const chat = document.getElementById('chatArea');
+    let existingFb = chat.querySelector('.feedback');
+    if (existingFb) existingFb.remove();
+    const fb = document.createElement('div');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = '💪 괜찮아요, 다시 해볼까?  Try again!';
+    chat.appendChild(fb);
+    chat.scrollTop = chat.scrollHeight;
+
+    // Re-enable after brief pause
+    setTimeout(() => {
+      btnEl.classList.remove('wrong');
+      fb.remove();
+    }, 1400);
+  }
+}
+
+// ─── COMPLETION ───
+function showCompletion() {
+  // Mark scenario complete for this mode
+  if (!completions[currentScenario.id]) completions[currentScenario.id] = {};
+  completions[currentScenario.id][currentMode] = true;
+  try { sessionStorage.setItem('dialogueCompletions', JSON.stringify(completions)); } catch(e) {}
+
+  // Build completion view
+  const c = completions[currentScenario.id];
+  const stars = (c.learn ? '⭐' : '☆') + (c.quiz ? '⭐' : '☆');
+
+  const chat = document.getElementById('chatArea');
+  chat.innerHTML = `
+    <div class="completion-view">
+      <div class="completion-emoji">🎉</div>
+      <div class="completion-title">Well done, Hannah!</div>
+      <div class="completion-subtitle">You finished the "${currentScenario.title}" conversation!</div>
+      <div class="completion-stars">${stars}</div>
+      <div style="font-size:12px;color:#888;margin-bottom:22px;">
+        📖 Learn:  ${c.learn ? '✓ done' : 'not yet'}  &nbsp; · &nbsp;
+        🎯 Quiz:  ${c.quiz ? '✓ done' : 'not yet'}
+      </div>
+      <div class="completion-actions">
+        <button class="action-btn primary" onclick="startDialogue('${currentMode}')">↺ Try Again</button>
+        ${currentMode === 'learn' && !c.quiz ? `<button class="action-btn primary" onclick="startDialogue('quiz')">🎯 Try Quiz Mode!</button>` : ''}
+        ${currentMode === 'quiz' && !c.learn ? `<button class="action-btn primary" onclick="startDialogue('learn')">📖 Try Learn Mode!</button>` : ''}
+        <button class="action-btn secondary" onclick="showPicker()">← Pick another</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('dlgActions').innerHTML = '';
+  playCelebrationSound();
+}
+
+// ─── HELPERS ───
+function toggleHint(btn) {
+  const bubble = btn.closest('.message-bubble');
+  const hint = bubble.querySelector('.hint-block');
+  if (hint) hint.classList.toggle('show');
+}
+function toggleHintLearn(btn) {
+  const preview = btn.closest('.learn-preview');
+  const hint = preview.querySelector('.hint-block');
+  if (hint) hint.classList.toggle('show');
+}
+function shuffleInPlace(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escapeAttr(s) {
+  return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// ─── SOUND EFFECTS ───
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { return null; }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, duration, type = 'sine', volume = 0.15) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(volume, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + duration);
+}
+function playSuccessSound() {
+  const notes = [523.25, 659.25, 783.99];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.15), i * 100));
+}
+function playErrorSound() {
+  playTone(440, 0.18, 'sine', 0.12);
+  setTimeout(() => playTone(330, 0.25, 'sine', 0.12), 150);
+}
+function playCelebrationSound() {
+  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sine', 0.18), i * 120));
+}
+
+// ─── INIT ───
+renderPicker();
+</script>
+</body>
+</html>

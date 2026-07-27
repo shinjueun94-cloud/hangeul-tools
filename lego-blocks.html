@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦄 Korean LEGO Blocks — Build a Syllable! 🧱</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #FFF0F6 0%, #F8F0FF 50%, #F0F8FF 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #2D2D2D;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  border-radius: 20px;
+  padding: 20px 28px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 6px 20px rgba(199, 125, 255, 0.25);
+  margin-bottom: 16px;
+}
+.header h1 { font-size: 26px; margin-bottom: 4px; font-weight: 700; }
+.header p { font-size: 14px; opacity: 0.95; }
+
+/* MODE TOGGLE */
+.mode-toggle {
+  background: white;
+  border-radius: 14px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.mode-info {
+  font-size: 13px;
+  color: #666;
+}
+.mode-info strong { color: #C77DFF; }
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #DDD;
+  border-radius: 34px;
+  transition: 0.3s;
+}
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+}
+input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+}
+.toggle-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2D2D2D;
+  white-space: nowrap;
+}
+
+/* JAMO PALETTE */
+.palette {
+  background: white;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+.palette-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.palette-row:last-child { margin-bottom: 0; }
+.palette-label {
+  min-width: 120px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-top: 8px;
+}
+.palette-label.c { color: #FF6B6B; }
+.palette-label.v { color: #4D96FF; }
+.palette-label .ko { font-size: 14px; }
+.palette-label .en { font-size: 10px; opacity: 0.8; font-weight: 500; }
+.palette-jamos {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* DRAGGABLE BLOCK */
+.block {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  cursor: grab;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+  touch-action: none;
+}
+.block.consonant { background: #FF6B6B; }
+.block.vowel { background: #4D96FF; }
+.block::before, .block::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.block::before { left: 30%; transform: translateX(-50%); }
+.block::after { right: 30%; transform: translateX(50%); }
+.block:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.25);
+}
+.block:active { cursor: grabbing; }
+.block.dragging {
+  opacity: 0.5;
+  transform: scale(1.1);
+}
+.block.advanced {
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* CANVAS */
+.canvas-wrapper {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  margin-bottom: 16px;
+}
+.canvas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #F0F0F0;
+}
+.canvas-title { font-size: 16px; font-weight: 700; color: #C77DFF; }
+.canvas-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.btn-clear {
+  background: #FFF0F0;
+  color: #FF6B6B;
+}
+.btn-clear:hover { background: #FFE0E0; }
+.btn-add-syllable {
+  background: linear-gradient(135deg, #6BCB77 0%, #4D96FF 100%);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 3px 8px rgba(107, 203, 119, 0.3);
+}
+.btn-add-syllable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(107, 203, 119, 0.4);
+}
+.btn-speak {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  color: white;
+  font-size: 14px;
+  padding: 8px 16px;
+}
+.btn-speak:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(199,125,255,0.4); }
+.btn-speak.small { padding: 5px 12px; font-size: 12px; }
+
+.canvas {
+  min-height: 280px;
+  background: linear-gradient(135deg, #FAFAFF 0%, #FFF8FF 100%);
+  border: 3px dashed #DDD0F0;
+  border-radius: 16px;
+  position: relative;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+.canvas.drag-over {
+  border-color: #C77DFF;
+  background: linear-gradient(135deg, #F8F0FF 0%, #FFF0F8 100%);
+}
+
+.canvas-placeholder {
+  color: #777;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.7;
+}
+.canvas-placeholder .emoji { font-size: 40px; display: block; margin-bottom: 8px; }
+.canvas-placeholder strong { color: #C77DFF; }
+
+/* SLOTS */
+.slots {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.slot:hover { transform: translateY(-2px); }
+
+.slot.active .slot-frame {
+  border-color: #C77DFF;
+  border-style: solid;
+  background: rgba(199, 125, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(199, 125, 255, 0.15);
+}
+
+.active-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #C77DFF;
+  background: white;
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1.5px solid #C77DFF;
+  white-space: nowrap;
+  animation: bounce 1.5s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* FIXED-WIDTH SLOT FRAME */
+.slot-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 8px;
+  width: 130px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 12px;
+  border: 2px dashed #DDDDFA;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* Top row: holds either side-by-side (C+V vertical-vowel) or stacked (C above, V horizontal-vowel below) */
+.slot-top {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+.slot-top.layout-side {
+  flex-direction: row;
+}
+.slot-top.layout-side .slot-block { flex: 1; height: 70px; }
+.slot-top.layout-stack {
+  flex-direction: column;
+}
+.slot-top.layout-stack .slot-block { width: 100%; height: 50px; }
+
+/* Bottom row: 받침 — fills full width */
+.slot-bottom {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+.slot-bottom .slot-block {
+  flex: 1;
+  height: 40px;
+}
+
+.slot-block {
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  position: relative;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+  cursor: pointer;
+  animation: pop 0.3s ease;
+}
+.slot-block.consonant { background: #FF6B6B; }
+.slot-block.vowel { background: #4D96FF; }
+.slot-block.batchim { background: #FF6B6B; }
+.slot-block::before, .slot-block::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.slot-block::before { left: 30%; transform: translateX(-50%); }
+.slot-block::after { right: 30%; transform: translateX(50%); }
+.slot-block.empty {
+  background: #F0F0F5;
+  color: #BBB;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  border: 2px dashed #DDD;
+  cursor: default;
+  font-size: 18px;
+}
+.slot-block.empty::before, .slot-block.empty::after { display: none; }
+.slot-block:not(.empty):hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+.slot-block .remove-x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  background: #FF6B6B;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.slot-block:not(.empty):hover .remove-x { display: flex; }
+
+@keyframes pop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Delete whole syllable */
+.slot-delete {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 26px;
+  height: 26px;
+  background: #FF6B6B;
+  color: white;
+  border-radius: 50%;
+  font-size: 16px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 0 3px 8px rgba(255,107,107,0.4);
+  border: 2px solid white;
+  cursor: pointer;
+  z-index: 5;
+}
+.slot:hover .slot-delete { display: flex; }
+.slot-delete:hover { transform: scale(1.15); }
+
+/* Status hint shown under the slot when incomplete */
+.slot-hint {
+  font-size: 11px;
+  color: #FF8800;
+  background: #FFF8E0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  white-space: normal;
+  text-align: center;
+  max-width: 140px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+.slot-hint.complete {
+  color: #1A8B3A;
+  background: #E0F7E5;
+}
+
+.plus {
+  font-size: 32px;
+  color: #BBB;
+  font-weight: 700;
+  margin-top: 30px;
+}
+
+/* RESULT */
+.result {
+  background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+  border-radius: 20px;
+  padding: 24px 28px;
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(255, 217, 61, 0.3);
+  display: none;
+  position: relative;
+}
+.result.show { display: block; animation: slideUp 0.4s ease; }
+.result.incomplete {
+  background: linear-gradient(135deg, #DDDDDD 0%, #CCCCCC 100%);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+.result.incomplete .result-word { color: #888; }
+.result.incomplete .btn-speak { display: none; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.result-word {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 64px;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.result-pronunciation {
+  font-size: 20px;
+  color: #5D4A1F;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.result-meaning {
+  font-size: 15px;
+  color: #5D4A1F;
+  font-style: italic;
+  margin-top: 8px;
+}
+.result-incomplete-msg {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* EXAMPLES */
+.examples {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+.examples-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #C77DFF;
+  margin-bottom: 10px;
+}
+.examples-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.example-chip {
+  background: linear-gradient(135deg, #F8F0FF 0%, #FFF0F8 100%);
+  border: 2px solid #E8D0FF;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #C77DFF;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+}
+.example-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(199, 125, 255, 0.25);
+  background: linear-gradient(135deg, #F0E0FF 0%, #FFE0F0 100%);
+}
+.example-chip small {
+  display: block;
+  font-size: 10px;
+  color: #888;
+  margin-top: 2px;
+  font-family: -apple-system, sans-serif;
+  font-weight: 400;
+}
+
+/* Sparkles */
+.sparkle {
+  position: absolute;
+  font-size: 24px;
+  pointer-events: none;
+  animation: sparkle 1s ease-out forwards;
+}
+@keyframes sparkle {
+  0% { transform: translate(0,0) scale(0); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; animation: fadeOverlay 0.2s ease; }
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal {
+  background: white;
+  border-radius: 24px;
+  padding: 30px 36px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.3s ease;
+  position: relative;
+}
+@keyframes modalIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 32px; height: 32px;
+  background: #F0F0F0;
+  color: #666;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.modal-close:hover { background: #E0E0E0; }
+.modal-letter {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 90px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 4px;
+  color: #FF6B6B;
+}
+.modal-letter.vowel { color: #4D96FF; }
+.modal-sound {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 10px;
+}
+.modal-description {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 18px;
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: #F8F0FF;
+  border-radius: 12px;
+}
+.modal-examples-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #C77DFF;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.modal-example {
+  background: linear-gradient(135deg, #FFF8E0 0%, #FFF0E0 100%);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal-example-emoji { font-size: 32px; }
+.modal-example-text { flex: 1; }
+.modal-example-kor {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2D2D2D;
+  line-height: 1.2;
+}
+.modal-example-rom {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+.modal-example-eng {
+  font-size: 13px;
+  color: #555;
+  margin-top: 2px;
+}
+.btn-listen-mini {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-listen-mini:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(199,125,255,0.3); }
+
+/* TOAST NOTIFICATION */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: min(560px, 92vw);
+}
+.toast {
+  background: #2D2D2D;
+  color: #FFFFFF;
+  padding: 18px 22px;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  animation: toastIn 0.4s ease, toastOut 0.4s ease 5.6s forwards;
+  pointer-events: auto;
+}
+.toast .toast-icon {
+  width: 32px;
+  height: 32px;
+  background: #FF6B6B;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.toast .toast-body {
+  flex: 1;
+  line-height: 1.4;
+  font-size: 17px;
+}
+.toast .toast-body strong {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 22px;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0 10px;
+  border-radius: 6px;
+  margin: 0 3px;
+  vertical-align: baseline;
+}
+.toast .toast-body small {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+.toast .toast-close {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: none;
+  font-size: 22px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color 0.15s ease;
+  font-family: inherit;
+}
+.toast .toast-close:hover {
+  color: #FFFFFF;
+}
+@keyframes toastIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-30px); opacity: 0; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .block { width: 38px; height: 38px; font-size: 20px; }
+  .result-word { font-size: 50px; }
+  .header h1 { font-size: 20px; }
+  .palette-label { min-width: 90px; font-size: 10px; }
+  .slot-frame { width: 110px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🦄  Korean LEGO Blocks  🧱</h1>
+    <p>Drag consonants & vowels to build a syllable!</p>
+  </div>
+
+  <!-- MODE TOGGLE -->
+  <div class="mode-toggle">
+    <div class="mode-info">
+      <strong>Advanced Mode</strong> shows double consonants (ㄲㄸㅃㅆㅉ) and compound vowels (ㅒㅖㅢ etc.)
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="toggle-label" id="modeLabel">Basic</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="modeToggle" onchange="toggleMode()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- JAMO PALETTE -->
+  <div class="palette">
+    <div class="palette-row">
+      <div class="palette-label c">
+        <span class="ko">🔴 자음</span>
+        <span class="en">Consonants</span>
+      </div>
+      <div class="palette-jamos" id="consonantsPalette"></div>
+    </div>
+    <div class="palette-row">
+      <div class="palette-label v">
+        <span class="ko">🔵 모음</span>
+        <span class="en">Vowels</span>
+      </div>
+      <div class="palette-jamos" id="vowelsPalette"></div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrapper">
+    <div class="canvas-header">
+      <div class="canvas-title">✨ Your Syllable Canvas</div>
+      <div class="canvas-actions">
+        <button class="btn btn-clear" onclick="clearCanvas()">↺ Reset</button>
+        <button class="btn btn-add-syllable" onclick="addNewSyllable()">➕ New Syllable</button>
+      </div>
+    </div>
+    <div class="canvas" id="canvas">
+      <div class="canvas-placeholder" id="placeholder">
+        <span class="emoji">👆</span>
+        <strong>1.</strong> Drag a <span style="color:#FF6B6B;font-weight:700;">red consonant</span> and a <span style="color:#4D96FF;font-weight:700;">blue vowel</span> into the box!<br>
+        <strong>2.</strong> Want a new syllable? Click <strong style="color:#6BCB77;">➕ New Syllable</strong> first!<br>
+        <strong>3.</strong> Click any letter (without dragging) to <strong>hear it</strong> and see examples!
+      </div>
+      <div class="slots" id="slots" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result" id="result">
+    <div class="result-word" id="resultWord">가</div>
+    <div class="result-pronunciation" id="resultPronunciation">[ ga ]</div>
+    <button class="btn btn-speak" onclick="speakResult()">🔊 Listen!</button>
+    <div class="result-meaning" id="resultMeaning"></div>
+    <div class="result-incomplete-msg" id="resultIncompleteMsg" style="display:none;"></div>
+  </div>
+
+  <!-- EXAMPLES -->
+  <div class="examples">
+    <div class="examples-title">💡 Try making these words:</div>
+    <div class="examples-list" id="examplesList"></div>
+  </div>
+
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-letter" id="modalLetter">ㄱ</div>
+    <div class="modal-sound" id="modalSound">[ g / k ] sound</div>
+    <div class="modal-description" id="modalDescription"></div>
+    <div class="modal-examples-title">📚 Example Words</div>
+    <div id="modalExamples"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────
+const basicConsonants = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const basicVowels = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ'];
+const advancedConsonants = ['ㄲ','ㄸ','ㅃ','ㅆ','ㅉ'];
+const advancedVowels = ['ㅐ','ㅒ','ㅔ','ㅖ','ㅘ','ㅙ','ㅚ','ㅝ','ㅞ','ㅟ','ㅢ'];
+
+// Hangul Unicode composition
+const INITIALS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const MEDIALS = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const FINALS = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+// Vowel shape classification — determines layout
+const VERTICAL_VOWELS = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅣ'];  // C beside V
+const HORIZONTAL_VOWELS = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];                       // C above V
+const COMPOUND_VOWELS = ['ㅘ','ㅙ','ㅚ','ㅝ','ㅞ','ㅟ','ㅢ'];               // mixed (treat as horizontal-like for layout)
+
+// Consonants that CANNOT be used as 받침 (final position)
+// In Korean: ㄸ, ㅃ, ㅉ never appear as 받침
+const INVALID_BATCHIM = ['ㄸ', 'ㅃ', 'ㅉ'];
+
+// Romanization (revised)
+const ROM_INITIAL = {'ㄱ':'g','ㄲ':'kk','ㄴ':'n','ㄷ':'d','ㄸ':'tt','ㄹ':'r','ㅁ':'m','ㅂ':'b','ㅃ':'pp','ㅅ':'s','ㅆ':'ss','ㅇ':'','ㅈ':'j','ㅉ':'jj','ㅊ':'ch','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+const ROM_MEDIAL = {'ㅏ':'a','ㅐ':'ae','ㅑ':'ya','ㅒ':'yae','ㅓ':'eo','ㅔ':'e','ㅕ':'yeo','ㅖ':'ye','ㅗ':'o','ㅘ':'wa','ㅙ':'wae','ㅚ':'oe','ㅛ':'yo','ㅜ':'u','ㅝ':'wo','ㅞ':'we','ㅟ':'wi','ㅠ':'yu','ㅡ':'eu','ㅢ':'ui','ㅣ':'i'};
+const ROM_FINAL = {'':'','ㄱ':'k','ㄲ':'k','ㄴ':'n','ㄷ':'t','ㄹ':'l','ㅁ':'m','ㅂ':'p','ㅅ':'t','ㅆ':'t','ㅇ':'ng','ㅈ':'t','ㅊ':'t','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+
+// Letter info — for modal
+const LETTER_INFO = {
+  // Basic consonants
+  'ㄱ': {sound:'g / k', name:'기역 (giyeok)', description:'Like the "g" in "go" or "k" in "kick".', examples:[{kor:'가방',rom:'ga-bang',eng:'bag',emoji:'👜'},{kor:'곰',rom:'gom',eng:'bear',emoji:'🐻'}]},
+  'ㄴ': {sound:'n', name:'니은 (nieun)', description:'Like the "n" in "nose".', examples:[{kor:'나비',rom:'na-bi',eng:'butterfly',emoji:'🦋'},{kor:'눈',rom:'nun',eng:'eye / snow',emoji:'❄️'}]},
+  'ㄷ': {sound:'d / t', name:'디귿 (digeut)', description:'Like the "d" in "dog".', examples:[{kor:'다리',rom:'da-ri',eng:'leg / bridge',emoji:'🌉'},{kor:'딸기',rom:'ttal-gi',eng:'strawberry',emoji:'🍓'}]},
+  'ㄹ': {sound:'r / l', name:'리을 (rieul)', description:'A soft sound between "r" and "l".', examples:[{kor:'라면',rom:'ra-myeon',eng:'ramen',emoji:'🍜'},{kor:'레몬',rom:'re-mon',eng:'lemon',emoji:'🍋'}]},
+  'ㅁ': {sound:'m', name:'미음 (mieum)', description:'Like the "m" in "mum". Looks like a closed mouth!', examples:[{kor:'엄마',rom:'eom-ma',eng:'mum',emoji:'👩'},{kor:'마법',rom:'ma-beop',eng:'magic',emoji:'✨'}]},
+  'ㅂ': {sound:'b / p', name:'비읍 (bieup)', description:'Like the "b" in "ball".', examples:[{kor:'바나나',rom:'ba-na-na',eng:'banana',emoji:'🍌'},{kor:'밥',rom:'bap',eng:'rice',emoji:'🍚'}]},
+  'ㅅ': {sound:'s', name:'시옷 (siot)', description:'Like the "s" in "sun".', examples:[{kor:'사자',rom:'sa-ja',eng:'lion',emoji:'🦁'},{kor:'사과',rom:'sa-gwa',eng:'apple',emoji:'🍎'}]},
+  'ㅇ': {sound:'silent / ng', name:'이응 (ieung)', description:'Silent at the start of a syllable, but "ng" at the end!', examples:[{kor:'오리',rom:'o-ri',eng:'duck',emoji:'🦆'},{kor:'공',rom:'gong',eng:'ball',emoji:'⚽'}]},
+  'ㅈ': {sound:'j', name:'지읒 (jieut)', description:'Like the "j" in "jam".', examples:[{kor:'주스',rom:'ju-seu',eng:'juice',emoji:'🧃'},{kor:'좋아',rom:'jo-a',eng:'I like it',emoji:'❤️'}]},
+  'ㅊ': {sound:'ch', name:'치읓 (chieut)', description:'Like the "ch" in "cheese". Stronger than ㅈ — push more air!', examples:[{kor:'책',rom:'chaek',eng:'book',emoji:'📚'},{kor:'치즈',rom:'chi-jeu',eng:'cheese',emoji:'🧀'}]},
+  'ㅋ': {sound:'k', name:'키읔 (kieuk)', description:'Like the "k" in "kite". Stronger than ㄱ — push more air!', examples:[{kor:'키위',rom:'ki-wi',eng:'kiwi',emoji:'🥝'},{kor:'코',rom:'ko',eng:'nose',emoji:'👃'}]},
+  'ㅌ': {sound:'t', name:'티읕 (tieut)', description:'Like the "t" in "top". Stronger than ㄷ — push more air!', examples:[{kor:'토끼',rom:'to-kki',eng:'rabbit',emoji:'🐰'},{kor:'토마토',rom:'to-ma-to',eng:'tomato',emoji:'🍅'}]},
+  'ㅍ': {sound:'p', name:'피읖 (pieup)', description:'Like the "p" in "pop". Stronger than ㅂ — push more air!', examples:[{kor:'피자',rom:'pi-ja',eng:'pizza',emoji:'🍕'},{kor:'포도',rom:'po-do',eng:'grapes',emoji:'🍇'}]},
+  'ㅎ': {sound:'h', name:'히읗 (hieut)', description:'Like the "h" in "hi".', examples:[{kor:'하늘',rom:'ha-neul',eng:'sky',emoji:'☁️'},{kor:'하트',rom:'ha-teu',eng:'heart',emoji:'❤️'}]},
+
+  // Basic vowels
+  'ㅏ': {sound:'a (ah)', name:'아 (a)', description:'Like the "a" in "father". Open your mouth wide!', examples:[{kor:'아이',rom:'a-i',eng:'child',emoji:'👶'},{kor:'사과',rom:'sa-gwa',eng:'apple',emoji:'🍎'}]},
+  'ㅑ': {sound:'ya', name:'야 (ya)', description:'Like "ya" in "yard".', examples:[{kor:'야호',rom:'ya-ho',eng:'Yay!',emoji:'🎉'},{kor:'야채',rom:'ya-chae',eng:'vegetables',emoji:'🥦'}]},
+  'ㅓ': {sound:'eo (uh)', name:'어 (eo)', description:'Like "uh" in "duh". Relax your mouth.', examples:[{kor:'어머나',rom:'eo-meo-na',eng:'Oh my!',emoji:'😱'},{kor:'엄마',rom:'eom-ma',eng:'mum',emoji:'👩'}]},
+  'ㅕ': {sound:'yeo', name:'여 (yeo)', description:'Like "yo" but more like "yuh".', examples:[{kor:'여기',rom:'yeo-gi',eng:'here',emoji:'📍'},{kor:'여우',rom:'yeo-u',eng:'fox',emoji:'🦊'}]},
+  'ㅗ': {sound:'o (oh)', name:'오 (o)', description:'Like the "o" in "more". Round your lips!', examples:[{kor:'오리',rom:'o-ri',eng:'duck',emoji:'🦆'},{kor:'고래',rom:'go-rae',eng:'whale',emoji:'🐋'}]},
+  'ㅛ': {sound:'yo', name:'요 (yo)', description:'Like "yo" in "yo-yo".', examples:[{kor:'요리',rom:'yo-ri',eng:'cooking',emoji:'👩‍🍳'},{kor:'요요',rom:'yo-yo',eng:'yo-yo',emoji:'🪀'}]},
+  'ㅜ': {sound:'u (oo)', name:'우 (u)', description:'Like the "oo" in "moon". Pucker your lips!', examples:[{kor:'우유',rom:'u-yu',eng:'milk',emoji:'🥛'},{kor:'구름',rom:'gu-reum',eng:'cloud',emoji:'☁️'}]},
+  'ㅠ': {sound:'yu', name:'유 (yu)', description:'Like "you".', examples:[{kor:'유니콘',rom:'yu-ni-kon',eng:'unicorn',emoji:'🦄'},{kor:'유리',rom:'yu-ri',eng:'glass',emoji:'🔮'}]},
+  'ㅡ': {sound:'eu', name:'으 (eu)', description:'No English equivalent! Make a flat smile and say "uh".', examples:[{kor:'으르렁',rom:'eu-reu-reong',eng:'growl!',emoji:'🐯'},{kor:'그림',rom:'geu-rim',eng:'picture',emoji:'🖼️'}]},
+  'ㅣ': {sound:'i (ee)', name:'이 (i)', description:'Like the "ee" in "see". Big smile!', examples:[{kor:'이',rom:'i',eng:'tooth / this',emoji:'🦷'},{kor:'이야기',rom:'i-ya-gi',eng:'story',emoji:'📖'}]},
+
+  // Advanced consonants
+  'ㄲ': {sound:'kk (strong)', name:'쌍기역 (ssang-giyeok)', description:'A double ㄱ — make it tight & strong, like ramming the "k"!', examples:[{kor:'까만',rom:'kka-man',eng:'black',emoji:'⬛'},{kor:'토끼',rom:'to-kki',eng:'rabbit',emoji:'🐰'}]},
+  'ㄸ': {sound:'tt (strong)', name:'쌍디귿 (ssang-digeut)', description:'A double ㄷ — tight & strong "t"!', examples:[{kor:'딸기',rom:'ttal-gi',eng:'strawberry',emoji:'🍓'},{kor:'따뜻해',rom:'tta-tteu-tae',eng:'warm',emoji:'☀️'}]},
+  'ㅃ': {sound:'pp (strong)', name:'쌍비읍 (ssang-bieup)', description:'A double ㅂ — tight & strong "p"!', examples:[{kor:'빵',rom:'ppang',eng:'bread',emoji:'🍞'},{kor:'아빠',rom:'a-ppa',eng:'dad',emoji:'👨'}]},
+  'ㅆ': {sound:'ss (strong)', name:'쌍시옷 (ssang-siot)', description:'A double ㅅ — tight & strong "s"!', examples:[{kor:'쌀',rom:'ssal',eng:'uncooked rice',emoji:'🌾'},{kor:'씨앗',rom:'ssi-at',eng:'seed',emoji:'🌱'}]},
+  'ㅉ': {sound:'jj (strong)', name:'쌍지읒 (ssang-jieut)', description:'A double ㅈ — tight & strong "j"!', examples:[{kor:'짜요',rom:'jja-yo',eng:'it\'s salty',emoji:'🧂'},{kor:'찌개',rom:'jji-gae',eng:'stew',emoji:'🍲'}]},
+
+  // Advanced vowels
+  'ㅐ': {sound:'ae (eh)', name:'애 (ae)', description:'Like the "e" in "bed".', examples:[{kor:'개',rom:'gae',eng:'dog',emoji:'🐶'},{kor:'배',rom:'bae',eng:'pear / boat',emoji:'🍐'}]},
+  'ㅒ': {sound:'yae', name:'얘 (yae)', description:'Like "yeh".', examples:[{kor:'얘기',rom:'yae-gi',eng:'talk/story',emoji:'💬'}]},
+  'ㅔ': {sound:'e (eh)', name:'에 (e)', description:'Almost the same as ㅐ — both like "e" in "bed".', examples:[{kor:'네',rom:'ne',eng:'yes',emoji:'✅'},{kor:'세 개',rom:'se gae',eng:'three',emoji:'3️⃣'}]},
+  'ㅖ': {sound:'ye', name:'예 (ye)', description:'Like "yeh" — similar to ㅒ.', examples:[{kor:'예쁜',rom:'ye-ppeun',eng:'pretty',emoji:'💕'}]},
+  'ㅘ': {sound:'wa', name:'와 (wa)', description:'Like "wa" in "water". ㅗ + ㅏ combined!', examples:[{kor:'사과',rom:'sa-gwa',eng:'apple',emoji:'🍎'},{kor:'와요',rom:'wa-yo',eng:'(I) come',emoji:'👋'}]},
+  'ㅙ': {sound:'wae', name:'왜 (wae)', description:'Like "weh" — ㅗ + ㅐ.', examples:[{kor:'왜',rom:'wae',eng:'why',emoji:'❓'}]},
+  'ㅚ': {sound:'oe (weh)', name:'외 (oe)', description:'Sounds like "weh". ㅗ + ㅣ.', examples:[{kor:'외',rom:'oe',eng:'outside',emoji:'🚪'}]},
+  'ㅝ': {sound:'wo', name:'워 (wo)', description:'Like "wuh". ㅜ + ㅓ.', examples:[{kor:'더워',rom:'deo-wo',eng:'it\'s hot',emoji:'🥵'}]},
+  'ㅞ': {sound:'we', name:'웨 (we)', description:'Like "weh". ㅜ + ㅔ.', examples:[{kor:'웨이브',rom:'we-i-beu',eng:'wave',emoji:'🌊'}]},
+  'ㅟ': {sound:'wi', name:'위 (wi)', description:'Like "wee". ㅜ + ㅣ.', examples:[{kor:'귀',rom:'gwi',eng:'ear',emoji:'👂'},{kor:'위',rom:'wi',eng:'above',emoji:'⬆️'}]},
+  'ㅢ': {sound:'ui', name:'의 (ui)', description:'Like saying "eu" then "ee" quickly! ㅡ + ㅣ.', examples:[{kor:'의자',rom:'ui-ja',eng:'chair',emoji:'🪑'}]},
+};
+
+// Examples for word builder chips
+const WORD_EXAMPLES = [
+  {kor:'가', meaning:'go!', emoji:'🏃'},
+  {kor:'너', meaning:'you', emoji:'👉'},
+  {kor:'밥', meaning:'rice', emoji:'🍚'},
+  {kor:'공', meaning:'ball', emoji:'⚽'},
+  {kor:'손', meaning:'hand', emoji:'✋'},
+  {kor:'눈', meaning:'eye', emoji:'👁️'},
+  {kor:'엄마', meaning:'mum', emoji:'👩'},
+  {kor:'아빠', meaning:'dad', emoji:'👨'},
+  {kor:'배고파', meaning:'I\'m hungry', emoji:'😋'},
+  {kor:'한나', meaning:'Hannah', emoji:'✨'},
+  {kor:'라면', meaning:'ramen', emoji:'🍜'},
+  {kor:'유니콘', meaning:'unicorn', emoji:'🦄'},
+];
+
+// Word meanings (for result display)
+const MEANINGS = {};
+WORD_EXAMPLES.forEach(w => MEANINGS[w.kor] = w.meaning + ' ' + w.emoji);
+Object.values(LETTER_INFO).forEach(info => {
+  info.examples.forEach(ex => {
+    if (!MEANINGS[ex.kor]) MEANINGS[ex.kor] = ex.eng + ' ' + ex.emoji;
+  });
+});
+
+// ── STATE ───────────────────────────────────────────────────────
+let syllables = [{ initial: null, medial: null, final: null }];
+let activeSyllableIdx = 0;
+let advancedMode = false;
+
+// ── PALETTE RENDER ──────────────────────────────────────────────
+function renderPalette() {
+  const cList = advancedMode ? [...basicConsonants, ...advancedConsonants] : basicConsonants;
+  const vList = advancedMode ? [...basicVowels, ...advancedVowels] : basicVowels;
+
+  document.getElementById('consonantsPalette').innerHTML = cList.map(c => {
+    const isAdv = advancedConsonants.includes(c);
+    return `<div class="block consonant${isAdv ? ' advanced' : ''}" draggable="true" data-jamo="${c}" data-type="consonant">${c}</div>`;
+  }).join('');
+
+  document.getElementById('vowelsPalette').innerHTML = vList.map(v => {
+    const isAdv = advancedVowels.includes(v);
+    return `<div class="block vowel${isAdv ? ' advanced' : ''}" draggable="true" data-jamo="${v}" data-type="vowel">${v}</div>`;
+  }).join('');
+
+  // Attach drag + click handlers
+  document.querySelectorAll('.palette .block').forEach(block => {
+    block.addEventListener('dragstart', handleDragStart);
+    block.addEventListener('dragend', handleDragEnd);
+    // Click vs drag detection
+    block.addEventListener('mousedown', handleMouseDown);
+    // Touch support
+    block.addEventListener('touchstart', handleTouchStart, {passive: false});
+    block.addEventListener('touchmove', handleTouchMove, {passive: false});
+    block.addEventListener('touchend', handleTouchEnd);
+  });
+}
+
+function renderExamples() {
+  document.getElementById('examplesList').innerHTML = WORD_EXAMPLES.map(w =>
+    `<div class="example-chip" onclick="loadExample('${w.kor}')">${w.kor}<small>${w.meaning} ${w.emoji}</small></div>`
+  ).join('');
+}
+
+// ── MODE TOGGLE ─────────────────────────────────────────────────
+function toggleMode() {
+  advancedMode = document.getElementById('modeToggle').checked;
+  document.getElementById('modeLabel').textContent = advancedMode ? 'Advanced' : 'Basic';
+  renderPalette();
+}
+
+// ── DRAG vs CLICK DETECTION ─────────────────────────────────────
+let mouseDownPos = null;
+let mouseDownTarget = null;
+let didDrag = false;
+
+function handleMouseDown(e) {
+  mouseDownPos = { x: e.clientX, y: e.clientY };
+  mouseDownTarget = e.currentTarget;
+  didDrag = false;
+}
+
+document.addEventListener('mouseup', (e) => {
+  if (mouseDownTarget && !didDrag) {
+    // It was a click, not a drag
+    const dx = Math.abs(e.clientX - mouseDownPos.x);
+    const dy = Math.abs(e.clientY - mouseDownPos.y);
+    if (dx < 5 && dy < 5) {
+      const jamo = mouseDownTarget.dataset.jamo;
+      const type = mouseDownTarget.dataset.type;
+      openLetterModal(jamo, type);
+    }
+  }
+  mouseDownTarget = null;
+  mouseDownPos = null;
+});
+
+// ── DRAG & DROP ─────────────────────────────────────────────────
+let draggedJamo = null;
+let draggedType = null;
+
+function handleDragStart(e) {
+  draggedJamo = e.target.dataset.jamo;
+  draggedType = e.target.dataset.type;
+  didDrag = true;  // mark that drag happened
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'copy';
+  e.dataTransfer.setData('text/plain', draggedJamo);
+}
+function handleDragEnd(e) {
+  e.target.classList.remove('dragging');
+}
+
+const canvas = document.getElementById('canvas');
+canvas.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  canvas.classList.add('drag-over');
+});
+canvas.addEventListener('dragleave', (e) => {
+  if (e.target === canvas) canvas.classList.remove('drag-over');
+});
+canvas.addEventListener('drop', (e) => {
+  e.preventDefault();
+  canvas.classList.remove('drag-over');
+  if (draggedJamo) addJamoToActiveSyllable(draggedJamo, draggedType);
+  draggedJamo = null;
+});
+
+// Touch support
+let touchClone = null;
+let touchStartPos = null;
+let touchMoved = false;
+
+function handleTouchStart(e) {
+  const target = e.target.closest('.block');
+  if (!target) return;
+  const t = e.touches[0];
+  touchStartPos = { x: t.clientX, y: t.clientY, target };
+  touchMoved = false;
+  draggedJamo = target.dataset.jamo;
+  draggedType = target.dataset.type;
+}
+
+function handleTouchMove(e) {
+  if (!touchStartPos) return;
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - touchStartPos.x);
+  const dy = Math.abs(t.clientY - touchStartPos.y);
+  if (!touchMoved && (dx > 8 || dy > 8)) {
+    touchMoved = true;
+    // Start dragging - create clone
+    touchClone = touchStartPos.target.cloneNode(true);
+    touchClone.style.position = 'fixed';
+    touchClone.style.pointerEvents = 'none';
+    touchClone.style.zIndex = 9999;
+    touchClone.style.opacity = '0.8';
+    document.body.appendChild(touchClone);
+  }
+  if (touchMoved) {
+    e.preventDefault();
+    touchClone.style.left = (t.clientX - 23) + 'px';
+    touchClone.style.top = (t.clientY - 23) + 'px';
+  }
+}
+
+function handleTouchEnd(e) {
+  if (!touchStartPos) return;
+  if (!touchMoved) {
+    // It was a tap, not a drag - open modal
+    const jamo = touchStartPos.target.dataset.jamo;
+    const type = touchStartPos.target.dataset.type;
+    openLetterModal(jamo, type);
+  } else {
+    // It was a drag - check drop target
+    const t = e.changedTouches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el && (el.id === 'canvas' || el.closest('#canvas'))) {
+      addJamoToActiveSyllable(draggedJamo, draggedType);
+    }
+    if (touchClone) touchClone.remove();
+    touchClone = null;
+  }
+  touchStartPos = null;
+  draggedJamo = null;
+}
+
+// ── TOAST NOTIFICATION ──────────────────────────────────────────
+function showToast(message, icon = '⚠') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span class="toast-body">${message}</span>
+    <button class="toast-close" aria-label="Close">×</button>
+  `;
+  // close button handler
+  toast.querySelector('.toast-close').addEventListener('click', () => {
+    toast.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  });
+  container.appendChild(toast);
+  // auto-remove: toastIn 0.4s + visible 5.2s + toastOut 0.4s = 6.0s
+  setTimeout(() => {
+    if (toast.parentNode) toast.remove();
+  }, 6000);
+}
+
+// ── SYLLABLE LOGIC ──────────────────────────────────────────────
+function addJamoToActiveSyllable(jamo, type) {
+  const syl = syllables[activeSyllableIdx];
+
+  if (type === 'consonant') {
+    // Within the same syllable, dropping a consonant:
+    // - If no initial: set as initial
+    // - If initial exists but no medial: replace initial (since we don't have vowel yet)
+    // - If initial + medial both present, but no final: treat as 받침 (final)
+    // - If all three present: replace final
+    if (!syl.initial) {
+      syl.initial = jamo;
+    } else if (!syl.medial) {
+      // Replace initial (user is changing their mind)
+      syl.initial = jamo;
+    } else if (!syl.final) {
+      // Would become 받침 — check if this consonant is allowed there
+      if (INVALID_BATCHIM.includes(jamo)) {
+        showToast(
+          `<strong>${jamo}</strong> can\'t be used as a 받침 (ending sound).<br>` +
+          `<small>Only ㄸ, ㅃ, ㅉ have this rule. Click ➕ New Syllable to start a new one.</small>`,
+          '!'
+        );
+        return; // don't add it
+      }
+      syl.final = jamo;
+    } else {
+      // All slots full - replacing final
+      if (INVALID_BATCHIM.includes(jamo)) {
+        showToast(
+          `<strong>${jamo}</strong> can\'t be used as a 받침 (ending sound).<br>` +
+          `<small>Only ㄸ, ㅃ, ㅉ have this rule.</small>`,
+          '!'
+        );
+        return;
+      }
+      syl.final = jamo;
+    }
+  } else if (type === 'vowel') {
+    syl.medial = jamo;
+  }
+
+  renderCanvas();
+  updateResult();
+}
+
+function renderCanvas() {
+  const placeholder = document.getElementById('placeholder');
+  const slotsEl = document.getElementById('slots');
+
+  const hasAnyJamo = syllables.some(s => s.initial || s.medial || s.final);
+  if (!hasAnyJamo && syllables.length === 1) {
+    placeholder.style.display = 'block';
+    slotsEl.style.display = 'none';
+    return;
+  }
+  placeholder.style.display = 'none';
+  slotsEl.style.display = 'flex';
+
+  slotsEl.innerHTML = syllables.map((syl, idx) => {
+    // Determine layout based on medial vowel
+    let topLayout = 'layout-side';  // default
+    if (syl.medial && HORIZONTAL_VOWELS.includes(syl.medial)) {
+      topLayout = 'layout-stack';
+    } else if (syl.medial && COMPOUND_VOWELS.includes(syl.medial)) {
+      // Compound vowels — usually stack
+      topLayout = 'layout-stack';
+    }
+
+    // Build top row (initial + medial)
+    let topHTML = '';
+    if (syl.initial) {
+      topHTML += `<div class="slot-block consonant" onclick="event.stopPropagation();removeJamo(${idx},'initial')">${syl.initial}<span class="remove-x">×</span></div>`;
+    } else {
+      topHTML += `<div class="slot-block empty">?</div>`;
+    }
+    if (syl.medial) {
+      topHTML += `<div class="slot-block vowel" onclick="event.stopPropagation();removeJamo(${idx},'medial')">${syl.medial}<span class="remove-x">×</span></div>`;
+    } else {
+      topHTML += `<div class="slot-block empty">?</div>`;
+    }
+
+    // Build bottom row only if there's a final
+    let bottomHTML = '';
+    if (syl.final) {
+      bottomHTML = `
+        <div class="slot-bottom">
+          <div class="slot-block batchim" onclick="event.stopPropagation();removeJamo(${idx},'final')">${syl.final}<span class="remove-x">×</span></div>
+        </div>
+      `;
+    }
+
+    // Compute hint about what's missing
+    const hint = getCompletionHint(syl);
+    const hintClass = hint.complete ? 'complete' : '';
+
+    const isActive = idx === activeSyllableIdx;
+    const plus = idx < syllables.length - 1 ? '<div class="plus">+</div>' : '';
+
+    return `
+      <div class="slot ${isActive ? 'active' : ''}" onclick="setActiveSyllable(${idx})">
+        ${isActive ? '<div class="active-label">✏️ Building here!</div>' : ''}
+        <div class="slot-frame">
+          ${syllables.length > 1 ? `<button class="slot-delete" onclick="event.stopPropagation();deleteSyllable(${idx})" title="Delete this syllable">🗑</button>` : ''}
+          <div class="slot-top ${topLayout}">${topHTML}</div>
+          ${bottomHTML}
+        </div>
+        <div class="slot-hint ${hintClass}">${hint.text}</div>
+      </div>
+      ${plus}
+    `;
+  }).join('');
+}
+
+function getCompletionHint(syl) {
+  if (!syl.initial && !syl.medial && !syl.final) {
+    return {complete: false, text: '⏳ Empty — add letters!'};
+  }
+  if (!syl.initial && syl.medial) {
+    return {complete: false, text: '⚠️ Add a consonant (red) at the start!'};
+  }
+  if (syl.initial && !syl.medial) {
+    return {complete: false, text: '⚠️ Add a vowel (blue) next!'};
+  }
+  if (syl.initial && syl.medial) {
+    return {complete: true, text: '✅ Complete!'};
+  }
+  return {complete: false, text: '⏳ Empty'};
+}
+
+window.setActiveSyllable = function(idx) {
+  activeSyllableIdx = idx;
+  renderCanvas();
+};
+
+window.removeJamo = function(sylIdx, slot) {
+  syllables[sylIdx][slot] = null;
+  // Don't auto-delete syllable; user can use trash button
+  renderCanvas();
+  updateResult();
+};
+
+window.deleteSyllable = function(idx) {
+  if (syllables.length === 1) {
+    // Just clear it
+    syllables[0] = { initial: null, medial: null, final: null };
+  } else {
+    syllables.splice(idx, 1);
+    if (activeSyllableIdx >= syllables.length) {
+      activeSyllableIdx = syllables.length - 1;
+    } else if (activeSyllableIdx > idx) {
+      activeSyllableIdx--;
+    }
+  }
+  renderCanvas();
+  updateResult();
+};
+
+function addNewSyllable() {
+  const curr = syllables[activeSyllableIdx];
+  if (!curr.initial && !curr.medial && !curr.final) {
+    return;
+  }
+  if (!curr.medial) {
+    alert('Add a vowel to the current syllable first!');
+    return;
+  }
+  syllables.push({ initial: null, medial: null, final: null });
+  activeSyllableIdx = syllables.length - 1;
+  renderCanvas();
+  updateResult();
+}
+
+function clearCanvas() {
+  syllables = [{ initial: null, medial: null, final: null }];
+  activeSyllableIdx = 0;
+  renderCanvas();
+  updateResult();
+}
+
+// ── COMPOSE HANGUL ──────────────────────────────────────────────
+function composeSyllable(syl) {
+  if (!syl.initial || !syl.medial) return null;
+  const iIdx = INITIALS.indexOf(syl.initial);
+  const mIdx = MEDIALS.indexOf(syl.medial);
+  const fIdx = syl.final ? FINALS.indexOf(syl.final) : 0;
+  if (iIdx < 0 || mIdx < 0 || fIdx < 0) return null;
+  const code = 0xAC00 + (iIdx * 588) + (mIdx * 28) + fIdx;
+  return String.fromCharCode(code);
+}
+
+function romanizeSyllable(syl) {
+  if (!syl.initial || !syl.medial) return '';
+  let r = (ROM_INITIAL[syl.initial] || '') + (ROM_MEDIAL[syl.medial] || '');
+  if (syl.final) r += (ROM_FINAL[syl.final] || '');
+  return r;
+}
+
+function updateResult() {
+  const result = document.getElementById('result');
+  const incompleteEl = document.getElementById('resultIncompleteMsg');
+
+  // Check completion
+  const validSyllables = syllables.filter(s => s.initial && s.medial);
+  const totalSyllables = syllables.filter(s => s.initial || s.medial || s.final).length;
+
+  if (totalSyllables === 0) {
+    result.classList.remove('show');
+    return;
+  }
+
+  // Check if ALL non-empty syllables are complete
+  const allComplete = syllables.every(s =>
+    (!s.initial && !s.medial && !s.final) || (s.initial && s.medial)
+  );
+
+  if (!allComplete || validSyllables.length === 0) {
+    // Show incomplete state
+    result.classList.add('show');
+    result.classList.add('incomplete');
+    document.getElementById('resultWord').textContent = '?';
+    document.getElementById('resultPronunciation').textContent = 'Not a complete syllable yet';
+
+    // Find the problem
+    const problemSyllable = syllables.find(s =>
+      (s.initial || s.medial || s.final) && !(s.initial && s.medial)
+    );
+    let msg = '';
+    if (problemSyllable) {
+      if (!problemSyllable.initial && problemSyllable.medial) {
+        msg = '⚠️ We need a consonant (red block) at the beginning!';
+      } else if (problemSyllable.initial && !problemSyllable.medial) {
+        msg = '⚠️ We need a vowel (blue block) next!';
+      } else if (!problemSyllable.initial && !problemSyllable.medial && problemSyllable.final) {
+        msg = '⚠️ A 받침 alone is not a syllable — add a consonant and vowel first!';
+      }
+    }
+    incompleteEl.textContent = msg;
+    incompleteEl.style.display = msg ? 'block' : 'none';
+    document.getElementById('resultMeaning').textContent = '';
+    return;
+  }
+
+  // Complete!
+  result.classList.add('show');
+  result.classList.remove('incomplete');
+  incompleteEl.style.display = 'none';
+
+  const composed = validSyllables.map(composeSyllable).filter(x => x).join('');
+  const romanized = validSyllables.map(romanizeSyllable).filter(x => x).join('-');
+  const meaning = MEANINGS[composed] || '';
+
+  document.getElementById('resultWord').textContent = composed;
+  document.getElementById('resultPronunciation').textContent = '[ ' + romanized + ' ]';
+  document.getElementById('resultMeaning').textContent = meaning;
+
+  // Auto-speak on completion (only if word just became complete)
+  if (composed && composed !== lastSpokenWord) {
+    speakWord(composed);
+    lastSpokenWord = composed;
+    burstSparkles();
+  }
+}
+
+let lastSpokenWord = '';
+
+// ── SPEECH ──────────────────────────────────────────────────────
+let cachedKoreanVoice = null;
+
+function pickKoreanVoice() {
+  if (cachedKoreanVoice) return cachedKoreanVoice;
+  const voices = speechSynthesis.getVoices();
+  const koVoices = voices.filter(v => v.lang && (v.lang.startsWith('ko') || v.lang === 'ko_KR'));
+  if (koVoices.length === 0) return null;
+
+  // Preference order (best for child-friendly, natural Korean):
+  // 1. Google Korean (Female) — high quality, natural, online
+  // 2. Microsoft "SunHi"/"InJoon" or any Neural voice
+  // 3. Apple "Yuna" (macOS/iOS premium voice)
+  // 4. Any premium / enhanced / neural voice
+  // 5. Non-local voices (usually online & better quality)
+  // 6. Any Korean voice
+  const score = (v) => {
+    const name = (v.name || '').toLowerCase();
+    let s = 0;
+    if (/google/.test(name)) s += 100;
+    if (/female|여|여자|woman|sunhi|선희|yuna|유나|heami|heami/.test(name)) s += 50;
+    if (/neural|natural|premium|enhanced|wavenet/.test(name)) s += 40;
+    if (/microsoft/.test(name)) s += 30;
+    if (/injoon|인준/.test(name)) s += 20;
+    if (!v.localService) s += 25; // online voices usually sound better
+    return s;
+  };
+
+  const sorted = [...koVoices].sort((a, b) => score(b) - score(a));
+  cachedKoreanVoice = sorted[0];
+  return cachedKoreanVoice;
+}
+
+function speakWord(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+
+  // Detect words containing double consonants (쌍자음) — speak slower for clarity
+  const hasDoubleConsonant = /[ㄲㄸㅃㅆㅉ]|[가-힣]/.test(text) && text.split('').some(ch => {
+    const code = ch.charCodeAt(0) - 0xAC00;
+    if (code < 0 || code > 11171) return false;
+    const iIdx = Math.floor(code / 588);
+    // initials index for ㄲ=1, ㄸ=4, ㅃ=8, ㅆ=10, ㅉ=13
+    return [1, 4, 8, 10, 13].includes(iIdx);
+  });
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  // Short words and double-consonant words need extra-slow rate
+  if (text.length <= 2 || hasDoubleConsonant) {
+    utter.rate = 0.55;
+  } else {
+    utter.rate = 0.7;
+  }
+  utter.pitch = 1.0;
+  utter.volume = 1.0;
+  const koVoice = pickKoreanVoice();
+  if (koVoice) utter.voice = koVoice;
+  speechSynthesis.speak(utter);
+}
+
+function speakResult() {
+  const text = document.getElementById('resultWord').textContent;
+  if (text === '?') return;
+  speakWord(text);
+}
+
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => {
+    cachedKoreanVoice = null;  // re-pick when voices change
+    pickKoreanVoice();
+  };
+  speechSynthesis.getVoices();
+}
+
+// ── SPARKLES ────────────────────────────────────────────────────
+function burstSparkles() {
+  const result = document.getElementById('result');
+  if (!result.classList.contains('show') || result.classList.contains('incomplete')) return;
+  const sparkleChars = ['✨','⭐','🌟','💫','🎉'];
+  for (let i = 0; i < 6; i++) {
+    const s = document.createElement('span');
+    s.className = 'sparkle';
+    s.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+    const dx = (Math.random() - 0.5) * 200;
+    const dy = -100 - Math.random() * 100;
+    s.style.setProperty('--dx', dx + 'px');
+    s.style.setProperty('--dy', dy + 'px');
+    s.style.left = '50%';
+    s.style.top = '50%';
+    result.appendChild(s);
+    setTimeout(() => s.remove(), 1000);
+  }
+}
+
+// ── LOAD EXAMPLE ────────────────────────────────────────────────
+function loadExample(word) {
+  syllables = [];
+  for (const char of word) {
+    const code = char.charCodeAt(0) - 0xAC00;
+    if (code < 0 || code > 11171) continue;
+    const iIdx = Math.floor(code / 588);
+    const mIdx = Math.floor((code % 588) / 28);
+    const fIdx = code % 28;
+    syllables.push({
+      initial: INITIALS[iIdx],
+      medial: MEDIALS[mIdx],
+      final: fIdx > 0 ? FINALS[fIdx] : null,
+    });
+  }
+  if (syllables.length === 0) syllables = [{ initial: null, medial: null, final: null }];
+  activeSyllableIdx = syllables.length - 1;
+  lastSpokenWord = '';  // Reset so it'll speak the new word
+  renderCanvas();
+  updateResult();
+}
+
+// ── MODAL ───────────────────────────────────────────────────────
+function openLetterModal(jamo, type) {
+  const info = LETTER_INFO[jamo];
+  if (!info) return;
+
+  document.getElementById('modalLetter').textContent = jamo;
+  document.getElementById('modalLetter').className = 'modal-letter ' + (type === 'vowel' ? 'vowel' : '');
+  document.getElementById('modalSound').textContent = `[ ${info.sound} ] sound  ·  ${info.name}`;
+  document.getElementById('modalDescription').textContent = info.description;
+
+  document.getElementById('modalExamples').innerHTML = info.examples.map((ex, i) => `
+    <div class="modal-example">
+      <div class="modal-example-emoji">${ex.emoji}</div>
+      <div class="modal-example-text">
+        <div class="modal-example-kor">${ex.kor}</div>
+        <div class="modal-example-rom">${ex.rom}</div>
+        <div class="modal-example-eng">= ${ex.eng}</div>
+      </div>
+      <button class="btn-listen-mini" onclick="speakWord('${ex.kor}')">🔊 Listen</button>
+    </div>
+  `).join('');
+
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e && e.target.id !== 'modal' && !e.target.classList.contains('modal-close')) return;
+  document.getElementById('modal').classList.remove('show');
+  // Stop any speech when closing
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal({target: {id: 'modal'}});
+});
+
+// ── INIT ────────────────────────────────────────────────────────
+renderPalette();
+renderExamples();
+renderCanvas();
+</script>
+</body>
+</html>

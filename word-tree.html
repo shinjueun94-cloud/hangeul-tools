@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌳 Word Tree — Explore Korean Words!</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #FFF0F6 0%, #F8F0FF 50%, #F0F8FF 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #2D2D2D;
+}
+.container { max-width: 1100px; margin: 0 auto; }
+
+/* ─── HEADER ─── */
+.header {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  border-radius: 20px;
+  padding: 22px 28px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 6px 20px rgba(199, 125, 255, 0.25);
+  margin-bottom: 18px;
+}
+.header h1 { font-size: 26px; margin-bottom: 4px; font-weight: 700; }
+.header p { font-size: 14px; opacity: 0.95; }
+
+/* ─── WORD PICKER ─── */
+.picker {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+.picker-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.picker-chip {
+  background: linear-gradient(135deg, #FFF8FF 0%, #FFFFFF 100%);
+  border: 2px solid #E8D0FF;
+  border-radius: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.picker-chip:hover {
+  background: #F8F0FF;
+  border-color: #C77DFF;
+  transform: translateY(-2px);
+}
+.picker-chip.active {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  border-color: #C77DFF;
+  color: white;
+}
+.picker-chip .emoji { font-size: 18px; }
+.picker-chip .kor {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.picker-input {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+}
+.picker-input input {
+  padding: 7px 11px;
+  border: 2px solid #E5E5E5;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Malgun Gothic', sans-serif;
+  font-weight: 600;
+  outline: none;
+}
+.picker-input input:focus { border-color: #C77DFF; }
+.picker-input .emoji-input { width: 50px; text-align: center; font-size: 18px; }
+.picker-input .word-input { width: 120px; }
+.picker-input button {
+  background: linear-gradient(135deg, #6BCB77 0%, #4D96FF 100%);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.picker-input button:hover { transform: translateY(-1px); }
+
+/* ─── TREE STAGE ─── */
+.tree-stage {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 22px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  min-height: 500px;
+  position: relative;
+}
+
+/* ─── LEVEL 1: WORD ─── */
+.level-word {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+.word-card {
+  background: linear-gradient(135deg, #C77DFF 0%, #B47EFF 100%);
+  color: white;
+  border-radius: 18px;
+  padding: 18px 28px;
+  text-align: center;
+  min-width: 260px;
+  box-shadow: 0 6px 20px rgba(199, 125, 255, 0.4);
+  position: relative;
+}
+.word-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+.word-card-emoji { font-size: 36px; margin-bottom: 4px; }
+.word-card-kor {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.word-card-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.tiny-btn {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.tiny-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+.tiny-btn:active { transform: translateY(0); }
+.tiny-btn.dark {
+  background: rgba(0, 0, 0, 0.08);
+  color: #2D2D2D;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+.tiny-btn.dark:hover { background: rgba(0, 0, 0, 0.15); }
+
+.hint-text {
+  font-size: 12px;
+  margin-top: 6px;
+  font-style: italic;
+  opacity: 0.92;
+  min-height: 16px;
+  display: none;
+}
+.hint-text.show { display: block; }
+
+/* ─── BREAK BUTTON ─── */
+.break-action {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.break-btn {
+  background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+  color: #2D2D2D;
+  border: none;
+  padding: 11px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.break-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 165, 0, 0.4);
+}
+.break-btn:disabled {
+  background: #DDD;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.break-btn.collapse {
+  background: linear-gradient(135deg, #C77DFF 0%, #B47EFF 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(199, 125, 255, 0.3);
+}
+.break-btn.collapse:hover {
+  box-shadow: 0 6px 16px rgba(199, 125, 255, 0.4);
+}
+
+/* ─── CONNECTOR LINES ─── */
+.connector-area {
+  height: 30px;
+  position: relative;
+  margin: -8px 0;
+}
+.connector-area svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ─── LEVEL 2: SYLLABLES ─── */
+.level-syllables {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  animation: fadeInUp 0.5s ease;
+  align-items: flex-start;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Wraps a syllable card with its expandable jamo group below */
+.syllable-card-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.syllable-card {
+  background: linear-gradient(135deg, #FFFDE0 0%, #FFF8C0 100%);
+  border: 3px solid #FFD93D;
+  border-radius: 16px;
+  padding: 16px 18px;
+  text-align: center;
+  min-width: 165px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+}
+.syllable-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(255, 217, 61, 0.35);
+}
+.syllable-card.expanded {
+  background: linear-gradient(135deg, #FFFCE8 0%, #FFEDA8 100%);
+  border-color: #FFA500;
+}
+.syllable-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8B7000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.syllable-card-kor {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #2D2D2D;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.click-hint {
+  font-size: 10px;
+  color: #8B7000;
+  font-style: italic;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+/* Yellow connector between syllable card and its jamo group */
+.jamo-connector {
+  width: 3px;
+  height: 22px;
+  background: #FFA500;
+  border-radius: 2px;
+}
+
+/* ─── LEVEL 3: JAMOS ─── */
+.level-jamos {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.jamo-group {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 14px;
+  border: 2px dashed #DDD;
+  animation: fadeInUp 0.4s ease;
+}
+.jamo-block {
+  width: 60px;
+  height: 70px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.jamo-block.consonant { background: #FF6B6B; }
+.jamo-block.vowel { background: #4D96FF; }
+.jamo-block.batchim { background: #6BCB77; }
+.jamo-block::before, .jamo-block::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.jamo-block::before { left: 30%; transform: translateX(-50%); }
+.jamo-block::after { right: 30%; transform: translateX(50%); }
+.jamo-block:hover {
+  transform: translateY(-4px) scale(1.06);
+  box-shadow: 0 8px 14px rgba(0,0,0,0.28);
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+.empty-state-emoji { font-size: 60px; margin-bottom: 12px; }
+.empty-state-text { font-size: 16px; font-weight: 600; }
+
+/* ─── RESET BUTTON ─── */
+.reset-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #F0F0F0;
+  border: none;
+  padding: 7px 13px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.reset-btn:hover { background: #E0E0E0; color: #2D2D2D; }
+
+/* ─── LEGEND ─── */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #EEE;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+}
+.legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.legend-dot.c { background: #FF6B6B; }
+.legend-dot.v { background: #4D96FF; }
+.legend-dot.b { background: #6BCB77; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: overlayIn 0.2s ease;
+}
+.modal-overlay.show { display: flex; }
+@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: white;
+  border-radius: 22px;
+  padding: 28px 28px 22px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: modalIn 0.3s ease;
+  position: relative;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #F0F0F0;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: #FF6B6B; color: white; }
+
+/* Modal header */
+.modal-jamo {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  padding-bottom: 18px;
+  border-bottom: 2px solid #F0F0F0;
+  margin-bottom: 18px;
+}
+.modal-big-jamo {
+  width: 110px;
+  height: 110px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 70px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+.modal-big-jamo.consonant { background: #FF6B6B; }
+.modal-big-jamo.vowel { background: #4D96FF; }
+.modal-big-jamo.batchim { background: #6BCB77; }
+.modal-big-jamo::before, .modal-big-jamo::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+}
+.modal-big-jamo::before { left: 30%; transform: translateX(-50%); }
+.modal-big-jamo::after { right: 30%; transform: translateX(50%); }
+
+.modal-jamo-info { flex: 1; }
+.modal-jamo-type {
+  display: inline-block;
+  background: #F0F0F0;
+  color: #666;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.modal-jamo-type.consonant { background: #FFE5E5; color: #CC3333; }
+.modal-jamo-type.vowel { background: #E5EEFF; color: #2B5FB8; }
+.modal-jamo-type.batchim { background: #E5F5E5; color: #2D8033; }
+.modal-jamo-name {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2D2D2D;
+  font-family: 'Malgun Gothic', sans-serif;
+  margin-bottom: 2px;
+}
+.modal-jamo-name-en {
+  font-size: 15px;
+  font-style: italic;
+  color: #888;
+  margin-bottom: 10px;
+}
+.modal-jamo-sound {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #2D2D2D;
+}
+.modal-jamo-sound .english-letter {
+  font-size: 20px;
+  background: white;
+  padding: 2px 10px;
+  border-radius: 8px;
+  margin-right: 2px;
+}
+
+/* Modal examples */
+.modal-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.modal-examples {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.example-card {
+  background: linear-gradient(135deg, #FFF8FF 0%, #FFFFFF 100%);
+  border: 2px solid #E8D0FF;
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.example-card:hover {
+  transform: translateY(-3px);
+  border-color: #C77DFF;
+  box-shadow: 0 6px 12px rgba(199, 125, 255, 0.2);
+}
+.example-card-emoji { font-size: 30px; display: block; margin-bottom: 4px; }
+.example-card-kor {
+  font-family: 'Malgun Gothic', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 2px;
+}
+.example-card-kor .highlight {
+  color: #FF6B6B;
+  background: #FFF0F0;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+.example-card-kor .highlight.vowel { color: #4D96FF; background: #F0F6FF; }
+.example-card-kor .highlight.batchim { color: #2D8033; background: #E5F5E5; }
+.example-card-en {
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.example-card-listen {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  color: white;
+  border: none;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ─── TOAST ─── */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: min(520px, 92vw);
+}
+.toast {
+  background: #2D2D2D;
+  color: #FFFFFF;
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  animation: toastIn 0.4s ease, toastOut 0.4s ease 3.6s forwards;
+  pointer-events: auto;
+}
+.toast .toast-icon {
+  width: 28px;
+  height: 28px;
+  background: #FF6B6B;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+@keyframes toastIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-30px); opacity: 0; }
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 640px) {
+  .header h1 { font-size: 20px; }
+  .word-card-kor { font-size: 34px; }
+  .syllable-card-kor { font-size: 32px; }
+  .jamo-block { width: 52px; height: 60px; font-size: 26px; }
+  .modal { padding: 22px 18px; }
+  .modal-big-jamo { width: 80px; height: 80px; font-size: 50px; }
+  .modal-jamo-name { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🌳 Word Tree — Explore Korean Words!</h1>
+    <p>Pick a word → break it into syllables → discover letters!</p>
+  </div>
+
+  <!-- Word picker -->
+  <div class="picker">
+    <div class="picker-label">📚 Pick a word, or type your own:</div>
+    <div class="picker-row" id="pickerRow"></div>
+  </div>
+
+  <!-- Tree stage -->
+  <div class="tree-stage" id="treeStage">
+    <button class="reset-btn" id="resetBtn" onclick="resetTree()" style="display:none;">↺ Reset</button>
+    <div id="treeContent">
+      <div class="empty-state">
+        <div class="empty-state-emoji">🌱</div>
+        <div class="empty-state-text">Pick a word above to start growing your tree!</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot c"></span> Consonant (자음)</div>
+      <div class="legend-item"><span class="legend-dot v"></span> Vowel (모음)</div>
+      <div class="legend-item"><span class="legend-dot b"></span> Ending (받침)</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal for jamo details -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalIfBackdrop(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+const PRESET_WORDS = [
+  {kor:'엄마',   emoji:'👩', meaning:'mum'},
+  {kor:'아빠',   emoji:'👨', meaning:'dad'},
+  {kor:'한나',   emoji:'✨', meaning:'Hannah'},
+  {kor:'밥',     emoji:'🍚', meaning:'rice'},
+  {kor:'김',     emoji:'🌿', meaning:'seaweed'},
+  {kor:'우유',   emoji:'🥛', meaning:'milk'},
+  {kor:'사과',   emoji:'🍎', meaning:'apple'},
+  {kor:'유니콘', emoji:'🦄', meaning:'unicorn'},
+  {kor:'강아지', emoji:'🐶', meaning:'puppy'},
+  {kor:'무지개', emoji:'🌈', meaning:'rainbow'},
+  {kor:'공주',   emoji:'👸', meaning:'princess'},
+  {kor:'안녕',   emoji:'👋', meaning:'hello'},
+];
+
+// Hangul Unicode mappings
+const INITIALS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const MEDIALS = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const FINALS = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+// Jamo info — names, English equivalents, examples
+const JAMO_INFO = {
+  // Consonants
+  'ㄱ': {name:'기역', nameEn:'giyeok', eng:'g/k', examples:[
+    {kor:'고양이', emoji:'🐱', en:'cat'}, {kor:'곰', emoji:'🐻', en:'bear'},
+    {kor:'개', emoji:'🐕', en:'dog'},   {kor:'김', emoji:'🌿', en:'seaweed'},
+  ]},
+  'ㄴ': {name:'니은', nameEn:'nieun', eng:'n', examples:[
+    {kor:'눈', emoji:'👁️', en:'eye/snow'},  {kor:'나비', emoji:'🦋', en:'butterfly'},
+    {kor:'너구리', emoji:'🦝', en:'raccoon'}, {kor:'노래', emoji:'🎵', en:'song'},
+  ]},
+  'ㄷ': {name:'디귿', nameEn:'digeut', eng:'d/t', examples:[
+    {kor:'달', emoji:'🌙', en:'moon'},  {kor:'다리', emoji:'🦵', en:'leg'},
+    {kor:'돼지', emoji:'🐷', en:'pig'}, {kor:'딸기', emoji:'🍓', en:'strawberry'},
+  ]},
+  'ㄹ': {name:'리을', nameEn:'rieul', eng:'r/l', examples:[
+    {kor:'라면', emoji:'🍜', en:'ramen'}, {kor:'레몬', emoji:'🍋', en:'lemon'},
+    {kor:'로봇', emoji:'🤖', en:'robot'}, {kor:'리본', emoji:'🎀', en:'ribbon'},
+  ]},
+  'ㅁ': {name:'미음', nameEn:'mieum', eng:'m', examples:[
+    {kor:'머리', emoji:'🧠', en:'head'},  {kor:'마법', emoji:'✨', en:'magic'},
+    {kor:'무지개', emoji:'🌈', en:'rainbow'}, {kor:'물', emoji:'💧', en:'water'},
+  ]},
+  'ㅂ': {name:'비읍', nameEn:'bieup', eng:'b/p', examples:[
+    {kor:'밥', emoji:'🍚', en:'rice'},  {kor:'빵', emoji:'🍞', en:'bread'},
+    {kor:'바나나', emoji:'🍌', en:'banana'}, {kor:'배', emoji:'🍐', en:'pear'},
+  ]},
+  'ㅅ': {name:'시옷', nameEn:'siot', eng:'s', examples:[
+    {kor:'사과', emoji:'🍎', en:'apple'}, {kor:'손', emoji:'✋', en:'hand'},
+    {kor:'새', emoji:'🐦', en:'bird'},   {kor:'사자', emoji:'🦁', en:'lion'},
+  ]},
+  'ㅇ': {name:'이응', nameEn:'ieung', eng:'silent / ng', examples:[
+    {kor:'아기', emoji:'👶', en:'baby'},  {kor:'엄마', emoji:'👩', en:'mum'},
+    {kor:'강아지', emoji:'🐶', en:'puppy'}, {kor:'공', emoji:'⚽', en:'ball'},
+  ]},
+  'ㅈ': {name:'지읒', nameEn:'jieut', eng:'j', examples:[
+    {kor:'주스', emoji:'🧃', en:'juice'}, {kor:'잠', emoji:'😴', en:'sleep'},
+    {kor:'지구', emoji:'🌍', en:'Earth'}, {kor:'장미', emoji:'🌹', en:'rose'},
+  ]},
+  'ㅊ': {name:'치읓', nameEn:'chieut', eng:'ch', examples:[
+    {kor:'친구', emoji:'🤝', en:'friend'}, {kor:'책', emoji:'📚', en:'book'},
+    {kor:'차', emoji:'🚗', en:'car/tea'}, {kor:'치즈', emoji:'🧀', en:'cheese'},
+  ]},
+  'ㅋ': {name:'키읔', nameEn:'kieuk', eng:'k', examples:[
+    {kor:'코', emoji:'👃', en:'nose'},   {kor:'커피', emoji:'☕', en:'coffee'},
+    {kor:'코끼리', emoji:'🐘', en:'elephant'}, {kor:'케이크', emoji:'🎂', en:'cake'},
+  ]},
+  'ㅌ': {name:'티읕', nameEn:'tieut', eng:'t', examples:[
+    {kor:'토끼', emoji:'🐰', en:'rabbit'}, {kor:'태양', emoji:'☀️', en:'sun'},
+    {kor:'토마토', emoji:'🍅', en:'tomato'}, {kor:'타조', emoji:'🦤', en:'ostrich'},
+  ]},
+  'ㅍ': {name:'피읖', nameEn:'pieup', eng:'p', examples:[
+    {kor:'피자', emoji:'🍕', en:'pizza'},   {kor:'팥', emoji:'🫘', en:'red bean'},
+    {kor:'포도', emoji:'🍇', en:'grape'},  {kor:'파인애플', emoji:'🍍', en:'pineapple'},
+  ]},
+  'ㅎ': {name:'히읗', nameEn:'hieut', eng:'h', examples:[
+    {kor:'한나', emoji:'✨', en:'Hannah'}, {kor:'해', emoji:'☀️', en:'sun'},
+    {kor:'호랑이', emoji:'🐯', en:'tiger'}, {kor:'하늘', emoji:'☁️', en:'sky'},
+  ]},
+  'ㄲ': {name:'쌍기역', nameEn:'ssang-giyeok', eng:'kk (strong g)', examples:[
+    {kor:'꽃', emoji:'🌸', en:'flower'}, {kor:'꿀', emoji:'🍯', en:'honey'},
+    {kor:'꿈', emoji:'💭', en:'dream'},  {kor:'꼬리', emoji:'🐕', en:'tail'},
+  ]},
+  'ㄸ': {name:'쌍디귿', nameEn:'ssang-digeut', eng:'tt (strong d)', examples:[
+    {kor:'딸기', emoji:'🍓', en:'strawberry'}, {kor:'땅', emoji:'🌍', en:'ground'},
+    {kor:'떡', emoji:'🍡', en:'rice cake'},  {kor:'또', emoji:'🔄', en:'again'},
+  ]},
+  'ㅃ': {name:'쌍비읍', nameEn:'ssang-bieup', eng:'pp (strong b)', examples:[
+    {kor:'빵', emoji:'🍞', en:'bread'},  {kor:'뽀뽀', emoji:'😘', en:'kiss'},
+    {kor:'뼈', emoji:'🦴', en:'bone'},   {kor:'빨강', emoji:'🔴', en:'red'},
+  ]},
+  'ㅆ': {name:'쌍시옷', nameEn:'ssang-siot', eng:'ss (strong s)', examples:[
+    {kor:'쌀', emoji:'🌾', en:'rice grain'}, {kor:'씨앗', emoji:'🌱', en:'seed'},
+    {kor:'쌍둥이', emoji:'👯', en:'twins'},  {kor:'씻다', emoji:'🚿', en:'wash'},
+  ]},
+  'ㅉ': {name:'쌍지읒', nameEn:'ssang-jieut', eng:'jj (strong j)', examples:[
+    {kor:'짜장면', emoji:'🍜', en:'black-bean noodles'}, {kor:'짝', emoji:'👯', en:'pair'},
+    {kor:'쪽', emoji:'➡️', en:'side'},     {kor:'찌개', emoji:'🍲', en:'stew'},
+  ]},
+  // Vowels
+  'ㅏ': {name:'아', nameEn:'a', eng:'ah (as in "father")', examples:[
+    {kor:'아빠', emoji:'👨', en:'dad'},  {kor:'사과', emoji:'🍎', en:'apple'},
+    {kor:'바다', emoji:'🌊', en:'sea'},  {kor:'나비', emoji:'🦋', en:'butterfly'},
+  ]},
+  'ㅑ': {name:'야', nameEn:'ya', eng:'yah', examples:[
+    {kor:'야구', emoji:'⚾', en:'baseball'}, {kor:'양', emoji:'🐑', en:'sheep'},
+    {kor:'얌', emoji:'😋', en:'yum'},     {kor:'야채', emoji:'🥬', en:'vegetable'},
+  ]},
+  'ㅓ': {name:'어', nameEn:'eo', eng:'uh (as in "fun")', examples:[
+    {kor:'엄마', emoji:'👩', en:'mum'},  {kor:'어깨', emoji:'💪', en:'shoulder'},
+    {kor:'얼음', emoji:'🧊', en:'ice'},  {kor:'머리', emoji:'🧠', en:'head'},
+  ]},
+  'ㅕ': {name:'여', nameEn:'yeo', eng:'yuh', examples:[
+    {kor:'여우', emoji:'🦊', en:'fox'}, {kor:'여름', emoji:'☀️', en:'summer'},
+    {kor:'영화', emoji:'🎬', en:'movie'},{kor:'역', emoji:'🚉', en:'station'},
+  ]},
+  'ㅗ': {name:'오', nameEn:'o', eng:'oh', examples:[
+    {kor:'오리', emoji:'🦆', en:'duck'},  {kor:'코', emoji:'👃', en:'nose'},
+    {kor:'도넛', emoji:'🍩', en:'donut'},{kor:'곰', emoji:'🐻', en:'bear'},
+  ]},
+  'ㅛ': {name:'요', nameEn:'yo', eng:'yo', examples:[
+    {kor:'요리', emoji:'🍳', en:'cooking'}, {kor:'요정', emoji:'🧚', en:'fairy'},
+    {kor:'교실', emoji:'🏫', en:'classroom'}, {kor:'우표', emoji:'📮', en:'stamp'},
+  ]},
+  'ㅜ': {name:'우', nameEn:'u', eng:'oo (as in "boot")', examples:[
+    {kor:'우유', emoji:'🥛', en:'milk'}, {kor:'우산', emoji:'☂️', en:'umbrella'},
+    {kor:'주스', emoji:'🧃', en:'juice'}, {kor:'국수', emoji:'🍜', en:'noodles'},
+  ]},
+  'ㅠ': {name:'유', nameEn:'yu', eng:'you', examples:[
+    {kor:'유니콘', emoji:'🦄', en:'unicorn'}, {kor:'유리', emoji:'🪟', en:'glass'},
+    {kor:'우유', emoji:'🥛', en:'milk'},   {kor:'휴식', emoji:'😌', en:'rest'},
+  ]},
+  'ㅡ': {name:'으', nameEn:'eu', eng:'eu (like "uh" but tighter)', examples:[
+    {kor:'음악', emoji:'🎵', en:'music'}, {kor:'은행', emoji:'🏦', en:'bank'},
+    {kor:'그림', emoji:'🎨', en:'picture'}, {kor:'스푼', emoji:'🥄', en:'spoon'},
+  ]},
+  'ㅣ': {name:'이', nameEn:'i', eng:'ee (as in "see")', examples:[
+    {kor:'이름', emoji:'📛', en:'name'}, {kor:'기차', emoji:'🚂', en:'train'},
+    {kor:'아이', emoji:'👶', en:'child'}, {kor:'친구', emoji:'🤝', en:'friend'},
+  ]},
+  'ㅐ': {name:'애', nameEn:'ae', eng:'ay (as in "cat")', examples:[
+    {kor:'개', emoji:'🐕', en:'dog'},  {kor:'배', emoji:'🍐', en:'pear/boat'},
+    {kor:'새', emoji:'🐦', en:'bird'}, {kor:'배구', emoji:'🏐', en:'volleyball'},
+  ]},
+  'ㅒ': {name:'얘', nameEn:'yae', eng:'yay', examples:[
+    {kor:'얘기', emoji:'💬', en:'talk'}, {kor:'얘', emoji:'👶', en:'this kid'},
+  ]},
+  'ㅔ': {name:'에', nameEn:'e', eng:'eh (as in "bed")', examples:[
+    {kor:'세 개', emoji:'3️⃣', en:'three things'}, {kor:'네', emoji:'✅', en:'yes'},
+    {kor:'베개', emoji:'🛏️', en:'pillow'},  {kor:'테이프', emoji:'🎞️', en:'tape'},
+  ]},
+  'ㅖ': {name:'예', nameEn:'ye', eng:'yeah', examples:[
+    {kor:'예쁘다', emoji:'💖', en:'pretty'}, {kor:'예의', emoji:'🙇', en:'manners'},
+    {kor:'얘기', emoji:'💬', en:'chat'},   {kor:'예약', emoji:'📅', en:'booking'},
+  ]},
+  'ㅘ': {name:'와', nameEn:'wa', eng:'wah', examples:[
+    {kor:'사과', emoji:'🍎', en:'apple'}, {kor:'과자', emoji:'🍪', en:'snack'},
+    {kor:'화분', emoji:'🪴', en:'flower pot'}, {kor:'왕', emoji:'👑', en:'king'},
+  ]},
+  'ㅙ': {name:'왜', nameEn:'wae', eng:'way', examples:[
+    {kor:'왜', emoji:'❓', en:'why'}, {kor:'돼지', emoji:'🐷', en:'pig'},
+  ]},
+  'ㅚ': {name:'외', nameEn:'oe', eng:'weh', examples:[
+    {kor:'외국', emoji:'🌏', en:'foreign'}, {kor:'외투', emoji:'🧥', en:'coat'},
+    {kor:'회', emoji:'🍣', en:'sashimi'},  {kor:'외삼촌', emoji:'👨', en:'uncle'},
+  ]},
+  'ㅝ': {name:'워', nameEn:'wo', eng:'wuh', examples:[
+    {kor:'원', emoji:'⭕', en:'circle/won'}, {kor:'더워', emoji:'🥵', en:'hot'},
+    {kor:'쉬워', emoji:'🙂', en:'easy'},   {kor:'추워', emoji:'🥶', en:'cold'},
+  ]},
+  'ㅞ': {name:'웨', nameEn:'we', eng:'weh', examples:[
+    {kor:'웨이터', emoji:'🤵', en:'waiter'}, {kor:'스웨터', emoji:'🧥', en:'sweater'},
+  ]},
+  'ㅟ': {name:'위', nameEn:'wi', eng:'wee', examples:[
+    {kor:'위', emoji:'⬆️', en:'top/above'}, {kor:'귀', emoji:'👂', en:'ear'},
+    {kor:'쥐', emoji:'🐭', en:'mouse'},   {kor:'바위', emoji:'🪨', en:'rock'},
+  ]},
+  'ㅢ': {name:'의', nameEn:'ui', eng:'ui (like "we" but short)', examples:[
+    {kor:'의사', emoji:'👨‍⚕️', en:'doctor'}, {kor:'의자', emoji:'🪑', en:'chair'},
+  ]},
+};
+
+// Romanization for syllables
+const ROM_INITIAL = {'ㄱ':'g','ㄲ':'kk','ㄴ':'n','ㄷ':'d','ㄸ':'tt','ㄹ':'r','ㅁ':'m','ㅂ':'b','ㅃ':'pp','ㅅ':'s','ㅆ':'ss','ㅇ':'','ㅈ':'j','ㅉ':'jj','ㅊ':'ch','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+const ROM_MEDIAL = {'ㅏ':'a','ㅐ':'ae','ㅑ':'ya','ㅒ':'yae','ㅓ':'eo','ㅔ':'e','ㅕ':'yeo','ㅖ':'ye','ㅗ':'o','ㅘ':'wa','ㅙ':'wae','ㅚ':'oe','ㅛ':'yo','ㅜ':'u','ㅝ':'wo','ㅞ':'we','ㅟ':'wi','ㅠ':'yu','ㅡ':'eu','ㅢ':'ui','ㅣ':'i'};
+const ROM_FINAL = {'':'','ㄱ':'k','ㄲ':'k','ㄴ':'n','ㄷ':'t','ㄹ':'l','ㅁ':'m','ㅂ':'p','ㅅ':'t','ㅆ':'t','ㅇ':'ng','ㅈ':'t','ㅊ':'t','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+
+// State
+let currentWord = null;
+let stage = 'word'; // 'word', 'broken' (syllables visible)
+let expandedSyllables = []; // per-syllable expanded state: array of booleans
+let userWords = [];
+try {
+  const saved = sessionStorage.getItem('treeUserWords');
+  if (saved) userWords = JSON.parse(saved);
+} catch(e) {}
+
+// ══════════════════════════════════════════════════════════════
+// HANGUL DECOMPOSITION
+// ══════════════════════════════════════════════════════════════
+function decomposeSyllable(char) {
+  const code = char.charCodeAt(0) - 0xAC00;
+  if (code < 0 || code > 11171) return null;
+  const iIdx = Math.floor(code / 588);
+  const mIdx = Math.floor((code % 588) / 28);
+  const fIdx = code % 28;
+  return {
+    initial: INITIALS[iIdx],
+    medial: MEDIALS[mIdx],
+    final: fIdx > 0 ? FINALS[fIdx] : null,
+  };
+}
+function decomposeWord(word) {
+  const syllables = [];
+  for (const ch of word) {
+    const d = decomposeSyllable(ch);
+    if (d) syllables.push({char: ch, ...d});
+  }
+  return syllables;
+}
+function romanizeSyllable(syl) {
+  let r = (ROM_INITIAL[syl.initial] || '') + (ROM_MEDIAL[syl.medial] || '');
+  if (syl.final) r += (ROM_FINAL[syl.final] || '');
+  return r;
+}
+function romanizeWord(word) {
+  return decomposeWord(word).map(romanizeSyllable).join('-');
+}
+
+// ══════════════════════════════════════════════════════════════
+// TTS
+// ══════════════════════════════════════════════════════════════
+let cachedKoreanVoice = null;
+function pickKoreanVoice() {
+  if (cachedKoreanVoice) return cachedKoreanVoice;
+  const voices = speechSynthesis.getVoices();
+  const koVoices = voices.filter(v => v.lang && (v.lang.startsWith('ko') || v.lang === 'ko_KR'));
+  if (koVoices.length === 0) return null;
+  const score = (v) => {
+    const name = (v.name || '').toLowerCase();
+    let s = 0;
+    if (/google/.test(name)) s += 100;
+    if (/female|여|woman|sunhi|선희|yuna|유나|heami/.test(name)) s += 50;
+    if (/neural|natural|premium|enhanced|wavenet/.test(name)) s += 40;
+    if (/microsoft/.test(name)) s += 30;
+    if (!v.localService) s += 25;
+    return s;
+  };
+  const sorted = [...koVoices].sort((a, b) => score(b) - score(a));
+  cachedKoreanVoice = sorted[0];
+  return cachedKoreanVoice;
+}
+function speakText(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  utter.rate = text.length <= 2 ? 0.55 : 0.7;
+  utter.pitch = 1.0;
+  const voice = pickKoreanVoice();
+  if (voice) utter.voice = voice;
+  speechSynthesis.speak(utter);
+}
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => {
+    cachedKoreanVoice = null;
+    pickKoreanVoice();
+  };
+  speechSynthesis.getVoices();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PICKER
+// ══════════════════════════════════════════════════════════════
+function renderPicker() {
+  const row = document.getElementById('pickerRow');
+  const allWords = [...PRESET_WORDS, ...userWords];
+  row.innerHTML = allWords.map(w => `
+    <div class="picker-chip${currentWord && currentWord.kor === w.kor ? ' active' : ''}"
+         data-word="${escapeHtml(w.kor)}">
+      <span class="emoji">${w.emoji}</span>
+      <span class="kor">${w.kor}</span>
+    </div>
+  `).join('') + `
+    <div class="picker-input">
+      <input type="text" id="newEmojiInput" class="emoji-input" placeholder="🦄" maxlength="2">
+      <input type="text" id="newWordInput" class="word-input" placeholder="한국어 단어" maxlength="10">
+      <input type="text" id="newMeaningInput" class="word-input" placeholder="English" style="width:90px;font-family:inherit;" maxlength="20">
+      <button onclick="addWord()">+ Add</button>
+    </div>
+  `;
+
+  // Wire up chip clicks via delegation
+  row.querySelectorAll('.picker-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      pickWord(chip.dataset.word);
+    });
+  });
+
+  // IME-aware Enter handling
+  const wordInputEl = document.getElementById('newWordInput');
+  let imeComposing = false;
+  wordInputEl.addEventListener('compositionstart', () => { imeComposing = true; });
+  wordInputEl.addEventListener('compositionend', () => { imeComposing = false; });
+  wordInputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !imeComposing && !e.isComposing) {
+      e.preventDefault();
+      addWord();
+    }
+  });
+  document.getElementById('newMeaningInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addWord(); }
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function addWord() {
+  const emojiInput = document.getElementById('newEmojiInput');
+  const wordInput = document.getElementById('newWordInput');
+  const meaningInput = document.getElementById('newMeaningInput');
+  let kor = (wordInput.value || '').trim().replace(/\s+/g, '');
+  // Keep only complete Hangul syllables
+  kor = Array.from(kor).filter(ch => {
+    const code = ch.charCodeAt(0);
+    return code >= 0xAC00 && code <= 0xD7A3;
+  }).join('');
+  const emoji = (emojiInput.value || '').trim() || '⭐';
+  const meaning = (meaningInput.value || '').trim();
+
+  if (!kor) {
+    showToast('Please enter a Korean word (complete syllables, e.g. 사랑해)');
+    return;
+  }
+  const allWords = [...PRESET_WORDS, ...userWords];
+  if (allWords.some(w => w.kor === kor)) {
+    showToast(`"${kor}" is already in the list!`);
+    pickWord(kor);
+    emojiInput.value = ''; wordInput.value = ''; meaningInput.value = '';
+    return;
+  }
+  const newWord = {kor, emoji, meaning};
+  userWords.push(newWord);
+  try { sessionStorage.setItem('treeUserWords', JSON.stringify(userWords)); } catch(e) {}
+  emojiInput.value = ''; wordInput.value = ''; meaningInput.value = '';
+  renderPicker();
+  pickWord(kor);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MAIN TREE FLOW
+// ══════════════════════════════════════════════════════════════
+function pickWord(kor) {
+  const allWords = [...PRESET_WORDS, ...userWords];
+  const w = allWords.find(x => x.kor === kor);
+  if (!w) return;
+  currentWord = w;
+  stage = 'word';
+  expandedSyllables = decomposeWord(w.kor).map(() => false);
+  document.getElementById('resetBtn').style.display = 'block';
+  renderTree();
+  renderPicker(); // re-render to show active state
+  // Auto-speak the word once
+  setTimeout(() => speakText(w.kor), 200);
+}
+
+function resetTree() {
+  currentWord = null;
+  stage = 'word';
+  expandedSyllables = [];
+  document.getElementById('resetBtn').style.display = 'none';
+  renderTree();
+  renderPicker();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+function renderTree() {
+  const content = document.getElementById('treeContent');
+  if (!currentWord) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-emoji">🌱</div>
+        <div class="empty-state-text">Pick a word above to start growing your tree!</div>
+      </div>
+    `;
+    return;
+  }
+
+  const w = currentWord;
+  const syllables = decomposeWord(w.kor);
+  const rom = romanizeWord(w.kor);
+
+  let html = '';
+
+  // ── LEVEL 1: WORD ──
+  html += `
+    <div class="level-word">
+      <div class="word-card">
+        <div class="word-card-label">📜 Word</div>
+        <div class="word-card-emoji">${w.emoji}</div>
+        <div class="word-card-kor">${w.kor}</div>
+        <div class="word-card-buttons">
+          <button class="tiny-btn" onclick="speakText('${escapeHtml(w.kor)}')">🔊 Listen</button>
+          <button class="tiny-btn" onclick="toggleHint(this, 'word-hint')">💡 Hint</button>
+        </div>
+        <div class="hint-text" id="word-hint">
+          🔤 <strong>${rom}</strong>  ·  ${w.meaning ? `means "${escapeHtml(w.meaning)}"` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // ── TOGGLE: show / hide syllables ──
+  if (stage === 'word') {
+    html += `
+      <div class="break-action">
+        <button class="break-btn" onclick="toggleSyllables()">
+          ⬇️ Break into ${syllables.length === 1 ? 'letters' : 'syllables'}!
+        </button>
+      </div>
+    `;
+  } else {
+    // stage === 'broken' — show syllables, with a collapse button
+    html += `
+      <div class="break-action">
+        <button class="break-btn collapse" onclick="toggleSyllables()">
+          ⬆️ Hide syllables
+        </button>
+      </div>
+    `;
+
+    // Connector lines from word to syllables
+    html += renderConnectors(1, syllables.length);
+
+    // ── LEVEL 2: SYLLABLES ──
+    html += `<div class="level-syllables">`;
+    syllables.forEach((syl, i) => {
+      const sylRom = romanizeSyllable(syl);
+      const isExpanded = expandedSyllables[i];
+      html += `
+        <div class="syllable-card-wrap">
+          <div class="syllable-card ${isExpanded ? 'expanded' : ''}" data-syl-idx="${i}">
+            <div class="syllable-card-label">🧩 Syllable ${i+1}</div>
+            <div class="syllable-card-kor">${syl.char}</div>
+            <div class="word-card-buttons">
+              <button class="tiny-btn dark" onclick="event.stopPropagation();speakText('${syl.char}')">🔊 Listen</button>
+              <button class="tiny-btn dark" onclick="event.stopPropagation();toggleHint(this, 'syl-hint-${i}')">💡 Hint</button>
+              <button class="tiny-btn dark expand-toggle" data-syl-idx="${i}">
+                ${isExpanded ? '⬆️ Hide letters' : '⬇️ Show letters'}
+              </button>
+            </div>
+            <div class="hint-text" id="syl-hint-${i}" style="color:#8B7000;">
+              🔤 <strong>${sylRom}</strong>
+            </div>
+          </div>
+          ${isExpanded ? renderSyllableJamos(syl, i) : ''}
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+
+  content.innerHTML = html;
+
+  // Wire up syllable expand/collapse buttons
+  if (stage === 'broken') {
+    content.querySelectorAll('.expand-toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.sylIdx, 10);
+        toggleSyllableExpand(idx);
+      });
+    });
+
+    // Wire up syllable card clicks (whole card toggles expand, except inner buttons)
+    content.querySelectorAll('.syllable-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.tiny-btn')) return; // ignore button clicks
+        const idx = parseInt(card.dataset.sylIdx, 10);
+        toggleSyllableExpand(idx);
+      });
+    });
+
+    // Wire up jamo clicks (open modal)
+    content.querySelectorAll('.jamo-block').forEach(block => {
+      block.addEventListener('click', () => {
+        openJamoModal(block.dataset.jamo, block.dataset.type);
+      });
+    });
+  }
+}
+
+// Render the jamos for a single syllable (called inline within renderTree)
+function renderSyllableJamos(syl, idx) {
+  let html = `<div class="jamo-connector"></div>`;
+  html += `<div class="jamo-group">`;
+  html += `<div class="jamo-block consonant" data-jamo="${syl.initial}" data-type="consonant">${syl.initial}</div>`;
+  html += `<div class="jamo-block vowel" data-jamo="${syl.medial}" data-type="vowel">${syl.medial}</div>`;
+  if (syl.final) {
+    html += `<div class="jamo-block batchim" data-jamo="${syl.final}" data-type="batchim">${syl.final}</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function toggleSyllables() {
+  if (stage === 'word') {
+    stage = 'broken';
+  } else {
+    stage = 'word';
+    // Also collapse all expanded syllables
+    expandedSyllables = expandedSyllables.map(() => false);
+  }
+  renderTree();
+}
+
+function toggleSyllableExpand(idx) {
+  if (idx < 0 || idx >= expandedSyllables.length) return;
+  expandedSyllables[idx] = !expandedSyllables[idx];
+  renderTree();
+}
+
+function renderConnectors(level, count) {
+  // Simple visual connector (SVG lines)
+  const color = level === 1 ? '#C77DFF' : '#FFD93D';
+  return `
+    <div class="connector-area">
+      <svg viewBox="0 0 1000 30" preserveAspectRatio="none">
+        ${Array.from({length: count}).map((_, i) => {
+          const x = (i + 0.5) * (1000 / count);
+          return `<line x1="500" y1="0" x2="${x}" y2="30" stroke="${color}" stroke-width="3" stroke-linecap="round" />`;
+        }).join('')}
+      </svg>
+    </div>
+  `;
+}
+
+function toggleHint(btn, hintId) {
+  const hint = document.getElementById(hintId);
+  if (hint) hint.classList.toggle('show');
+}
+
+// ══════════════════════════════════════════════════════════════
+// JAMO MODAL
+// ══════════════════════════════════════════════════════════════
+function openJamoModal(jamo, type) {
+  const info = JAMO_INFO[jamo];
+  if (!info) {
+    showToast(`No detailed info for ${jamo} yet — try a different one!`);
+    return;
+  }
+
+  const typeLabel = type === 'consonant' ? 'Consonant 자음' : (type === 'vowel' ? 'Vowel 모음' : 'Ending 받침');
+
+  // Highlight class for examples
+  const hlClass = type === 'consonant' ? '' : (type === 'vowel' ? 'vowel' : 'batchim');
+
+  const html = `
+    <div class="modal-jamo">
+      <div class="modal-big-jamo ${type}">${jamo}</div>
+      <div class="modal-jamo-info">
+        <div class="modal-jamo-type ${type}">${typeLabel}</div>
+        <div class="modal-jamo-name">${info.name}</div>
+        <div class="modal-jamo-name-en">${info.nameEn}</div>
+        <div class="modal-jamo-sound">
+          Sounds like <span class="english-letter">${info.eng}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section-label">📚 Words with ${jamo}</div>
+    <div class="modal-examples">
+      ${info.examples.map(ex => {
+        // Highlight the jamo in the example word
+        const highlighted = highlightJamoInWord(ex.kor, jamo);
+        return `
+          <div class="example-card">
+            <span class="example-card-emoji">${ex.emoji}</span>
+            <div class="example-card-kor">${highlighted}</div>
+            <div class="example-card-en">${ex.en}</div>
+            <button class="example-card-listen" onclick="speakText('${escapeHtml(ex.kor)}')">🔊 Listen</button>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+
+  // Speak the jamo
+  setTimeout(() => speakText(jamo), 150);
+}
+
+function highlightJamoInWord(word, targetJamo) {
+  const syls = decomposeWord(word);
+  return syls.map(syl => {
+    if (syl.initial === targetJamo || syl.medial === targetJamo || syl.final === targetJamo) {
+      const cls = INITIALS.includes(targetJamo) && syl.initial === targetJamo ? 'highlight' :
+                  (MEDIALS.includes(targetJamo) ? 'highlight vowel' : 'highlight batchim');
+      return `<span class="${cls}">${syl.char}</span>`;
+    }
+    return syl.char;
+  }).join('');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+function closeModalIfBackdrop(e) {
+  if (e.target.id === 'modalOverlay') closeModal();
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ══════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════
+function showToast(message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span class="toast-icon">!</span><span>${escapeHtml(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+renderPicker();
+</script>
+</body>
+</html>

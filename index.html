@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hangeul Tools — built by Jueun Shin</title>
+<meta name="description" content="Seven browser tools for teaching Hangeul, built and used in real lessons by Jueun Shin, product manager.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B222E;
+    --ink-soft:#5C6675;
+    --paper:#F4F5F2;
+    --card:#FFFFFF;
+    --rule:#DDE0D8;
+    --cho:#E05A5A;      /* 초성 · initial consonant */
+    --jung:#3B76DE;     /* 중성 · vowel */
+    --jong:#4A9E63;     /* 종성 · batchim */
+    --display:'Bricolage Grotesque',system-ui,sans-serif;
+    --body:'IBM Plex Sans',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --kr:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--body);font-size:16.5px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      linear-gradient(to right,var(--rule) 1px,transparent 1px),
+      linear-gradient(to bottom,var(--rule) 1px,transparent 1px);
+    background-size:44px 44px;
+    background-position:center top;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 0%,rgba(244,245,242,0) 0%,var(--paper) 72%);
+  }
+  .wrap{position:relative;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:inherit}
+  :focus-visible{outline:2.5px solid var(--jung);outline-offset:3px;border-radius:3px}
+
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);
+  }
+
+  /* ---------- HERO ---------- */
+  header{padding:64px 0 8px}
+  .top{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:baseline;
+       border-bottom:1px solid var(--rule);padding-bottom:14px}
+  .top .name{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em}
+  .top .role{font-family:var(--mono);font-size:13px;color:var(--ink-soft)}
+  .top nav{margin-left:auto;display:flex;gap:18px;font-family:var(--mono);font-size:13px}
+  .top nav a{text-decoration:none;color:var(--ink-soft);border-bottom:1px solid transparent}
+  .top nav a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+
+  .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:52px;align-items:center;
+        padding:60px 0 76px}
+  h1{
+    font-family:var(--display);font-weight:800;
+    font-size:clamp(34px,4.6vw,58px);line-height:1.03;letter-spacing:-.028em;
+    margin:14px 0 20px;text-wrap:balance;
+  }
+  h1 .cho{color:var(--cho)}
+  h1 .jung{color:var(--jung)}
+  h1 .jong{color:var(--jong)}
+  .lede{font-size:18px;color:var(--ink-soft);max-width:46ch;margin:0 0 28px}
+  .lede strong{color:var(--ink);font-weight:600}
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{
+    display:inline-block;padding:13px 20px;border-radius:2px;text-decoration:none;
+    font-weight:600;font-size:15.5px;background:var(--ink);color:#fff;
+    border:1px solid var(--ink);transition:transform .16s ease,background .16s ease;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:#fff}
+
+  /* ---------- SIGNATURE: the syllable rig ---------- */
+  .rig{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .square{
+    position:relative;width:min(280px,72vw);aspect-ratio:1;
+    border:1px solid var(--rule);background:var(--card);
+    display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+    padding:12px;gap:8px;box-shadow:0 18px 40px -28px rgba(27,34,46,.5);
+  }
+  .square::after{
+    content:"한";position:absolute;inset:0;display:grid;place-items:center;
+    font-family:var(--kr);font-weight:700;font-size:170px;color:var(--ink);
+    opacity:0;transition:opacity .5s ease .15s;pointer-events:none;
+  }
+  .square.joined::after{opacity:1}
+  .jamo{
+    display:grid;place-items:center;border:1.5px solid;border-radius:2px;
+    font-family:var(--kr);font-weight:700;font-size:clamp(38px,9vw,58px);
+    transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .4s ease;
+  }
+  .jamo span{font-family:var(--mono);font-size:10px;font-weight:400;
+             letter-spacing:.1em;display:block;text-align:center;margin-top:-4px}
+  .j1{border-color:var(--cho);color:var(--cho);background:rgba(224,90,90,.06)}
+  .j2{border-color:var(--jung);color:var(--jung);background:rgba(59,118,222,.06)}
+  .j3{border-color:var(--jong);color:var(--jong);background:rgba(74,158,99,.06);
+      grid-column:1/-1}
+  .square.joined .jamo{opacity:0;transform:scale(.9)}
+  .rig-note{font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);text-align:center}
+  .toggle{
+    font-family:var(--mono);font-size:13px;padding:9px 16px;cursor:pointer;
+    background:transparent;border:1px solid var(--ink);border-radius:2px;color:var(--ink);
+  }
+  .toggle:hover{background:var(--ink);color:#fff}
+
+  /* ---------- NOTES ---------- */
+  section{padding:64px 0;border-top:1px solid var(--rule)}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(24px,2.6vw,32px);
+     letter-spacing:-.02em;margin:10px 0 34px;max-width:34ch}
+  .notes{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--rule)}
+  .note{background:var(--card);padding:26px 24px 30px}
+  .note h3{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--ink-soft);margin:0 0 12px;font-weight:500}
+  .note p{margin:0;font-size:15.5px}
+  .note p + p{margin-top:12px}
+
+  /* ---------- TOOLS ---------- */
+  .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--rule)}
+  .tool{
+    background:var(--card);padding:26px 26px 24px;text-decoration:none;display:block;
+    transition:background .18s ease,transform .18s ease;position:relative;
+  }
+  .tool:hover{background:#FCFCFA;transform:translateY(-2px)}
+  .tool.flagship{grid-column:1/-1;padding:34px 30px 32px}
+  .tool .tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+             color:var(--ink-soft);display:flex;align-items:center;gap:8px}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .d-cho{background:var(--cho)} .d-jung{background:var(--jung)} .d-jong{background:var(--jong)}
+  .tool h3{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:-.015em;
+           margin:12px 0 8px}
+  .tool.flagship h3{font-size:27px}
+  .tool .ko{font-family:var(--kr);font-weight:500;font-size:15px;color:var(--ink-soft);
+            display:block;margin-top:2px}
+  .tool p{margin:0;font-size:15px;color:var(--ink-soft);max-width:52ch}
+  .tool .open{font-family:var(--mono);font-size:12.5px;margin-top:16px;display:inline-block;
+              border-bottom:1px solid var(--rule);padding-bottom:2px}
+  .tool:hover .open{border-bottom-color:var(--ink);color:var(--ink)}
+
+  /* ---------- BUILD ---------- */
+  .build{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .specs{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:13.5px}
+  .specs li{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--rule)}
+  .specs b{flex:none;width:112px;font-weight:500;color:var(--ink-soft)}
+  .caveat{background:var(--card);border-left:3px solid var(--jung);padding:20px 22px;
+          font-size:15px}
+
+  footer{border-top:1px solid var(--rule);padding:44px 0 68px;font-size:15px;color:var(--ink-soft)}
+  footer a{text-decoration:none;border-bottom:1px solid var(--rule);color:var(--ink)}
+  footer a:hover{border-bottom-color:var(--ink)}
+  .flinks{display:flex;flex-wrap:wrap;gap:20px;margin-top:12px;font-family:var(--mono);font-size:13.5px}
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr;gap:44px;padding:40px 0 56px}
+    .rig{order:-1}
+    .notes,.tools,.build{grid-template-columns:1fr}
+    .tool.flagship{grid-column:auto}
+    .top nav{margin-left:0;width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="top">
+      <span class="name">Jueun Shin</span>
+      <span class="role">Product Manager · London</span>
+      <nav>
+        <a href="#tools">Tools</a>
+        <a href="#build">How it's built</a>
+        <a href="https://www.linkedin.com/in/jueunshin09/">LinkedIn</a>
+      </nav>
+    </div>
+
+    <div class="hero">
+      <div>
+        <p class="eyebrow">Side project · seven browser tools</p>
+        <h1>A Korean syllable is a machine with <span class="cho">three</span> <span class="jung">moving</span> <span class="jong">parts</span>.</h1>
+        <p class="lede">Most apps teach Hangeul as flashcards, so children memorise whole syllables and stall the moment they meet a new one. I teach bilingual children privately, and I kept hitting the same wall. So I built the tools I wanted: <strong>seven small things that take the syllable apart and put it back together</strong>. I've used them in real lessons.</p>
+        <div class="cta-row">
+          <a class="btn" href="letter-lab.html">Open Letter Lab</a>
+          <a class="btn ghost" href="#tools">See all seven</a>
+        </div>
+      </div>
+
+      <div class="rig">
+        <div class="square" id="square">
+          <div class="jamo j1">ㅎ<span>초성</span></div>
+          <div class="jamo j2">ㅏ<span>중성</span></div>
+          <div class="jamo j3">ㄴ<span>종성</span></div>
+        </div>
+        <button class="toggle" id="toggle" aria-live="polite">Put it together →</button>
+        <p class="rig-note">Three parts in, one block out. Every tool here drills one stage of that.</p>
+      </div>
+    </div>
+  </header>
+</div>
+
+<div class="wrap">
+  <section>
+    <p class="eyebrow">Why these exist</p>
+    <h2>Three decisions that shaped them.</h2>
+    <div class="notes">
+      <div class="note">
+        <h3>The problem</h3>
+        <p>Children who read Hangeul as pictures can recognise 학교 and still freeze on 학생. They never learned that the parts recombine.</p>
+        <p>Fixed-vocabulary apps make this worse: the child learns the app's word list, not the system.</p>
+      </div>
+      <div class="note">
+        <h3>The decision</h3>
+        <p>So none of these tools ship with a word list. I type whatever word the lesson needs, and the tool generates the exercise from it — splitting it into syllables, then into letters, then rebuilding it.</p>
+        <p>That gave every tool two interfaces in one: a setup view for me, a play view for the child.</p>
+      </div>
+      <div class="note">
+        <h3>What I'd do next</h3>
+        <p>Right now I'm the only one who can set an exercise up. The obvious next step is letting a parent do it, which means saved word sets and progress that survives a page refresh.</p>
+        <p>I stopped short of that on purpose — it wasn't the bottleneck in my own lessons yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <p class="eyebrow">The seven</p>
+    <h2>Each one opens in a browser tab. Nothing to install.</h2>
+    <div class="tools">
+
+      <a class="tool flagship" href="letter-lab.html">
+        <span class="tag"><i class="dot d-cho"></i><i class="dot d-jung"></i><i class="dot d-jong"></i> Start here · full lesson</span>
+        <h3>Hangeul Letter Lab</h3>
+        <p>The most complete of the seven: a single letter taken through six stages — spot it, hear it, meet it, build a syllable with it, grow that syllable into words, then read the words back. It's the whole arc of one lesson in one screen, which is what made the other six make sense as separate drills.</p>
+        <span class="open">Open Letter Lab →</span>
+      </a>
+
+      <a class="tool" href="sound-playground.html">
+        <span class="tag"><i class="dot d-cho"></i> Letter level</span>
+        <h3>Sound Playground <span class="ko">가나다 사운드 놀이터</span></h3>
+        <p>Fix one vowel, then swap consonants through it and listen. Hearing 가·나·다·라 back to back is what makes the pattern audible instead of theoretical.</p>
+        <span class="open">Open →</span>
+      </a>
+
+      <a class="tool" href="lego-blocks.html">
+        <span class="tag"><i class="dot d-jung"></i> Syllable level</span>
+        <h3>Korean LEGO Blocks <span class="ko">한글 블록 빌더</span></h3>
+        <p>Drag consonants and vowels into a syllable frame. It enforces the real rules of the writing system — try putting ㄸ in the final position and it tells you why you can't.</p>
+        <span class="open">Open →</span>
+      </a>
+
+      <a class="tool" href="word-tree.html">
+        <span class="tag"><i class="dot d-jong"></i> Word level</span>
+        <h3>Word Tree</h3>
+        <p>Type any word and it branches: word → syllables → individual letters, each expandable. Built for the moment a child asks "why does this one sound different?"</p>
+        <span class="open">Open →</span>
+      </a>
+
+      <a class="tool" href="word-explorer.html">
+        <span class="tag"><i class="dot d-jong"></i> Word level</span>
+        <h3>Word Explorer <span class="ko">한글 단어 탐험</span></h3>
+        <p>The reverse of Word Tree. The word is taken apart into shuffled blocks and the child rebuilds it, one syllable slot at a time, with the batchim slot appearing only where the word actually needs one.</p>
+        <span class="open">Open →</span>
+      </a>
+
+      <a class="tool" href="sound-quiz.html">
+        <span class="tag"><i class="dot d-jung"></i> Listening</span>
+        <h3>Sound Quiz <span class="ko">한글 소리 퀴즈</span></h3>
+        <p>I type a word and choose which syllables to hide; the child hears it and picks the missing piece. Choosing what to hide is the whole lesson plan, so that control sits with the teacher.</p>
+        <span class="open">Open →</span>
+      </a>
+
+      <a class="tool" href="dialogue.html">
+        <span class="tag"><i class="dot d-cho"></i> Speaking</span>
+        <h3>Let's Talk <span class="ko">대화 연습</span></h3>
+        <p>Situational conversation practice with two modes: read along with hints, or answer cold. The one tool here that isn't about letters — it's where the letters end up.</p>
+        <span class="open">Open →</span>
+      </a>
+
+    </div>
+  </section>
+
+  <section id="build">
+    <p class="eyebrow">How it's built</p>
+    <h2>Plain files, on purpose.</h2>
+    <div class="build">
+      <ul class="specs">
+        <li><b>Stack</b><span>One self-contained HTML file per tool. No framework, no build step, no backend.</span></li>
+        <li><b>Audio</b><span>Web Speech API, Korean voice. No recorded audio files to maintain.</span></li>
+        <li><b>Built with</b><span>Written hands-on with AI assistance, then reshaped over successive lessons.</span></li>
+        <li><b>Tested by</b><span>The children I tutor, in live 1:1 and small-group lessons.</span></li>
+      </ul>
+      <div>
+        <div class="caveat">
+          <p style="margin:0 0 10px"><strong>Two honest caveats.</strong></p>
+          <p style="margin:0 0 10px">Korean speech synthesis is best in Chrome and Edge. In Safari the audio can be silent or wrong, which I found out mid-lesson.</p>
+          <p style="margin:0">Nothing is saved. Close the tab and the exercise is gone. That's a deliberate limit of a teaching aid I set up live, not a finished product — and it's the first thing I'd fix if anyone else were going to use these.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p style="margin:0">Built and used by Jueun Shin, product manager. These were made for my own lessons, not as a commercial product.</p>
+    <div class="flinks">
+      <a href="https://www.linkedin.com/in/jueunshin09/">LinkedIn</a>
+      <a href="mailto:shinjueun94@gmail.com">shinjueun94@gmail.com</a>
+      <a href="letter-lab.html">Start with Letter Lab</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var sq = document.getElementById('square');
+    var btn = document.getElementById('toggle');
+    function set(joined){
+      sq.classList.toggle('joined', joined);
+      btn.textContent = joined ? '← Take it apart' : 'Put it together →';
+    }
+    btn.addEventListener('click', function(){ set(!sq.classList.contains('joined')); });
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!reduce){ setTimeout(function(){ set(true); }, 1400); setTimeout(function(){ set(false); }, 3400); }
+  })();
+</script>
+</body>
+</html>

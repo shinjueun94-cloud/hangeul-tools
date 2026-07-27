@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Hangeul Letter Lab</title>
+<style>
+  :root{
+    --red:#FF6B6B; --blue:#4D96FF; --green:#6BCB77;
+    --purple:#C77DFF; --yellow:#FFD93D; --gold:#F5A623;
+    --cream:#FFFCE0; --ink:#3A3A3A; --muted:#888; --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Trebuchet MS','Segoe UI',sans-serif;
+    background: radial-gradient(circle at 20% 10%, #fffef2 0%, var(--cream) 55%, #fff9d6 100%);
+    color:var(--ink); min-height:100vh; padding:14px;
+  }
+  .kor{font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;}
+  #app{max-width:1040px; margin:0 auto;}
+
+  .heroBox{background:#fff; border-radius:24px; padding:28px 24px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,.08); margin-bottom:16px;}
+  .heroTopRow{display:flex; justify-content:flex-end; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .heroBox h1{font-size:2.1rem; font-weight:800; color:var(--purple); margin:0; font-family:'Cambria',serif;}
+  .heroKor{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; font-size:1.15rem; color:var(--muted); margin-top:4px; font-weight:700;}
+  .heroTag{color:var(--muted); font-style:italic; margin-top:12px; font-size:0.95rem;}
+  .homebtn{background:var(--ink); color:#fff; border:none; border-radius:999px; padding:8px 16px; font-size:0.85rem; cursor:pointer; font-weight:600;}
+  .homebtn:hover{background:#555;}
+
+  .modalOverlay{position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px;}
+  .modalOverlay.show{display:flex;}
+  .customizeModal{background:#fff; border-radius:20px; padding:24px; max-width:640px; width:100%; max-height:85vh; overflow-y:auto;}
+  .custRow{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #eee; flex-wrap:wrap;}
+  .custRow .kor{font-size:1.3rem; font-weight:800; width:70px; flex-shrink:0; font-family:'Malgun Gothic',sans-serif;}
+  .custField{flex:1; min-width:140px;}
+  .custField label{font-size:0.68rem; color:var(--muted); display:block; margin-bottom:2px;}
+  .custField input{width:100%; padding:6px 10px; border:1.5px solid #ddd; border-radius:8px; font-size:0.8rem;}
+  .custSaveBtn{background:var(--green); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:0.75rem; cursor:pointer; font-weight:700;}
+  .modalCloseBtn{background:#eee; border:none; border-radius:999px; padding:8px 16px; cursor:pointer; font-weight:700;}
+
+  .miniToast{
+    position:fixed; left:50%; bottom:36px; transform:translate(-50%, 20px);
+    background:var(--ink); color:#fff; padding:12px 22px; border-radius:999px;
+    font-size:0.95rem; font-weight:700; box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0; transition:opacity .25s ease, transform .25s ease; z-index:3000; pointer-events:none;
+  }
+  .miniToast.show{ opacity:1; transform:translate(-50%, 0); }
+
+  .confettiPiece{
+    position:fixed; top:-20px; width:10px; height:14px; border-radius:2px; opacity:0.9;
+    animation-name:confettiFall; animation-timing-function:ease-in; animation-fill-mode:forwards; z-index:3000;
+  }
+  @keyframes confettiFall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(100vh) rotate(360deg); opacity:0; }
+  }
+
+  .spinLaunchBtn{
+    background:linear-gradient(135deg, var(--purple), #a855e8); color:#fff; border:none; border-radius:999px;
+    padding:10px 20px; font-size:0.9rem; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(199,125,255,.4);
+  }
+  .spinLaunchBtn:hover{ filter:brightness(1.08); }
+  .wheelStage{ display:flex; flex-direction:column; align-items:center; gap:20px; padding:10px 0 4px; }
+  .wheelOuter{ position:relative; width:240px; height:240px; }
+  .wheelPointer{
+    position:absolute; top:-16px; left:50%; transform:translateX(-50%); z-index:5;
+    width:0; height:0; border-left:15px solid transparent; border-right:15px solid transparent; border-top:24px solid var(--ink);
+  }
+  .wheel{
+    width:240px; height:240px; border-radius:50%; border:7px solid #fff; box-shadow:0 10px 30px rgba(0,0,0,.25);
+    background:conic-gradient(var(--red) 0deg 30deg, var(--blue) 30deg 60deg, var(--purple) 60deg 90deg, var(--yellow) 90deg 120deg, var(--green) 120deg 150deg, var(--red) 150deg 180deg, var(--blue) 180deg 210deg, var(--purple) 210deg 240deg, var(--yellow) 240deg 270deg, var(--green) 270deg 300deg, var(--red) 300deg 330deg, var(--blue) 330deg 360deg);
+    transition: transform 3s cubic-bezier(.12,.66,.14,1);
+  }
+  .wheelCenter{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:56px; height:56px; border-radius:50%;
+    background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.2); display:flex; align-items:center; justify-content:center; font-size:1.6rem;
+  }
+  .spinBtn{
+    background:var(--ink); color:#fff; border:none; border-radius:999px; padding:12px 28px; font-size:1rem; font-weight:800; cursor:pointer;
+  }
+  .spinBtn:disabled{ opacity:.5; cursor:not-allowed; }
+  .wheelResultCard{ text-align:center; min-height:40px; }
+  .wheelResultCard .kor{ font-family:'Malgun Gothic',sans-serif; }
+
+  .progress{display:flex; gap:6px; justify-content:center; margin:6px 0 18px;}
+  .dot{width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid #e5e0c0; font-size:0.85rem; font-weight:700; color:var(--muted); cursor:pointer; transition:.2s;}
+  .dot.active{background:var(--purple); border-color:var(--purple); color:#fff; transform:scale(1.15);}
+  .dot.done{background:var(--green); border-color:var(--green); color:#fff;}
+
+  .card{background:#fff; border-radius:20px; padding:22px; box-shadow:0 6px 20px rgba(0,0,0,.08);}
+  .stepTitle{font-size:1.5rem; font-weight:800; color:var(--purple); margin:0 0 4px;}
+  .stepSub{color:var(--muted); font-style:italic; margin:0 0 20px; font-size:0.95rem;}
+
+  .modeToggle{display:flex; align-items:center; gap:10px; background:#fff; border-radius:999px; padding:8px 16px; box-shadow:0 3px 10px rgba(0,0,0,.06);}
+  .modeToggle span{font-size:0.85rem; font-weight:700; color:var(--muted);}
+  .modeToggle span.on{color:var(--purple);}
+  .switch{position:relative; width:52px; height:28px; background:#e5e0c0; border-radius:999px; cursor:pointer; transition:.2s;}
+  .switch.advanced{background:var(--purple);}
+  .switch .knob{position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 2px 4px rgba(0,0,0,.2);}
+  .switch.advanced .knob{left:27px;}
+
+  .sectionLabel{font-weight:800; color:var(--ink); margin:22px 0 10px; font-size:1.05rem;}
+  .letterGrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(98px,1fr)); gap:10px;}
+  .letterChip{background:#fff; border-radius:16px; padding:12px 6px; text-align:center; cursor:pointer; border:3px solid transparent; transition:.15s; box-shadow:0 3px 10px rgba(0,0,0,.06);}
+  .letterChip:hover{transform:translateY(-3px); box-shadow:0 8px 16px rgba(0,0,0,.12);}
+  .letterChip.consonant{border-color:var(--red);}
+  .letterChip.vowel{border-color:var(--blue);}
+  .letterChip .big{font-size:2.1rem; font-weight:800;}
+  .letterChip.consonant .big{color:var(--red);}
+  .letterChip.vowel .big{color:var(--blue);}
+  .letterChip .emo{font-size:1.2rem; margin:3px 0;}
+  .letterChip .hint{font-size:0.65rem; color:var(--muted); line-height:1.2;}
+
+  .mediaBox{display:inline-flex; align-items:center; justify-content:center;}
+  .mediaBox img{max-width:100%; max-height:100%; object-fit:contain; border-radius:10px;}
+
+  .hookGrid, .listenGrid{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin:10px 0 20px;}
+  .hookCard{background:var(--cream); border-radius:18px; width:160px; padding:16px 10px 12px; text-align:center; box-shadow:0 3px 10px rgba(0,0,0,.06);}
+  .hookCard .mediaBox{width:100%; height:100px; font-size:3.6rem;}
+  .hookCard .q{font-size:1.4rem; color:#ccc; font-weight:800;}
+
+  .listenCard{background:#fff; border:2px solid #eee; border-radius:18px; width:175px; padding:14px 10px; text-align:center; box-shadow:0 3px 10px rgba(0,0,0,.06);}
+  .listenCard .mediaBox{width:100%; height:80px; font-size:3rem;}
+  .listenCard .rom{color:var(--purple); font-weight:700; margin:6px 0 2px; font-size:0.85rem;}
+  .listenCard .en{color:var(--muted); font-size:0.78rem; margin-bottom:8px;}
+  .playBtn{background:var(--purple); color:#fff; border:none; border-radius:999px; padding:7px 16px; font-size:0.85rem; cursor:pointer; font-weight:700;}
+  .playBtn:hover{background:#a855e8;}
+  .playBtn.small{padding:5px 12px; font-size:0.75rem;}
+
+  .meetWrap{display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;}
+  .meetLetterCard{flex:0 0 220px; background:var(--cream); border-radius:18px; padding:20px; text-align:center;}
+  .meetLetterCard .letterBig{font-size:4.6rem; font-weight:800;}
+  .meetLetterCard.consonant .letterBig{color:var(--red);}
+  .meetLetterCard.vowel .letterBig{color:var(--blue);}
+  .meetLetterCard .name{color:var(--muted); margin-top:6px;}
+  .factList{flex:1; min-width:260px; display:flex; flex-direction:column; gap:12px;}
+  .factCard{background:var(--cream); border-radius:14px; padding:14px 16px; font-size:0.92rem;}
+  .factCard b{color:var(--purple);}
+
+  .jamoUnit{display:flex; flex-direction:column; border-radius:10px; overflow:hidden; border:2px solid #ddd; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.08); position:relative;}
+  .jamoSlot{display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-family:'Malgun Gothic',sans-serif; position:relative;}
+  .jamoSlot:not(.empty)::before, .jamoSlot:not(.empty)::after{content:''; position:absolute; top:5px; width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.55); pointer-events:none;}
+  .jamoSlot:not(.empty)::before{left:20%; transform:translateX(-50%);}
+  .jamoSlot:not(.empty)::after{right:20%; transform:translateX(50%);}
+  .jamoGroupWrap{display:inline-flex; gap:6px; padding:10px; border:2px dashed #ddd; border-radius:16px; background:#fafafa;}
+  .jamoSlot.c{background:var(--red);} .jamoSlot.v{background:var(--blue);} .jamoSlot.f{background:var(--green);}
+  .jamoSlot.empty{background:#f0f0f0 !important; color:#ccc; border:2px dashed #ddd;}
+  .jamoSlot.target{outline:3px solid var(--gold); outline-offset:-3px;}
+  .starTag{position:absolute; top:2px; right:2px; font-size:0.8rem; line-height:1;}
+
+  .buildStage{display:flex; align-items:center; justify-content:center; gap:18px; margin:20px 0; flex-wrap:wrap;}
+  .composedReadout{text-align:center; min-width:140px;}
+  .composedReadout .syl{font-size:3.2rem; font-weight:800; color:var(--ink); font-family:'Malgun Gothic',sans-serif; min-height:60px;}
+  .composedReadout .rom{color:var(--purple); font-weight:700; font-size:0.9rem;}
+  .chipRow{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:16px 0 6px;}
+  .partnerChip{width:60px; height:60px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; color:#fff; cursor:grab; border:none; font-family:'Malgun Gothic',sans-serif; box-shadow:0 3px 8px rgba(0,0,0,.15); transition:.15s; touch-action:none; user-select:none;}
+  .partnerChip:hover{transform:scale(1.08);}
+  .partnerChip.done{opacity:.45;}
+  .dragGhost{box-shadow:0 10px 24px rgba(0,0,0,.35) !important;}
+  .jamoSlot.empty{background:#f0f0f0 !important; color:#ccc; border:2px dashed #ddd; transition:.15s;}
+  .progressBadges{display:flex; gap:6px; justify-content:center; margin-top:10px;}
+  .badge{width:14px; height:14px; border-radius:50%; background:#e5e0c0;}
+  .badge.on{background:var(--green);}
+
+  .treeNav{display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:14px;}
+  .treeNavBtn{background:#eee; border:none; border-radius:999px; width:34px; height:34px; font-size:1rem; cursor:pointer;}
+  .treeNavBtn:hover{background:#ddd;}
+  .treeDots{display:flex; gap:6px;}
+  .treeDot{width:9px; height:9px; border-radius:50%; background:#e5e0c0;}
+  .treeDot.active{background:var(--purple);}
+  .word-card{background:linear-gradient(135deg,#C77DFF 0%, #B47EFF 100%); color:#fff; border-radius:18px; padding:16px 26px; text-align:center; min-width:220px; box-shadow:0 6px 20px rgba(199,125,255,.35); margin:0 auto 16px; max-width:280px;}
+  .word-card .mediaBox{width:100%; height:70px; font-size:2.6rem;}
+  .word-card-kor{font-family:'Malgun Gothic',sans-serif; font-size:2rem; font-weight:800; margin:4px 0 8px;}
+  .tinyBtnRow{display:flex; gap:6px; justify-content:center;}
+  .tinyBtn{background:rgba(255,255,255,.25); color:#fff; border:1.5px solid rgba(255,255,255,.4); border-radius:16px; padding:5px 11px; font-size:0.72rem; font-weight:700; cursor:pointer; font-family:inherit;}
+  .tinyBtn:hover{background:rgba(255,255,255,.4);}
+  .breakRow{text-align:center; margin-bottom:16px;}
+  .breakBtn{background:linear-gradient(135deg,#FFD93D 0%, #FFA500 100%); color:var(--ink); border:none; padding:10px 20px; border-radius:14px; font-weight:700; font-size:0.85rem; cursor:pointer; box-shadow:0 4px 12px rgba(255,165,0,.3);}
+  .breakBtn.collapse{background:linear-gradient(135deg,#C77DFF 0%, #B47EFF 100%); color:#fff;}
+  .connectorArea{height:26px; position:relative; margin:-6px 0;}
+  .connectorArea svg{width:100%; height:100%; overflow:visible;}
+  .sylRow{display:flex; justify-content:center; gap:18px; flex-wrap:wrap; margin-bottom:14px; animation:fadeInUp .4s ease;}
+  @keyframes fadeInUp{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+  .sylWrap{display:flex; flex-direction:column; align-items:center;}
+  .sylCard{background:linear-gradient(135deg,#FFFDE0 0%, #FFF8C0 100%); border:3px solid var(--yellow); border-radius:16px; padding:10px 16px; text-align:center; cursor:pointer; min-width:100px;}
+  .sylCard .kor{font-family:'Malgun Gothic',sans-serif; font-size:1.8rem; font-weight:800;}
+  .sylJamoConnector{width:2px; height:14px; background:var(--yellow); margin:0 auto;}
+
+  .matchWrap{display:flex; gap:24px; justify-content:center; flex-wrap:wrap;}
+  .matchCol{display:flex; flex-direction:column; gap:9px;}
+  .matchTile{width:170px; padding:12px; border-radius:14px; background:#fff; border:3px solid #eee; cursor:pointer; text-align:center; font-size:1.5rem; transition:.15s; font-family:'Malgun Gothic',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px;}
+  .matchTile .mediaBox{width:36px; height:36px; font-size:1.6rem;}
+  .matchTile.word{font-size:1.25rem; font-weight:800;}
+  .matchTile:hover{border-color:var(--purple);}
+  .matchTile.selected{border-color:var(--purple); background:#f6ecff;}
+  .matchTile.matched{border-color:var(--green); background:#eefbf0; opacity:.6; cursor:default;}
+
+  .celebrate{background:var(--ink); color:#fff; border-radius:20px; padding:36px 20px; text-align:center;}
+  .celebrate .big{font-size:2.8rem;}
+  .chipsRow{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:16px;}
+  .wordChip{background:#3A3A3A; border-radius:12px; padding:8px 14px; font-weight:800; color:var(--yellow); font-family:'Malgun Gothic',sans-serif; font-size:0.9rem;}
+
+  .navRow{display:flex; justify-content:space-between; margin-top:24px;}
+  .navBtn{background:var(--purple); color:#fff; border:none; border-radius:999px; padding:11px 22px; font-size:0.95rem; font-weight:700; cursor:pointer;}
+  .navBtn:hover{background:#a855e8;}
+  .navBtn.ghost{background:#eee; color:var(--ink);}
+  .navBtn.ghost:hover{background:#ddd;}
+  .navBtn:disabled{opacity:.35; cursor:not-allowed;}
+  .hint{text-align:center; color:var(--muted); font-size:0.82rem; margin-top:4px;}
+  .rarityNote{text-align:center; color:var(--muted); font-size:0.78rem; font-style:italic; margin-top:10px;}
+
+  @media (max-width:600px){ .meetWrap{flex-direction:column;} .buildStage{gap:10px;} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   CORE HANGEUL DATA (Unicode composition tables)
+   ============================================================ */
+const INITIALS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const MEDIALS  = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const FINALS   = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const ROM_INITIAL = {'ㄱ':'g','ㄲ':'kk','ㄴ':'n','ㄷ':'d','ㄸ':'tt','ㄹ':'r','ㅁ':'m','ㅂ':'b','ㅃ':'pp','ㅅ':'s','ㅆ':'ss','ㅇ':'','ㅈ':'j','ㅉ':'jj','ㅊ':'ch','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+const ROM_MEDIAL = {'ㅏ':'a','ㅐ':'ae','ㅑ':'ya','ㅒ':'yae','ㅓ':'eo','ㅔ':'e','ㅕ':'yeo','ㅖ':'ye','ㅗ':'o','ㅘ':'wa','ㅙ':'wae','ㅚ':'oe','ㅛ':'yo','ㅜ':'u','ㅝ':'wo','ㅞ':'we','ㅟ':'wi','ㅠ':'yu','ㅡ':'eu','ㅢ':'ui','ㅣ':'i'};
+const ROM_FINAL  = {'':'','ㄱ':'k','ㄲ':'k','ㄴ':'n','ㄷ':'t','ㄹ':'l','ㅁ':'m','ㅂ':'p','ㅅ':'t','ㅆ':'t','ㅇ':'ng','ㅈ':'t','ㅊ':'t','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+const HORIZONTAL_VOWELS = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];
+
+function decomposeSyllable(char){
+  const code = char.charCodeAt(0) - 0xAC00;
+  if(code < 0 || code > 11171) return null;
+  const iIdx = Math.floor(code/588), mIdx = Math.floor((code%588)/28), fIdx = code%28;
+  return { initial:INITIALS[iIdx], medial:MEDIALS[mIdx], final: fIdx>0 ? FINALS[fIdx] : null };
+}
+function decomposeWord(word){
+  const out = [];
+  for(const ch of word){ const d = decomposeSyllable(ch); if(d) out.push({char:ch, ...d}); }
+  return out;
+}
+function composeSyllable(initial, medial, final){
+  const i = INITIALS.indexOf(initial), m = MEDIALS.indexOf(medial), f = final ? FINALS.indexOf(final) : 0;
+  if(i < 0 || m < 0) return (initial||'') + (medial||'');
+  return String.fromCharCode(0xAC00 + i*588 + m*28 + Math.max(f,0));
+}
+function romanizeSyllable(syl){
+  let r = (ROM_INITIAL[syl.initial]||'') + (ROM_MEDIAL[syl.medial]||'');
+  if(syl.final) r += (ROM_FINAL[syl.final]||'');
+  return r;
+}
+function romanizeWord(word){ return decomposeWord(word).map(romanizeSyllable).join('-'); }
+
+/* ============================================================
+   LETTER GROUPS
+   ============================================================ */
+const BASIC_CONSONANTS  = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const DOUBLE_CONSONANTS = ['ㄲ','ㄸ','ㅃ','ㅆ','ㅉ'];
+const BASIC_VOWELS      = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ'];
+const COMPLEX_VOWELS    = ['ㅐ','ㅒ','ㅔ','ㅖ','ㅘ','ㅙ','ㅚ','ㅝ','ㅞ','ㅟ','ㅢ'];
+
+const SHAPE_DESC = {
+  'ㄱ':'Looks like a little hook, or a backwards L!',
+  'ㄴ':'Looks like a bent noodle — an L-shaped corner!',
+  'ㄷ':'Looks like a table missing its right leg!',
+  'ㄹ':'Looks like a zigzag — a lightning bolt or a bumpy road!',
+  'ㅁ':'Looks like a square box or a little window!',
+  'ㅂ':'Looks like a table with two legs!',
+  'ㅅ':'Looks like a little mountain, or a tent!',
+  'ㅇ':'Looks like a circle — draw it round in the air!',
+  'ㅈ':'Looks like ㅅ wearing a little hat on top!',
+  'ㅊ':'Looks like ㅈ with an extra dash on top!',
+  'ㅋ':'Looks like ㄱ with an extra line — a stronger hook!',
+  'ㅌ':'Looks like ㄷ with a line through the middle!',
+  'ㅍ':'Looks like a table with four legs!',
+  'ㅎ':'Looks like a little hat, a dash, and a circle underneath!',
+  'ㄲ':'Just ㄱ written TWICE, side by side — a stronger, tenser sound!',
+  'ㄸ':'Just ㄷ written TWICE, side by side — a stronger, tenser sound!',
+  'ㅃ':'Just ㅂ written TWICE, side by side — a stronger, tenser sound!',
+  'ㅆ':'Just ㅅ written TWICE, side by side — a stronger, tenser sound!',
+  'ㅉ':'Just ㅈ written TWICE, side by side — a stronger, tenser sound!',
+  'ㅏ':'A tall pole with a little flag pointing RIGHT — like a flag on a pole! 🚩',
+  'ㅑ':'Same flag as ㅏ — but TWO little flags! Add a quick "y".',
+  'ㅓ':'Same pole — but the flag points LEFT this time!',
+  'ㅕ':'Left flag pole — but TWO flags! Add a quick "y".',
+  'ㅗ':'A flat line with a flag pointing UP — like an umbrella top!',
+  'ㅛ':'Same umbrella — but TWO flags! Add a quick "y".',
+  'ㅜ':'A flat line with a flag pointing DOWN — like roots growing down!',
+  'ㅠ':'Same roots — but TWO! Add a quick "y".',
+  'ㅡ':'Just a flat line — like a calm, flat road.',
+  'ㅣ':'Just a tall standing line — like a stick standing straight up!',
+  'ㅐ':'ㅏ plus one extra little line at the end.',
+  'ㅒ':'ㅑ plus that same extra little line.',
+  'ㅔ':'ㅓ plus that same extra little line.',
+  'ㅖ':'ㅕ plus that same extra little line.',
+  'ㅘ':'ㅗ and ㅏ holding hands!',
+  'ㅙ':'ㅗ, ㅏ, and the extra line — all holding hands!',
+  'ㅚ':'ㅗ plus that extra little line.',
+  'ㅝ':'ㅜ and ㅓ holding hands!',
+  'ㅞ':'ㅜ, ㅓ, and the extra line — all holding hands!',
+  'ㅟ':'ㅜ plus that extra little line.',
+  'ㅢ':'ㅡ and ㅣ holding hands!',
+};
+
+/* ============================================================
+   JAMO_INFO — name / sound / 5 example words each
+   (corrected 3 mismatches found in the source word-tree data:
+    딸기 -> moved from ㄷ to ㄸ; 빵 -> moved from ㅂ to ㅃ; 얘기 -> moved from ㅖ to ㅒ)
+   ============================================================ */
+const JAMO_INFO = {
+  'ㄱ':{name:'기역', nameEn:'giyeok', eng:'g / k', examples:[
+    {kor:'고양이',emoji:'🐱',en:'cat'},{kor:'곰',emoji:'🐻',en:'bear'},{kor:'개',emoji:'🐕',en:'dog'},
+    {kor:'김',emoji:'🌿',en:'seaweed'},{kor:'김밥',emoji:'🍙',en:'kimbap'}]},
+  'ㄴ':{name:'니은', nameEn:'nieun', eng:'n', examples:[
+    {kor:'눈',emoji:'❄️',en:'eye / snow'},{kor:'나비',emoji:'🦋',en:'butterfly'},{kor:'너구리',emoji:'🦝',en:'raccoon'},
+    {kor:'노래',emoji:'🎵',en:'song'},{kor:'한나',emoji:'✨',en:'Hannah!'}]},
+  'ㄷ':{name:'디귿', nameEn:'digeut', eng:'d / t', examples:[
+    {kor:'달',emoji:'🌙',en:'moon'},{kor:'다리',emoji:'🦵',en:'leg'},{kor:'돼지',emoji:'🐷',en:'pig'},
+    {kor:'도넛',emoji:'🍩',en:'donut'},{kor:'도토리',emoji:'🌰',en:'acorn (AC bells!)'}]},
+  'ㄹ':{name:'리을', nameEn:'rieul', eng:'r / l', examples:[
+    {kor:'라면',emoji:'🍜',en:'ramen'},{kor:'레몬',emoji:'🍋',en:'lemon'},{kor:'로봇',emoji:'🤖',en:'robot'},
+    {kor:'리본',emoji:'🎀',en:'ribbon'},{kor:'노래',emoji:'🎵',en:'song'}]},
+  'ㅁ':{name:'미음', nameEn:'mieum', eng:'m', examples:[
+    {kor:'머리',emoji:'🧠',en:'head'},{kor:'마법',emoji:'✨',en:'magic'},{kor:'무지개',emoji:'🌈',en:'rainbow'},
+    {kor:'물',emoji:'💧',en:'water'},{kor:'곰',emoji:'🐻',en:'bear'}]},
+  'ㅂ':{name:'비읍', nameEn:'bieup', eng:'b / p', examples:[
+    {kor:'밥',emoji:'🍚',en:'rice'},{kor:'바나나',emoji:'🍌',en:'banana'},{kor:'배',emoji:'🍐',en:'pear / boat'},
+    {kor:'비',emoji:'🌧️',en:'rain'},{kor:'비빔밥',emoji:'🍲',en:'bibimbap'}]},
+  'ㅅ':{name:'시옷', nameEn:'siot', eng:'s', examples:[
+    {kor:'사과',emoji:'🍎',en:'apple'},{kor:'손',emoji:'✋',en:'hand'},{kor:'새',emoji:'🐦',en:'bird'},
+    {kor:'사자',emoji:'🦁',en:'lion'},{kor:'사탕',emoji:'🍬',en:'candy'}]},
+  'ㅇ':{name:'이응', nameEn:'ieung', eng:'silent / ng', examples:[
+    {kor:'아기',emoji:'👶',en:'baby'},{kor:'엄마',emoji:'👩',en:'mum'},{kor:'강아지',emoji:'🐶',en:'puppy'},
+    {kor:'공',emoji:'⚽',en:'ball'},{kor:'유니콘',emoji:'🦄',en:'unicorn'}]},
+  'ㅈ':{name:'지읒', nameEn:'jieut', eng:'j', examples:[
+    {kor:'주스',emoji:'🧃',en:'juice'},{kor:'잠',emoji:'😴',en:'sleep'},{kor:'지구',emoji:'🌍',en:'Earth'},
+    {kor:'장미',emoji:'🌹',en:'rose'},{kor:'좋아',emoji:'❤️',en:'I like it'}]},
+  'ㅊ':{name:'치읓', nameEn:'chieut', eng:'ch', examples:[
+    {kor:'친구',emoji:'🤝',en:'friend'},{kor:'책',emoji:'📚',en:'book'},{kor:'차',emoji:'🚗',en:'car / tea'},
+    {kor:'치즈',emoji:'🧀',en:'cheese'},{kor:'초콜릿',emoji:'🍫',en:'chocolate'}]},
+  'ㅋ':{name:'키읔', nameEn:'kieuk', eng:'k', examples:[
+    {kor:'코',emoji:'👃',en:'nose'},{kor:'커피',emoji:'☕',en:'coffee'},{kor:'코끼리',emoji:'🐘',en:'elephant'},
+    {kor:'케이크',emoji:'🎂',en:'cake'},{kor:'쿠키',emoji:'🍪',en:'cookie'}]},
+  'ㅌ':{name:'티읕', nameEn:'tieut', eng:'t', examples:[
+    {kor:'토끼',emoji:'🐰',en:'rabbit'},{kor:'태양',emoji:'☀️',en:'sun'},{kor:'토마토',emoji:'🍅',en:'tomato'},
+    {kor:'타조',emoji:'🦤',en:'ostrich'},{kor:'티셔츠',emoji:'👕',en:'t-shirt'}]},
+  'ㅍ':{name:'피읖', nameEn:'pieup', eng:'p', examples:[
+    {kor:'피자',emoji:'🍕',en:'pizza'},{kor:'팥',emoji:'🫘',en:'red bean'},{kor:'포도',emoji:'🍇',en:'grape'},
+    {kor:'파인애플',emoji:'🍍',en:'pineapple'},{kor:'피아노',emoji:'🎹',en:'piano'}]},
+  'ㅎ':{name:'히읗', nameEn:'hieut', eng:'h', examples:[
+    {kor:'한나',emoji:'✨',en:'Hannah!'},{kor:'해',emoji:'☀️',en:'sun'},{kor:'호랑이',emoji:'🐯',en:'tiger'},
+    {kor:'하늘',emoji:'☁️',en:'sky'},{kor:'호박',emoji:'🎃',en:'pumpkin'}]},
+  'ㄲ':{name:'쌍기역', nameEn:'ssang-giyeok', eng:'kk (strong g)', examples:[
+    {kor:'꽃',emoji:'🌸',en:'flower'},{kor:'꿀',emoji:'🍯',en:'honey'},{kor:'꿈',emoji:'💭',en:'dream'},
+    {kor:'꼬리',emoji:'🐕',en:'tail'},{kor:'까꿍',emoji:'👀',en:'peekaboo!'}]},
+  'ㄸ':{name:'쌍디귿', nameEn:'ssang-digeut', eng:'tt (strong d)', examples:[
+    {kor:'땅',emoji:'🌍',en:'ground'},{kor:'떡',emoji:'🍡',en:'rice cake'},{kor:'또',emoji:'🔄',en:'again'},
+    {kor:'딸기',emoji:'🍓',en:'strawberry'},{kor:'똥',emoji:'💩',en:'poop (kids love this one!)'}]},
+  'ㅃ':{name:'쌍비읍', nameEn:'ssang-bieup', eng:'pp (strong b)', examples:[
+    {kor:'뽀뽀',emoji:'😘',en:'kiss'},{kor:'뼈',emoji:'🦴',en:'bone'},{kor:'빨강',emoji:'🔴',en:'red'},
+    {kor:'빵',emoji:'🍞',en:'bread'},{kor:'삐약',emoji:'🐥',en:'peep! (chick sound)'}]},
+  'ㅆ':{name:'쌍시옷', nameEn:'ssang-siot', eng:'ss (strong s)', examples:[
+    {kor:'쌀',emoji:'🌾',en:'rice grain'},{kor:'씨앗',emoji:'🌱',en:'seed'},{kor:'쌍둥이',emoji:'👯',en:'twins'},
+    {kor:'씻다',emoji:'🚿',en:'wash'},{kor:'쓰레기',emoji:'🗑️',en:'trash'}]},
+  'ㅉ':{name:'쌍지읒', nameEn:'ssang-jieut', eng:'jj (strong j)', examples:[
+    {kor:'짜장면',emoji:'🍜',en:'jjajangmyeon'},{kor:'짝',emoji:'👯',en:'pair'},{kor:'쪽',emoji:'➡️',en:'side'},
+    {kor:'찌개',emoji:'🍲',en:'stew'},{kor:'쨍쨍',emoji:'☀️',en:'sunny / shining'}]},
+
+  'ㅏ':{name:'아', nameEn:'a', eng:'ah (as in "father")', examples:[
+    {kor:'아빠',emoji:'👨',en:'dad'},{kor:'사과',emoji:'🍎',en:'apple'},{kor:'바다',emoji:'🌊',en:'sea'},
+    {kor:'나비',emoji:'🦋',en:'butterfly'},{kor:'강아지',emoji:'🐶',en:'puppy'}]},
+  'ㅑ':{name:'야', nameEn:'ya', eng:'yah', examples:[
+    {kor:'야구',emoji:'⚾',en:'baseball'},{kor:'양',emoji:'🐑',en:'sheep'},{kor:'얌',emoji:'😋',en:'yum'},
+    {kor:'야채',emoji:'🥬',en:'vegetable'},{kor:'고양이',emoji:'🐱',en:'cat'}]},
+  'ㅓ':{name:'어', nameEn:'eo', eng:'uh (as in "fun")', examples:[
+    {kor:'엄마',emoji:'👩',en:'mum'},{kor:'어깨',emoji:'💪',en:'shoulder'},{kor:'얼음',emoji:'🧊',en:'ice'},
+    {kor:'머리',emoji:'🧠',en:'head'},{kor:'너굴',emoji:'🦝',en:'Tom Nook'}]},
+  'ㅕ':{name:'여', nameEn:'yeo', eng:'yuh', examples:[
+    {kor:'여우',emoji:'🦊',en:'fox'},{kor:'여름',emoji:'☀️',en:'summer'},{kor:'영화',emoji:'🎬',en:'movie'},
+    {kor:'역',emoji:'🚉',en:'station'},{kor:'여울',emoji:'🐕',en:'Isabelle'}]},
+  'ㅗ':{name:'오', nameEn:'o', eng:'oh', examples:[
+    {kor:'오리',emoji:'🦆',en:'duck'},{kor:'코',emoji:'👃',en:'nose'},{kor:'도넛',emoji:'🍩',en:'donut'},
+    {kor:'곰',emoji:'🐻',en:'bear'},{kor:'공',emoji:'⚽',en:'ball'}]},
+  'ㅛ':{name:'요', nameEn:'yo', eng:'yo', examples:[
+    {kor:'요리',emoji:'🍳',en:'cooking'},{kor:'요정',emoji:'🧚',en:'fairy'},{kor:'교실',emoji:'🏫',en:'classroom'},
+    {kor:'우표',emoji:'📮',en:'stamp'},{kor:'표',emoji:'🎫',en:'ticket'}]},
+  'ㅜ':{name:'우', nameEn:'u', eng:'oo (as in "boot")', examples:[
+    {kor:'우유',emoji:'🥛',en:'milk'},{kor:'우산',emoji:'☂️',en:'umbrella'},{kor:'주스',emoji:'🧃',en:'juice'},
+    {kor:'국수',emoji:'🍜',en:'noodles'},{kor:'구름',emoji:'☁️',en:'cloud'}]},
+  'ㅠ':{name:'유', nameEn:'yu', eng:'you', examples:[
+    {kor:'유니콘',emoji:'🦄',en:'unicorn'},{kor:'유리',emoji:'🪟',en:'glass'},{kor:'우유',emoji:'🥛',en:'milk'},
+    {kor:'휴식',emoji:'😌',en:'rest'},{kor:'휴지',emoji:'🧻',en:'tissue'}]},
+  'ㅡ':{name:'으', nameEn:'eu', eng:'eu (no exact English match)', examples:[
+    {kor:'음악',emoji:'🎵',en:'music'},{kor:'은행',emoji:'🏦',en:'bank'},{kor:'그림',emoji:'🎨',en:'picture'},
+    {kor:'스푼',emoji:'🥄',en:'spoon'},{kor:'크레용',emoji:'🖍️',en:'crayon'}]},
+  'ㅣ':{name:'이', nameEn:'i', eng:'ee (as in "see")', examples:[
+    {kor:'이름',emoji:'📛',en:'name'},{kor:'기차',emoji:'🚂',en:'train'},{kor:'아이',emoji:'👶',en:'child'},
+    {kor:'친구',emoji:'🤝',en:'friend'},{kor:'나비',emoji:'🦋',en:'butterfly'}]},
+
+  'ㅐ':{name:'애', nameEn:'ae', eng:'ay (as in "cat")', examples:[
+    {kor:'개',emoji:'🐕',en:'dog'},{kor:'배',emoji:'🍐',en:'pear / boat'},{kor:'새',emoji:'🐦',en:'bird'},
+    {kor:'배구',emoji:'🏐',en:'volleyball'},{kor:'태양',emoji:'☀️',en:'sun'}]},
+  'ㅒ':{name:'얘', nameEn:'yae', eng:'yay', examples:[
+    {kor:'얘기',emoji:'💬',en:'talk'},{kor:'얘',emoji:'👶',en:'this kid'},{kor:'걔',emoji:'🧒',en:'that kid'},
+    {kor:'쟤',emoji:'👉',en:'that one over there'}], rare:true},
+  'ㅔ':{name:'에', nameEn:'e', eng:'eh (as in "bed")', examples:[
+    {kor:'세 개',emoji:'3️⃣',en:'three things'},{kor:'네',emoji:'✅',en:'yes'},{kor:'베개',emoji:'🛏️',en:'pillow'},
+    {kor:'테이프',emoji:'🎞️',en:'tape'},{kor:'케이크',emoji:'🎂',en:'cake'}]},
+  'ㅖ':{name:'예', nameEn:'ye', eng:'yeah', examples:[
+    {kor:'예쁘다',emoji:'💖',en:'pretty'},{kor:'예의',emoji:'🙇',en:'manners'},{kor:'예약',emoji:'📅',en:'booking'},
+    {kor:'시계',emoji:'⏰',en:'clock'},{kor:'계란',emoji:'🥚',en:'egg'}]},
+  'ㅘ':{name:'와', nameEn:'wa', eng:'wah', examples:[
+    {kor:'사과',emoji:'🍎',en:'apple'},{kor:'과자',emoji:'🍪',en:'snack'},{kor:'화분',emoji:'🪴',en:'flower pot'},
+    {kor:'왕',emoji:'👑',en:'king'},{kor:'동화',emoji:'📖',en:'fairytale'}]},
+  'ㅙ':{name:'왜', nameEn:'wae', eng:'way', examples:[
+    {kor:'왜',emoji:'❓',en:'why'},{kor:'돼지',emoji:'🐷',en:'pig'},{kor:'됐어',emoji:'✅',en:"that's enough / done"},
+    {kor:'괜찮아',emoji:'💛',en:"it's okay"}], rare:true},
+  'ㅚ':{name:'외', nameEn:'oe', eng:'weh', examples:[
+    {kor:'외국',emoji:'🌏',en:'foreign'},{kor:'외투',emoji:'🧥',en:'coat'},{kor:'회',emoji:'🍣',en:'sashimi'},
+    {kor:'외삼촌',emoji:'👨',en:'uncle'},{kor:'최고',emoji:'👍',en:'the best!'}]},
+  'ㅝ':{name:'워', nameEn:'wo', eng:'wuh', examples:[
+    {kor:'원',emoji:'⭕',en:'circle / won'},{kor:'더워',emoji:'🥵',en:'hot'},{kor:'쉬워',emoji:'🙂',en:'easy'},
+    {kor:'추워',emoji:'🥶',en:'cold'},{kor:'고마워',emoji:'🙏',en:'thank you'}]},
+  'ㅞ':{name:'웨', nameEn:'we', eng:'weh', examples:[
+    {kor:'웨이터',emoji:'🤵',en:'waiter'},{kor:'스웨터',emoji:'🧥',en:'sweater'},{kor:'웹',emoji:'🕸️',en:'web'}], rare:true},
+  'ㅟ':{name:'위', nameEn:'wi', eng:'wee', examples:[
+    {kor:'위',emoji:'⬆️',en:'top / above'},{kor:'귀',emoji:'👂',en:'ear'},{kor:'쥐',emoji:'🐭',en:'mouse'},
+    {kor:'바위',emoji:'🪨',en:'rock'},{kor:'가위',emoji:'✂️',en:'scissors'}]},
+  'ㅢ':{name:'의', nameEn:'ui', eng:'ui (like "we" but short)', examples:[
+    {kor:'의사',emoji:'👨‍⚕️',en:'doctor'},{kor:'의자',emoji:'🪑',en:'chair'},{kor:'무늬',emoji:'🎨',en:'pattern'}], rare:true},
+};
+
+/* ============================================================
+   TTS PRONUNCIATION OVERRIDES
+   (Korean spelling often differs from actual pronunciation —
+    feed the TTS engine the phonetic form for accuracy.
+    Add more here any time you spot a mispronunciation!)
+   ============================================================ */
+const SPEAK_OVERRIDES = {
+  '김밥':'김빱', '좋아':'조아', '됐어':'돼써', '무늬':'무니', '국수':'국쑤',
+};
+
+/* ============================================================
+   CUSTOM IMAGES
+   Replace emoji with your own pictures! For each Korean word you
+   want to customise, add a line like:
+     "김밥": "https://your-image-url.com/gimbap.jpg"
+   or paste a base64 data URI (ask Claude to convert an uploaded
+   photo to base64 and embed it here for a fully offline file).
+   Anything not listed here just falls back to its emoji.
+   ============================================================ */
+const CUSTOM_IMAGES = {
+  // "김밥": "https://example.com/gimbap.jpg",
+};
+
+/* Runtime overrides loaded from window.storage (per-word image / audio URLs
+   entered through the in-app "Customize Words" panel). These take priority
+   over CUSTOM_IMAGES above and over emoji / browser TTS. */
+let RUNTIME_IMAGES = {};
+let RUNTIME_AUDIO = {};
+
+async function loadOverridesFromStorage(){
+  if(!window.storage) return;
+  try{
+    const imgList = await window.storage.list('img:', false);
+    if(imgList && imgList.keys){
+      for(const k of imgList.keys){
+        try{ const r = await window.storage.get(k, false); if(r) RUNTIME_IMAGES[k.slice(4)] = r.value; }catch(e){}
+      }
+    }
+  }catch(e){}
+  try{
+    const audList = await window.storage.list('audio:', false);
+    if(audList && audList.keys){
+      for(const k of audList.keys){
+        try{ const r = await window.storage.get(k, false); if(r) RUNTIME_AUDIO[k.slice(6)] = r.value; }catch(e){}
+      }
+    }
+  }catch(e){}
+  render();
+}
+
+function getMediaHTML(word, boxClass){
+  const src = RUNTIME_IMAGES[word.kor] || CUSTOM_IMAGES[word.kor];
+  if(src){
+    return '<div class="mediaBox ' + (boxClass||'') + '"><img src="' + src + '" alt="' + word.en + '"></div>';
+  }
+  return '<div class="mediaBox ' + (boxClass||'') + '">' + word.emoji + '</div>';
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = {
+  mode: 'basic',
+  screen: 'home',
+  letterId: null,
+  step: 1,
+  lego: { partner:null, tried:new Set() },
+  tree: { wordIndex:0, stage:'word', expandedSyl:new Set() },
+  match: { selected:null, matched:new Set(), imgOrder:[], wordOrder:[] },
+  customizeOpen: false,
+  jamoInfoOpen: false,
+  jamoInfoChar: null,
+  wheelOpen: false,
+};
+function currentModeLetterIds(){
+  return state.mode === 'basic'
+    ? [...BASIC_CONSONANTS, ...BASIC_VOWELS]
+    : [...BASIC_CONSONANTS, ...DOUBLE_CONSONANTS, ...BASIC_VOWELS, ...COMPLEX_VOWELS];
+}
+function resetFlowState(){
+  state.step = 1;
+  state.lego = { partner:null, tried:new Set() };
+  state.tree = { wordIndex:0, stage:'word', expandedSyl:new Set() };
+  state.match = { selected:null, matched:new Set(), imgOrder:[], wordOrder:[] };
+}
+
+/* ============================================================
+   SPEECH
+   ============================================================ */
+let bestVoice = null;
+function pickBestVoice(){
+  if(!('speechSynthesis' in window)) return null;
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices.length) return null;
+  let v = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ko') && /google/i.test(v.name));
+  if(!v) v = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ko'));
+  return v || null;
+}
+function speak(text){
+  try{
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.88;
+    if(!bestVoice) bestVoice = pickBestVoice();
+    if(bestVoice) u.voice = bestVoice;
+    window.speechSynthesis.speak(u);
+  }catch(e){ console.warn('speech failed', e); }
+}
+function speakWord(kor){
+  const audioSrc = RUNTIME_AUDIO[kor];
+  if(audioSrc){
+    try{ const a = new Audio(audioSrc); a.play(); return; }catch(e){ console.warn('audio playback failed', e); }
+  }
+  speak(SPEAK_OVERRIDES[kor] || kor);
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = () => { bestVoice = pickBestVoice(); };
+  window.speechSynthesis.getVoices();
+}
+
+/* ============================================================
+   SHARED JAMO RENDERING
+   ============================================================ */
+function jamoUnitHTML(size, initial, medial, final, targetLetter, emptySlot, clickable){
+  const stack = HORIZONTAL_VOWELS.includes(medial);
+  const isTargetC = initial === targetLetter, isTargetV = medial === targetLetter, isTargetF = final === targetLetter;
+  const w = size, h = Math.round(size*1.55);
+  let inner = '';
+  const emptyC = emptySlot === 'c', emptyV = emptySlot === 'v';
+
+  function clickAttr(jamo){
+    if(!clickable || !jamo || jamo === '?') return '';
+    return ' onclick="event.stopPropagation(); showJamoInfo(\'' + jamo + '\')" style="cursor:pointer;"';
+  }
+  function fontFor(slotH){ return Math.max(10, Math.min(slotH * 0.56, size * 0.34)); }
+
+  if(stack){
+    const halfH = Math.round((final ? h*0.62 : h)/2);
+    const fs = fontFor(halfH);
+    inner += '<div class="jamoSlot c ' + (isTargetC?'target':'') + ' ' + (emptyC?'empty':'') + '" data-role="c"' + clickAttr(emptyC?null:initial) + ' style="height:' + halfH + 'px; width:100%; box-sizing:border-box; font-size:' + fs + 'px; line-height:1;">' + (emptyC?'?':initial) + (isTargetC&&!emptyC?'<span class="starTag">⭐</span>':'') + '</div>';
+    inner += '<div class="jamoSlot v ' + (isTargetV?'target':'') + ' ' + (emptyV?'empty':'') + '" data-role="v"' + clickAttr(emptyV?null:medial) + ' style="height:' + halfH + 'px; width:100%; box-sizing:border-box; font-size:' + fs + 'px; line-height:1;">' + (emptyV?'?':medial) + (isTargetV&&!emptyV?'<span class="starTag">⭐</span>':'') + '</div>';
+  } else {
+    const topH = final ? Math.round(h*0.62) : h;
+    const fs = fontFor(topH);
+    inner += '<div style="display:flex; height:' + topH + 'px; width:100%; box-sizing:border-box;">';
+    inner += '<div class="jamoSlot c ' + (isTargetC?'target':'') + ' ' + (emptyC?'empty':'') + '" data-role="c"' + clickAttr(emptyC?null:initial) + ' style="width:50%; box-sizing:border-box; font-size:' + fs + 'px; line-height:1;">' + (emptyC?'?':initial) + (isTargetC&&!emptyC?'<span class="starTag">⭐</span>':'') + '</div>';
+    inner += '<div class="jamoSlot v ' + (isTargetV?'target':'') + ' ' + (emptyV?'empty':'') + '" data-role="v"' + clickAttr(emptyV?null:medial) + ' style="width:50%; box-sizing:border-box; font-size:' + fs + 'px; line-height:1;">' + (emptyV?'?':medial) + (isTargetV&&!emptyV?'<span class="starTag">⭐</span>':'') + '</div>';
+    inner += '</div>';
+  }
+  if(final){
+    const botH = Math.max(24, h - (stack ? Math.round(h*0.62/2)*2 : Math.round(h*0.62)));
+    const fsF = fontFor(botH);
+    inner += '<div class="jamoSlot f ' + (isTargetF?'target':'') + '" data-role="f"' + clickAttr(final) + ' style="height:' + botH + 'px; width:100%; box-sizing:border-box; font-size:' + fsF + 'px; line-height:1;">' + final + (isTargetF?'<span class="starTag">⭐</span>':'') + '</div>';
+  }
+  return '<div class="jamoUnit" style="width:' + w + 'px; box-sizing:border-box;">' + inner + '</div>';
+}
+
+/* ============================================================
+   TOP BAR / PROGRESS / NAV
+   ============================================================ */
+function topBar(){
+  const inFlow = state.screen === 'flow';
+  return '<div class="heroBox">' +
+    (inFlow ? '<div class="heroTopRow">' +
+        '<button class="homebtn" onclick="openCustomize()">Customize Words</button>' +
+        '<button class="homebtn" onclick="goHome()">Choose a different letter</button>' +
+      '</div>' : '') +
+    '<h1>Hangeul Letter Lab</h1>' +
+    '<div class="heroKor">한글 탐험</div>' +
+    (state.screen==='home' ? '<div class="heroTag">Pick a letter to explore!</div>' : '') +
+    '</div>';
+}
+
+/* ============================================================
+   CUSTOMIZE WORDS MODAL
+   ============================================================ */
+function openCustomize(){ state.customizeOpen = true; render(); }
+function closeCustomize(){ state.customizeOpen = false; render(); }
+function closeCustomizeIfBackdrop(e){ if(e.target.classList.contains('modalOverlay')) closeCustomize(); }
+
+function renderCustomizeModal(){
+  if(!state.customizeOpen || !state.letterId) return '';
+  const info = JAMO_INFO[state.letterId];
+  const rows = info.examples.map((w,i) => {
+    const imgVal = (RUNTIME_IMAGES[w.kor] || '').replace(/"/g,'&quot;');
+    const audVal = (RUNTIME_AUDIO[w.kor] || '').replace(/"/g,'&quot;');
+    return '<div class="custRow">' +
+      '<div class="kor">' + w.kor + '</div>' +
+      '<div class="custField"><label>Image URL</label><input id="imgInput' + i + '" value="' + imgVal + '" placeholder="https://..."></div>' +
+      '<div class="custField"><label>Audio URL</label><input id="audInput' + i + '" value="' + audVal + '" placeholder="https://... or data:audio/mp3;base64,..."></div>' +
+      '<button class="custSaveBtn" onclick="saveCustomRow(\'' + w.kor + '\',' + i + ')">Save</button>' +
+      '</div>';
+  }).join('');
+  return '<div class="modalOverlay show" onclick="closeCustomizeIfBackdrop(event)"><div class="customizeModal">' +
+    '<h3 style="color:var(--purple); margin-top:0;">Customize words for <span class="kor">' + state.letterId + '</span></h3>' +
+    '<p class="hint" style="text-align:left; margin-top:0;">Paste an image URL and/or audio URL for any word below. Leave blank to keep the default emoji / browser voice. Changes save instantly and are still here next time you open this letter.</p>' +
+    rows +
+    '<div style="text-align:right; margin-top:16px;"><button class="modalCloseBtn" onclick="closeCustomize()">Done</button></div>' +
+    '</div></div>';
+}
+
+async function saveCustomRow(kor, i){
+  const imgEl = document.getElementById('imgInput' + i);
+  const audEl = document.getElementById('audInput' + i);
+  const imgVal = imgEl ? imgEl.value.trim() : '';
+  const audVal = audEl ? audEl.value.trim() : '';
+  if(!window.storage){ alert('Storage is not available in this preview.'); return; }
+  try{
+    if(imgVal){ await window.storage.set('img:' + kor, imgVal, false); RUNTIME_IMAGES[kor] = imgVal; }
+    else { try{ await window.storage.delete('img:' + kor, false); }catch(e){} delete RUNTIME_IMAGES[kor]; }
+    if(audVal){ await window.storage.set('audio:' + kor, audVal, false); RUNTIME_AUDIO[kor] = audVal; }
+    else { try{ await window.storage.delete('audio:' + kor, false); }catch(e){} delete RUNTIME_AUDIO[kor]; }
+  }catch(e){ console.warn('save failed', e); }
+  render();
+}
+
+/* ============================================================
+   JAMO INFO MODAL (tap any letter in the Word Tree to learn it)
+   ============================================================ */
+function showJamoInfo(jamo){ state.jamoInfoOpen = true; state.jamoInfoChar = jamo; render(); }
+function closeJamoInfo(){ state.jamoInfoOpen = false; state.jamoInfoChar = null; render(); }
+function closeJamoInfoIfBackdrop(e){ if(e.target.classList.contains('modalOverlay')) closeJamoInfo(); }
+
+function renderJamoInfoModal(){
+  if(!state.jamoInfoOpen || !state.jamoInfoChar) return '';
+  const jamo = state.jamoInfoChar;
+  const info = JAMO_INFO[jamo];
+  const isC = INITIALS.includes(jamo);
+  const color = isC ? 'var(--red)' : (MEDIALS.includes(jamo) ? 'var(--blue)' : 'var(--green)');
+  if(!info){
+    return '<div class="modalOverlay show" onclick="closeJamoInfoIfBackdrop(event)"><div class="customizeModal" style="max-width:360px; text-align:center;">' +
+      '<div class="letterBig kor" style="font-size:3.5rem; font-weight:800; color:var(--green);">' + jamo + '</div>' +
+      '<p style="color:var(--muted); margin-top:10px;">Part of a compound batchim (받침) cluster — a combo of two final consonants.</p>' +
+      '<div style="text-align:center; margin-top:10px;"><button class="modalCloseBtn" onclick="closeJamoInfo()">Close</button></div>' +
+      '</div></div>';
+  }
+  const exWords = info.examples.slice(0,3).map(w => '<span style="display:inline-block;margin:3px 6px;">' + w.emoji + ' <span class="kor">' + w.kor + '</span></span>').join('');
+  return '<div class="modalOverlay show" onclick="closeJamoInfoIfBackdrop(event)"><div class="customizeModal" style="max-width:380px; text-align:center;">' +
+    '<div class="letterBig kor" style="font-size:3.5rem; font-weight:800; color:' + color + ';">' + jamo + '</div>' +
+    '<div style="color:var(--muted); margin-top:4px;">' + info.name + ' &middot; ' + info.nameEn + '</div>' +
+    '<div style="color:var(--purple); font-weight:700; margin-top:8px;">' + info.eng + '</div>' +
+    '<div style="margin-top:14px; font-size:0.85rem;">' + exWords + '</div>' +
+    '<div style="text-align:center; margin-top:16px;"><button class="modalCloseBtn" onclick="closeJamoInfo()">Close</button></div>' +
+    '</div></div>';
+}
+
+/* ============================================================
+   SPIN WHEEL (home screen randomizer)
+   ============================================================ */
+let wheelRotation = 0;
+function openSpinWheel(){ state.wheelOpen = true; render(); }
+function closeSpinWheel(){ state.wheelOpen = false; render(); }
+function closeSpinWheelIfBackdrop(e){ if(e.target.classList.contains('modalOverlay')) closeSpinWheel(); }
+
+function renderSpinWheelModal(){
+  if(!state.wheelOpen) return '';
+  return '<div class="modalOverlay show" onclick="closeSpinWheelIfBackdrop(event)"><div class="customizeModal" style="max-width:340px;">' +
+    '<h3 style="color:var(--purple); margin-top:0; text-align:center;">🎡 Today\u2019s Letter Pick!</h3>' +
+    '<div class="wheelStage">' +
+      '<div class="wheelOuter">' +
+        '<div class="wheelPointer"></div>' +
+        '<div class="wheel" id="spinWheelEl"><div class="wheelCenter">✨</div></div>' +
+      '</div>' +
+      '<button class="spinBtn" id="spinBtnEl" onclick="doSpin()">Spin!</button>' +
+      '<div class="wheelResultCard" id="wheelResultBox"></div>' +
+    '</div>' +
+    '<div style="text-align:center; margin-top:6px;"><button class="modalCloseBtn" onclick="closeSpinWheel()">Close</button></div>' +
+    '</div></div>';
+}
+
+function doSpin(){
+  const btn = document.getElementById('spinBtnEl');
+  const wheelEl = document.getElementById('spinWheelEl');
+  const resultBox = document.getElementById('wheelResultBox');
+  if(!btn || !wheelEl || btn.disabled) return;
+  btn.disabled = true;
+  resultBox.innerHTML = '';
+  const letterIds = currentModeLetterIds();
+  const target = letterIds[Math.floor(Math.random() * letterIds.length)];
+  wheelRotation += 1800 + Math.floor(Math.random() * 360);
+  wheelEl.style.transform = 'rotate(' + wheelRotation + 'deg)';
+  setTimeout(() => {
+    const info = JAMO_INFO[target];
+    resultBox.innerHTML =
+      '<div class="kor" style="font-size:2.6rem; font-weight:800; color:var(--purple);">' + target + '</div>' +
+      '<div style="color:var(--muted); margin:4px 0 12px;">' + info.examples[0].emoji + ' ' + info.name + '</div>' +
+      '<button class="navBtn" onclick="closeSpinWheel(); selectLetter(\'' + target + '\')">Start Learning!</button>';
+    btn.disabled = false;
+    fireConfetti();
+  }, 3000);
+}
+function progressDotsHTML(){
+  let html = '<div class="progress">';
+  for(let i=1;i<=6;i++){
+    const cls = i===state.step ? 'active' : (i<state.step ? 'done' : '');
+    html += '<div class="dot ' + cls + '" onclick="goToStep(' + i + ')">' + (i<state.step?'v':i) + '</div>';
+  }
+  return html + '</div>';
+}
+function navRowHTML(nextLabel){
+  return '<div class="navRow">' +
+    '<button class="navBtn ghost" onclick="prevStep()" ' + (state.step===1?'disabled':'') + '>Back</button>' +
+    '<button class="navBtn" onclick="nextStep()">' + (nextLabel || 'Next') + '</button>' +
+    '</div>';
+}
+
+/* ============================================================
+   HOME
+   ============================================================ */
+function renderHome(){
+  const letterIds = currentModeLetterIds();
+  const consonantIds = letterIds.filter(id => INITIALS.includes(id));
+  const vowelIds = letterIds.filter(id => MEDIALS.includes(id));
+
+  const chip = (id) => {
+    const info = JAMO_INFO[id];
+    const type = INITIALS.includes(id) ? 'consonant' : 'vowel';
+    return '<div class="letterChip ' + type + '" onclick="selectLetter(\'' + id + '\')">' +
+      '<div class="big kor">' + id + '</div>' +
+      '<div class="emo">' + info.examples[0].emoji + '</div>' +
+      '<div class="hint">' + info.examples.slice(0,2).map(w=>w.en).join(' | ') + '</div>' +
+      '</div>';
+  };
+
+  return topBar() +
+    '<div class="card">' +
+    '<div style="display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:6px;">' +
+    '<p class="stepSub" style="margin:0; flex:1; min-width:200px;">See it -&gt; Say it -&gt; Meet it -&gt; Build it -&gt; Read it -&gt; Play it</p>' +
+    '<button class="spinLaunchBtn" onclick="openSpinWheel()">🎡 Spin for a Letter!</button>' +
+    '<div class="modeToggle"><span class="' + (state.mode==='basic'?'on':'') + '">Basic 24</span>' +
+    '<div class="switch ' + (state.mode==='advanced'?'advanced':'') + '" onclick="toggleMode()"><div class="knob"></div></div>' +
+    '<span class="' + (state.mode==='advanced'?'on':'') + '">Advanced 40</span></div></div>' +
+    '<div class="sectionLabel">Consonants 자음 (' + consonantIds.length + ')</div>' +
+    '<div class="letterGrid">' + consonantIds.map(chip).join("") + '</div>' +
+    '<div class="sectionLabel">Vowels 모음 (' + vowelIds.length + ')</div>' +
+    '<div class="letterGrid">' + vowelIds.map(chip).join("") + '</div>' +
+    '</div>';
+}
+function toggleMode(){ state.mode = state.mode === 'basic' ? 'advanced' : 'basic'; render(); }
+
+/* ============================================================
+   STEP 1 — HOOK
+   ============================================================ */
+function renderStep1(letterId){
+  const info = JAMO_INFO[letterId];
+  return topBar() + progressDotsHTML() +
+    '<div class="card"><h2 class="stepTitle">What do you see?</h2>' +
+    '<p class="stepSub">Say what they are in English first — no Korean yet!</p>' +
+    '<div class="hookGrid">' +
+    info.examples.map(w => '<div class="hookCard">' + getMediaHTML(w) + '<div class="q">?</div></div>').join("") +
+    '</div>' +
+    '<p class="hint">These pictures all secretly share ONE Korean letter — can you guess what it might sound like?</p>' +
+    (info.rare ? '<p class="rarityNote">Note: ' + letterId + ' is a rare letter in Korean — these are genuinely most of the common words that use it!</p>' : '') +
+    navRowHTML() + '</div>';
+}
+
+/* ============================================================
+   STEP 2 — LISTEN & REPEAT
+   ============================================================ */
+function renderStep2(letterId){
+  const info = JAMO_INFO[letterId];
+  return topBar() + progressDotsHTML() +
+    '<div class="card"><h2 class="stepTitle">Listen &amp; Repeat</h2>' +
+    '<p class="stepSub">Tap to hear each word in Korean — try saying it back, no letters yet!</p>' +
+    '<div class="listenGrid">' +
+    info.examples.map(w =>
+      '<div class="listenCard">' + getMediaHTML(w) +
+      '<div class="rom">' + romanizeWord(w.kor) + '</div>' +
+      '<div class="en">' + w.en + '</div>' +
+      '<button class="playBtn" onclick="speakWord(\'' + w.kor + '\')">Play</button></div>'
+    ).join("") +
+    '</div>' + navRowHTML() + '</div>';
+}
+
+/* ============================================================
+   STEP 3 — MEET THE LETTER
+   ============================================================ */
+function renderStep3(letterId){
+  const info = JAMO_INFO[letterId];
+  const type = INITIALS.includes(letterId) ? 'consonant' : 'vowel';
+  return topBar() + progressDotsHTML() +
+    '<div class="card"><h2 class="stepTitle">Meet <span class="kor">' + letterId + '</span> (' + info.name + ')</h2>' +
+    '<p class="stepSub">Your letter for today!</p>' +
+    '<div class="meetWrap">' +
+    '<div class="meetLetterCard ' + type + '"><div class="letterBig kor">' + letterId + '</div>' +
+    '<div class="name">' + info.name + ' &middot; ' + info.nameEn + '</div>' +
+    '<button class="playBtn small" style="margin-top:10px;" onclick="speak(\'' + info.name + '\')">Hear it</button></div>' +
+    '<div class="factList">' +
+    '<div class="factCard"><b>Shape:</b> ' + (SHAPE_DESC[letterId]||'') + '</div>' +
+    '<div class="factCard"><b>Sound:</b> ' + info.eng + '</div>' +
+    '<div class="factCard"><b>You already met it!</b> It was hiding in all the pictures you just saw and heard.</div>' +
+    '</div></div>' + navRowHTML() + '</div>';
+}
+
+/* ============================================================
+   STEP 4 — BUILD A SYLLABLE (fixed target slot)
+   ============================================================ */
+function renderStep4(letterId){
+  const isConsonant = INITIALS.includes(letterId);
+  const partners = isConsonant ? BASIC_VOWELS.slice() : ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅎ'];
+  const partnerColor = isConsonant ? 'var(--blue)' : 'var(--red)';
+  const partnerLabel = isConsonant ? '모음' : '자음';
+
+  const chosen = state.lego.partner;
+  const consonantChar = isConsonant ? letterId : chosen;
+  const vowelChar = isConsonant ? chosen : letterId;
+  const emptySlot = isConsonant ? (chosen ? null : 'v') : (chosen ? null : 'c');
+  const frame = jamoUnitHTML(100, consonantChar || '?', vowelChar || (isConsonant?'ㅏ':letterId), null, letterId, emptySlot);
+  const composed = chosen ? composeSyllable(consonantChar, vowelChar) : null;
+
+  const chips = partners.map(p => {
+    const done = state.lego.tried.has(p);
+    return '<button class="partnerChip ' + (done?'done':'') + '" style="background:' + partnerColor + ';" onpointerdown="chipPointerDown(event,\'' + p + '\')">' + p + '</button>';
+  }).join("");
+  const badges = partners.map(p => '<div class="badge ' + (state.lego.tried.has(p)?'on':'') + '"></div>').join("");
+
+  return topBar() + progressDotsHTML() +
+    '<div class="card"><h2 class="stepTitle">Build a Syllable!</h2>' +
+    '<p class="stepSub"><span class="kor">' + letterId + '</span> is already in place — drag (or tap) a ' + partnerLabel + ' block below onto the empty slot to complete the syllable!</p>' +
+    '<div class="buildStage"><div id="buildFrame">' + frame + '</div>' +
+    '<div class="composedReadout" id="composedReadout"><div class="syl">' + (composed || '?') + '</div>' +
+    '<div class="rom">' + (composed ? romanizeSyllable(decomposeSyllable(composed)) : '') + '</div></div></div>' +
+    '<div class="chipRow">' + chips + '</div>' +
+    '<div class="progressBadges">' + badges + '</div>' +
+    navRowHTML() + '</div>';
+}
+
+/* ---- Pointer-based drag (works for mouse AND touch/tablet) ---- */
+let dragState = null;
+function chipPointerDown(e, jamo){
+  e.preventDefault();
+  const chip = e.currentTarget;
+  const rect = chip.getBoundingClientRect();
+  const ghost = chip.cloneNode(true);
+  ghost.classList.add('dragGhost');
+  ghost.style.position = 'fixed';
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  ghost.style.width = rect.width + 'px';
+  ghost.style.height = rect.height + 'px';
+  ghost.style.pointerEvents = 'none';
+  ghost.style.zIndex = 2000;
+  ghost.style.opacity = '0.9';
+  ghost.removeAttribute('onpointerdown');
+  document.body.appendChild(ghost);
+  dragState = { jamo, ghost, startX: e.clientX, startY: e.clientY, origLeft: rect.left, origTop: rect.top, moved: false };
+  document.addEventListener('pointermove', chipPointerMove);
+  document.addEventListener('pointerup', chipPointerUp);
+}
+function chipPointerMove(e){
+  if(!dragState) return;
+  const dx = e.clientX - dragState.startX, dy = e.clientY - dragState.startY;
+  if(Math.abs(dx) > 6 || Math.abs(dy) > 6) dragState.moved = true;
+  dragState.ghost.style.left = (dragState.origLeft + dx) + 'px';
+  dragState.ghost.style.top = (dragState.origTop + dy) + 'px';
+  dragState.ghost.style.transform = 'scale(1.12)';
+}
+function chipPointerUp(e){
+  if(!dragState) return;
+  document.removeEventListener('pointermove', chipPointerMove);
+  document.removeEventListener('pointerup', chipPointerUp);
+  dragState.ghost.remove();
+  const jamo = dragState.jamo, moved = dragState.moved;
+  dragState = null;
+  if(!moved){ tryBuild(jamo); return; }
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const withinFrame = el ? el.closest('#buildFrame') : null;
+  const slotEl = el ? el.closest('.jamoSlot') : null;
+  const isConsonant = INITIALS.includes(state.letterId);
+  const partnerRole = isConsonant ? 'v' : 'c';
+  if(withinFrame && slotEl && slotEl.getAttribute('data-role') === partnerRole){
+    tryBuild(jamo);
+  }
+}
+function tryBuild(partnerChar){
+  const letterId = state.letterId;
+  const isConsonant = INITIALS.includes(letterId);
+  state.lego.partner = partnerChar;
+  state.lego.tried.add(partnerChar);
+  const consonantChar = isConsonant ? letterId : partnerChar;
+  const vowelChar = isConsonant ? partnerChar : letterId;
+  const composed = composeSyllable(consonantChar, vowelChar);
+  speak(composed);
+  render();
+}
+
+/* ============================================================
+   STEP 5 — WORD TREE
+   ============================================================ */
+function renderStep5(letterId){
+  const info = JAMO_INFO[letterId];
+  const words = info.examples;
+  const wi = state.tree.wordIndex;
+  const w = words[wi];
+  const syllables = decomposeWord(w.kor);
+  const stage = state.tree.stage;
+
+  let body = '<div class="word-card">' + getMediaHTML(w) +
+    '<div class="word-card-kor">' + w.kor + '</div>' +
+    '<div class="tinyBtnRow"><button class="tinyBtn" onclick="speakWord(\'' + w.kor + '\')">Listen</button></div></div>';
+
+  if(stage === 'word'){
+    body += '<div class="breakRow"><button class="breakBtn" onclick="toggleTreeStage()">Break into ' + (syllables.length===1?'letters':'syllables') + '!</button></div>';
+  } else {
+    body += '<div class="breakRow"><button class="breakBtn collapse" onclick="toggleTreeStage()">Hide syllables</button></div>';
+    body += '<div class="connectorArea"><svg viewBox="0 0 1000 26" preserveAspectRatio="none">' +
+      syllables.map((_,i) => {
+        const x = (i+0.5) * (1000/syllables.length);
+        return '<line x1="500" y1="0" x2="' + x + '" y2="26" stroke="#C77DFF" stroke-width="3" stroke-linecap="round"/>';
+      }).join('') + '</svg></div>';
+    body += '<div class="sylRow">';
+    syllables.forEach((syl, si) => {
+      const expanded = state.tree.expandedSyl.has(si);
+      body += '<div class="sylWrap"><div class="sylCard" onclick="toggleSylExpand(' + si + ')"><div class="kor">' + syl.char + '</div></div>' +
+        (expanded ? '<div class="sylJamoConnector"></div><div class="jamoGroupWrap">' + jamoUnitHTML(104, syl.initial, syl.medial, syl.final, letterId, null, true) + '</div>' : '') +
+        '</div>';
+    });
+    body += '</div>';
+  }
+
+  const dots = words.map((_,i) => '<div class="treeDot ' + (i===wi?'active':'') + '"></div>').join("");
+
+  return topBar() + progressDotsHTML() +
+    '<div class="card"><h2 class="stepTitle">Word Tree</h2>' +
+    '<p class="stepSub">Break the word down: word -&gt; syllables -&gt; letters. A gold star marks today\u2019s letter!</p>' +
+    '<div class="treeNav"><button class="treeNavBtn" onclick="treeWord(-1)">&larr;</button>' +
+    '<div class="treeDots">' + dots + '</div>' +
+    '<button class="treeNavBtn" onclick="treeWord(1)">&rarr;</button></div>' +
+    body + navRowHTML() + '</div>';
+}
+function treeWord(delta){
+  const info = JAMO_INFO[state.letterId];
+  const n = info.examples.length;
+  state.tree.wordIndex = (state.tree.wordIndex + delta + n) % n;
+  state.tree.stage = 'word';
+  state.tree.expandedSyl = new Set();
+  render();
+}
+function toggleTreeStage(){
+  state.tree.stage = state.tree.stage === 'word' ? 'broken' : 'word';
+  state.tree.expandedSyl = new Set();
+  render();
+}
+function toggleSylExpand(si){
+  if(state.tree.expandedSyl.has(si)) state.tree.expandedSyl.delete(si);
+  else state.tree.expandedSyl.add(si);
+  render();
+}
+
+/* ============================================================
+   STEP 6 — MATCH & READ
+   ============================================================ */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); const t=arr[i]; arr[i]=arr[j]; arr[j]=t; }
+  return arr;
+}
+function renderStep6(letterId){
+  const info = JAMO_INFO[letterId];
+  const words = info.examples;
+  if(state.match.imgOrder.length === 0){
+    const idxs = words.map((_,i)=>i);
+    state.match.imgOrder = shuffle(idxs.slice());
+    state.match.wordOrder = shuffle(idxs.slice());
+  }
+  const allMatched = state.match.matched.size === words.length;
+  const attr = (matched, type, i) => matched ? '' : ('onclick="matchPick(\'' + type + '\',' + i + ')"');
+  return topBar() + progressDotsHTML() +
+    '<div class="card"><h2 class="stepTitle">Match &amp; Read!</h2>' +
+    '<p class="stepSub">Tap a picture, then tap its matching word.</p>' +
+    '<div class="matchWrap"><div class="matchCol">' +
+    state.match.imgOrder.map(i => {
+      const matched = state.match.matched.has(i);
+      const selected = state.match.selected && state.match.selected.type==='img' && state.match.selected.idx===i;
+      return '<div class="matchTile ' + (matched?'matched':'') + ' ' + (selected?'selected':'') + '" ' + attr(matched,'img',i) + '>' + getMediaHTML(words[i]) + '</div>';
+    }).join("") +
+    '</div><div class="matchCol">' +
+    state.match.wordOrder.map(i => {
+      const matched = state.match.matched.has(i);
+      const selected = state.match.selected && state.match.selected.type==='word' && state.match.selected.idx===i;
+      return '<div class="matchTile word ' + (matched?'matched':'') + ' ' + (selected?'selected':'') + '" ' + attr(matched,'word',i) + '>' + words[i].kor + '</div>';
+    }).join("") +
+    '</div></div>' +
+    (allMatched ? '<div style="text-align:center; margin-top:18px;"><p style="color:var(--green); font-weight:800;">All matched! Let\u2019s read them all together:</p>' +
+      '<button class="navBtn" onclick="readAllWords()">Read All Words</button></div>' : '') +
+    navRowHTML('Finish') + '</div>';
+}
+function matchPick(type, idx){
+  const sel = state.match.selected;
+  if(!sel || sel.type === type){ state.match.selected = {type, idx}; render(); return; }
+  if(sel.idx === idx){
+    state.match.matched.add(idx);
+    state.match.selected = null;
+    speakWord(JAMO_INFO[state.letterId].examples[idx].kor);
+    render();
+    const total = JAMO_INFO[state.letterId].examples.length;
+    if(state.match.matched.size === total){
+      setTimeout(() => { fireConfetti(); playClapSound(); }, 250);
+    }
+  } else {
+    state.match.selected = null;
+    render();
+    showToast('Try again! 다시 해봐요 💜');
+  }
+}
+
+/* ---- Toast (brief, encouraging — auto-dismiss) ---- */
+function showToast(msg){
+  const t = document.createElement('div');
+  t.className = 'miniToast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 300);
+  }, 1300);
+}
+
+/* ---- Confetti burst (DOM/CSS based, no external assets) ---- */
+function fireConfetti(){
+  const colors = ['var(--red)','var(--blue)','var(--green)','var(--purple)','var(--yellow)'];
+  for(let i = 0; i < 36; i++){
+    const piece = document.createElement('div');
+    piece.className = 'confettiPiece';
+    piece.style.left = (Math.random()*100) + 'vw';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDuration = (1.1 + Math.random()*0.8) + 's';
+    piece.style.animationDelay = (Math.random()*0.3) + 's';
+    piece.style.transform = 'rotate(' + Math.floor(Math.random()*360) + 'deg)';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 2400);
+  }
+}
+
+/* ---- Clap / applause sound (Web Audio API — no external files) ---- */
+function playClapSound(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    function oneClap(delay){
+      const bufferSize = Math.floor(ctx.sampleRate * 0.06);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i = 0; i < bufferSize; i++){ data[i] = (Math.random()*2-1) * (1 - i/bufferSize); }
+      const noise = ctx.createBufferSource(); noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1500;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + delay + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.09);
+      noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+      noise.start(ctx.currentTime + delay); noise.stop(ctx.currentTime + delay + 0.1);
+    }
+    [0, 0.09, 0.15, 0.26, 0.33, 0.46, 0.55, 0.7].forEach(oneClap);
+  }catch(e){ console.warn('clap sound failed', e); }
+}
+function readAllWords(){
+  const words = JAMO_INFO[state.letterId].examples;
+  let i = 0;
+  (function next(){ if(i>=words.length) return; speakWord(words[i].kor); i++; setTimeout(next, 1400); })();
+}
+
+/* ============================================================
+   CELEBRATE
+   ============================================================ */
+function renderCelebrate(letterId){
+  const info = JAMO_INFO[letterId];
+  return topBar() +
+    '<div class="celebrate"><div class="big">Great job!</div>' +
+    '<h2 style="margin:10px 0 4px;">You learned <span class="kor">' + letterId + '</span> today!</h2>' +
+    '<p style="color:var(--yellow); font-style:italic;">대단해, 한나! You found ' + info.name + ' in real words.</p>' +
+    '<div class="chipsRow">' + info.examples.map(w => '<div class="wordChip">' + w.kor + '</div>').join("") + '</div>' +
+    '<div style="margin-top:24px;"><button class="navBtn" onclick="goHome()">Pick another letter</button></div>' +
+    '</div>';
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function selectLetter(id){ state.screen='flow'; state.letterId=id; resetFlowState(); render(); }
+function goHome(){ state.screen='home'; state.letterId=null; state.customizeOpen=false; render(); }
+function nextStep(){ state.step = state.step < 6 ? state.step+1 : 7; render(); }
+function prevStep(){ if(state.step>1){ state.step -= 1; render(); } }
+function goToStep(n){ state.step = n; render(); }
+
+/* ============================================================
+   MAIN RENDER
+   ============================================================ */
+function render(){
+  const app = document.getElementById('app');
+  if(state.screen === 'home'){ app.innerHTML = renderHome() + renderSpinWheelModal(); return; }
+  const letterId = state.letterId;
+  let html;
+  switch(state.step){
+    case 1: html = renderStep1(letterId); break;
+    case 2: html = renderStep2(letterId); break;
+    case 3: html = renderStep3(letterId); break;
+    case 4: html = renderStep4(letterId); break;
+    case 5: html = renderStep5(letterId); break;
+    case 6: html = renderStep6(letterId); break;
+    default: html = renderCelebrate(letterId); break;
+  }
+  app.innerHTML = html + renderCustomizeModal() + renderJamoInfoModal();
+}
+render();
+loadOverridesFromStorage();
+</script>
+</body>
+</html>

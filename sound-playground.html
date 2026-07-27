@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎵 가나다 사운드 놀이터 · Hangul Sound Playground</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #FFF0F6 0%, #F8F0FF 50%, #F0F8FF 100%);
+  min-height: 100vh;
+  padding: 18px;
+  color: #2D2D2D;
+}
+.container { max-width: 820px; margin: 0 auto; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  border-radius: 20px;
+  padding: 20px 24px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 6px 20px rgba(199, 125, 255, 0.25);
+  margin-bottom: 14px;
+}
+.header h1 { font-size: 24px; margin-bottom: 4px; font-weight: 800; }
+.header p { font-size: 13px; opacity: .95; }
+
+.legend {
+  display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+  background: white; border-radius: 14px; padding: 10px 14px; margin-bottom: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.05); font-size: 12px; font-weight: 700;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; color: #666; }
+.legend-dot { width: 15px; height: 15px; border-radius: 4px; display: inline-block; }
+.legend-dot.c { background: #FF6B6B; }
+.legend-dot.v { background: #4D96FF; }
+.legend-dot.b { background: #6BCB77; }
+
+/* MODE TABS */
+.mode-tabs {
+  display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 12px;
+  -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+}
+.mode-tab {
+  flex-shrink: 0; padding: 10px 16px; border-radius: 14px; border: none;
+  background: white; font-weight: 800; font-size: 13px; color: #888; cursor: pointer;
+  white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.06); transition: all .15s ease;
+  font-family: inherit;
+}
+.mode-tab:hover { transform: translateY(-1px); }
+.mode-tab.active {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%); color: #fff;
+  box-shadow: 0 4px 12px rgba(199,125,255,.35);
+}
+
+/* PANEL CARD */
+.mode-panel {
+  background: white; border-radius: 20px; padding: 20px 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06); margin-bottom: 40px;
+}
+.mode-instructions {
+  font-size: 13.5px; color: #666; background: #F8F5FF; border-radius: 12px;
+  padding: 10px 14px; margin-bottom: 16px; line-height: 1.5;
+}
+.mode-instructions .en { display: block; font-size: 12px; color: #999; font-style: italic; margin-top: 2px; }
+
+.picker-label {
+  font-size: 13px; font-weight: 800; margin: 14px 0 8px; display: flex; align-items: center; gap: 4px;
+}
+.picker-label.vowel-label { color: #2E6FE0; }
+.picker-label.consonant-label { color: #E14848; }
+.picker-label.batchim-label { color: #2E9E4C; }
+
+/* JAMO CHIPS */
+.jchip-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 4px 0; }
+.jchip {
+  width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 21px; font-weight: 800;
+  color: white; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,.18); position: relative;
+  transition: all .15s ease; flex-shrink: 0; user-select: none;
+}
+.jchip::before, .jchip::after {
+  content: ''; position: absolute; top: 5px; width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,.5); pointer-events: none;
+}
+.jchip::before { left: 27%; transform: translateX(-50%); }
+.jchip::after { right: 27%; transform: translateX(50%); }
+.jchip.consonant { background: #FF6B6B; }
+.jchip.vowel { background: #4D96FF; }
+.jchip.batchim { background: #6BCB77; }
+.jchip.none { background: #B5B5C6; font-size: 12px; }
+.jchip:hover { transform: translateY(-2px) scale(1.05); }
+.jchip.active { outline: 3px solid #FFD93D; outline-offset: 2px; transform: translateY(-2px) scale(1.08); }
+.jchip.draggable { cursor: grab; touch-action: none; }
+.jchip.draggable:active { cursor: grabbing; }
+.jchip.dragging { opacity: .45; transform: scale(1.1); }
+
+/* DRAG-AND-DROP SYLLABLE FRAME */
+.syl-frame1, .syl-frame3 { display: flex; flex-direction: column; gap: 10px; align-items: center; margin: 16px 0; }
+.sf-top { display: flex; gap: 10px; align-items: center; transition: gap .2s ease; }
+.sf-top.layout-stack { flex-direction: column; }
+.sf-top.layout-side { flex-direction: row; }
+.sf-bottom { width: 100%; display: flex; justify-content: center; }
+.sf-slot {
+  min-width: 64px; min-height: 64px; border-radius: 14px; border: 3px dashed #DDD; background: #FAFAFF;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 30px; font-weight: 800; color: #BBB;
+  cursor: pointer; transition: all .15s ease;
+}
+.sf-slot.drag-over { border-color: #FFD93D; background: #FFFBEB; transform: scale(1.06); }
+.sf-slot.filled.consonant { border-style: solid; border-color: #FF6B6B; background: #FFF0F0; color: #E14848; }
+.sf-slot.filled.vowel { border-style: solid; border-color: #4D96FF; background: #F0F6FF; color: #2E6FE0; }
+.sf-slot.filled.batchim { border-style: solid; border-color: #6BCB77; background: #F0FFF3; color: #2E9E4C; }
+.sf-fixed {
+  min-width: 64px; min-height: 64px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 30px; font-weight: 800; color: #fff;
+  position: relative; box-shadow: 0 3px 8px rgba(0,0,0,.18);
+}
+.sf-fixed.consonant { background: #FF6B6B; }
+.sf-fixed.vowel { background: #4D96FF; }
+.sf-fixed .pin-badge {
+  position: absolute; top: -8px; right: -8px; font-size: 13px; background: #fff; border-radius: 50%;
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+.reflow-flash { animation: reflowPulse .4s ease; }
+@keyframes reflowPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,217,61,.6); }
+  50% { box-shadow: 0 0 0 10px rgba(255,217,61,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,217,61,0); }
+}
+
+/* LOOK-ALIKE VOWELS (ㅐㅔㅒㅖ) */
+.dip-divider { text-align: center; font-size: 12px; font-weight: 800; color: #C77DFF; margin: 26px 0 14px; }
+.ae-note {
+  text-align: center; font-size: 13px; color: #666; background: #F8F5FF; border-radius: 12px;
+  padding: 10px 14px; margin-top: 10px; display: none; line-height: 1.5;
+}
+
+/* STAGE (big syllable display) */
+.stage {
+  background: linear-gradient(135deg, #FFFDF5, #FFF8FF); border-radius: 18px; padding: 20px;
+  text-align: center; margin: 16px 0; box-shadow: inset 0 0 0 2px rgba(199,125,255,.15);
+  position: relative; overflow: visible;
+}
+.stage-syllable {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 76px; font-weight: 800;
+  color: #2D2D2D; line-height: 1; min-height: 88px; display: flex; align-items: center; justify-content: center;
+}
+.stage-syllable.pop { animation: stagePop .4s ease; }
+@keyframes stagePop { 0%{transform:scale(.7);} 60%{transform:scale(1.12);} 100%{transform:scale(1);} }
+.stage-rom { font-size: 15px; color: #888; font-style: italic; margin-top: 2px; }
+.stage-listen-btn {
+  margin-top: 12px; background: linear-gradient(135deg, #C77DFF, #FF6B6B); color: #fff; border: none;
+  border-radius: 14px; padding: 9px 20px; font-weight: 800; font-size: 14px; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(199,125,255,.35); font-family: inherit;
+}
+.stage-listen-btn:hover { transform: translateY(-1px); }
+
+.chant-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.ghost-btn {
+  border: 2px solid #E4E0F0; background: white; border-radius: 12px; padding: 9px 14px; font-weight: 700;
+  font-size: 13px; color: #555; cursor: pointer; font-family: inherit;
+}
+.ghost-btn:hover { background: #F5F2FF; }
+.chant-btn {
+  background: linear-gradient(135deg, #FFD76B, #FF9F43); color: #fff; border: none; border-radius: 14px;
+  padding: 10px 18px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,159,67,.35);
+  font-family: inherit;
+}
+
+/* MODE 3 compare row */
+.compare-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; }
+.compare-card { text-align: center; }
+.compare-label { font-size: 11px; color: #999; font-weight: 700; margin-bottom: 4px; }
+.compare-syl {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 34px; font-weight: 800;
+  background: #F5F2FF; border-radius: 12px; padding: 6px 16px; color: #444;
+}
+.compare-arrow { font-size: 20px; color: #C77DFF; font-weight: 800; }
+
+/* MODE 4 */
+.m4-diff-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
+.m4-diff-pill {
+  border: 2px solid #E4E0F0; background: white; border-radius: 14px; padding: 8px 16px; font-weight: 800;
+  font-size: 12.5px; color: #777; cursor: pointer; font-family: inherit;
+}
+.m4-diff-pill.active { background: linear-gradient(135deg,#C77DFF,#FF6B6B); color: #fff; border-color: transparent; }
+.m4-stage { text-align: center; margin: 10px 0 6px; position: relative; }
+.m4-placeholder {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 60px; font-weight: 800;
+  min-height: 76px; display: flex; align-items: center; justify-content: center; color: #C77DFF;
+}
+.m4-listen-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.m4-slots { display: flex; justify-content: center; gap: 10px; margin: 14px 0; }
+.m4-slot {
+  width: 54px; height: 60px; border-radius: 14px; border: 3px dashed #DDD; background: #FAFAFF;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 26px; font-weight: 800; color: #BBB;
+}
+.m4-slot.filled.consonant { border-style: solid; border-color: #FF6B6B; background: #FFF0F0; color: #E14848; }
+.m4-slot.filled.vowel { border-style: solid; border-color: #4D96FF; background: #F0F6FF; color: #2E6FE0; }
+.m4-slot.filled.batchim { border-style: solid; border-color: #6BCB77; background: #F0FFF3; color: #2E9E4C; }
+.m4-result { text-align: center; font-size: 15px; font-weight: 700; min-height: 22px; margin: 8px 0; }
+.m4-result.success { color: #2E9E4C; }
+.m4-result.retry { color: #FF8C42; }
+.m4-actions { display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.m4-check-btn {
+  background: linear-gradient(135deg, #6BCB77, #4D96FF); color: #fff; border: none; border-radius: 14px;
+  padding: 10px 22px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(107,203,119,.35);
+  font-family: inherit;
+}
+.m4-hint-btn { display: none; }
+
+/* MODE 5 diphthong chips */
+.dip-chip {
+  width: 62px; height: 66px; border-radius: 14px; flex-direction: column; gap: 1px;
+}
+.dip-big { font-size: 22px; }
+.dip-small { font-size: 10px; opacity: .85; font-weight: 700; }
+.merge-stage { display: none; align-items: center; justify-content: center; gap: 14px; margin: 18px 0; position: relative; }
+.merge-tile {
+  width: 68px; height: 68px; border-radius: 16px; background: #F0F6FF; display: flex; align-items: center;
+  justify-content: center; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 28px;
+  font-weight: 800; color: #2E6FE0; box-shadow: 0 4px 10px rgba(0,0,0,.12);
+}
+.merge-op { font-size: 22px; font-weight: 800; color: #C77DFF; }
+.merge-tile.result { background: repeating-linear-gradient(45deg,#FFF6DF,#FFF6DF 8px,#FFECC0 8px,#FFECC0 16px); color: #C98B00; border: 2px dashed #E0A400; }
+.merge-tile.result.revealed { background: linear-gradient(135deg, #FFD93D, #FFA500); color: #fff; border: none; animation: stagePop .5s ease; }
+.dip-examples { display: none; margin-top: 16px; }
+.dip-examples-title { font-size: 12px; font-weight: 800; color: #C77DFF; margin-bottom: 8px; text-align: center; }
+.dip-examples-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.dip-example-card {
+  background: linear-gradient(135deg, #F8F0FF, #FFF0F8); border: 2px solid #E8D0FF; border-radius: 12px;
+  padding: 10px 14px; text-align: center; cursor: pointer; transition: all .15s ease;
+}
+.dip-example-card:hover { transform: translateY(-2px); }
+.dip-example-card .em { font-size: 24px; display: block; }
+.dip-example-card .wd {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 15px; font-weight: 700; color: #2D2D2D;
+}
+.m5-carrier-wrap { display: none; margin-top: 18px; border-top: 2px dashed #EEE; padding-top: 14px; }
+
+/* SPARKLE */
+.sparkle-particle { position: absolute; font-size: 22px; pointer-events: none; animation: sparkleFly 1s ease-out forwards; }
+@keyframes sparkleFly { 0% { transform: translate(0,0) scale(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; } }
+
+/* TOAST */
+.toast-container {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none;
+  display: flex; flex-direction: column; gap: 10px; align-items: center; width: min(520px, 92vw);
+}
+.toast {
+  background: #2D2D2D; color: #fff; padding: 16px 20px; border-radius: 14px; font-size: 14.5px; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35); display: flex; align-items: center; gap: 12px; width: 100%;
+  animation: toastIn .4s ease, toastOut .4s ease 5.6s forwards; pointer-events: auto;
+}
+.toast .toast-icon {
+  width: 28px; height: 28px; background: #6BCB77; color: white; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0;
+}
+.toast .toast-icon.warn { background: #FF6B6B; }
+.toast .toast-body { flex: 1; line-height: 1.4; }
+.toast .toast-close {
+  background: transparent; color: rgba(255,255,255,.6); border: none; font-size: 19px; cursor: pointer;
+  padding: 0; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+@keyframes toastIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-30px); opacity: 0; } }
+
+@media (max-width: 480px) {
+  .stage-syllable { font-size: 58px; min-height: 70px; }
+  .jchip { width: 42px; height: 42px; font-size: 18px; }
+  .header h1 { font-size: 20px; }
+  .m4-placeholder { font-size: 48px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🎵 가나다 사운드 놀이터</h1>
+    <p>Hangul Sound Playground · 자음·모음·받침을 하나씩 바꿔가며 소리를 들어보세요!</p>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot c"></span>자음 Consonant</div>
+    <div class="legend-item"><span class="legend-dot v"></span>모음 Vowel</div>
+    <div class="legend-item"><span class="legend-dot b"></span>받침 Batchim</div>
+  </div>
+
+  <div class="mode-tabs" id="modeTabs">
+    <button class="mode-tab active" id="tab-m1" onclick="switchMode('m1')">🔤 모음 고정</button>
+    <button class="mode-tab" id="tab-m2" onclick="switchMode('m2')">🔡 자음 고정</button>
+    <button class="mode-tab" id="tab-m3" onclick="switchMode('m3')">🟢 받침 놀이</button>
+    <button class="mode-tab" id="tab-m4" onclick="switchMode('m4')">👂 듣고 만들기</button>
+    <button class="mode-tab" id="tab-m5" onclick="switchMode('m5')">🌈 이중모음</button>
+  </div>
+
+  <!-- ══════════ MODE 1: 모음 고정, 자음 변화 ══════════ -->
+  <section id="panel-m1" class="mode-panel">
+    <div id="m1StepPick">
+      <div class="mode-instructions">
+        1️⃣ 고정할 모음을 클릭해서 골라보세요! (가나다라마바사...)
+        <span class="en">Click a vowel to fix it in place first.</span>
+      </div>
+      <div class="picker-label vowel-label">🔵 모음 고르기 · Click a vowel</div>
+      <div class="jchip-row" id="m1VowelPickRow"></div>
+    </div>
+
+    <div id="m1StepDrag" style="display:none;">
+      <div class="mode-instructions">
+        2️⃣ <strong id="m1FixedVowelLabel">ㅏ</strong> 모음이 고정됐어요! 이제 🔴 자음을 끌어다 놓아보세요.
+        <span class="en">The vowel is fixed — now drag a consonant into the box.</span>
+      </div>
+
+      <div class="syl-frame1">
+        <div class="sf-top layout-side" id="m1Top">
+          <div class="sf-slot consonant" id="m1ConsonantSlot">?</div>
+          <div class="sf-fixed vowel" id="m1FixedVowelBlock">ㅏ<span class="pin-badge">📌</span></div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-syllable" id="m1Syllable">?</div>
+        <div class="stage-rom" id="m1Rom"></div>
+        <button class="stage-listen-btn" onclick="speakStage('m1')">🔊 Listen</button>
+      </div>
+
+      <div class="picker-label consonant-label">🔴 자음 끌어오기 · Drag a consonant</div>
+      <div class="jchip-row" id="m1ConsonantPalette"></div>
+
+      <div class="chant-controls">
+        <button class="ghost-btn" onclick="resetM1()">↺ 다른 모음 고르기 · Pick different vowel</button>
+        <button class="chant-btn" id="m1ChantBtn" onclick="toggleChant('m1')">▶️ 자동으로 듣기 · Auto-play all</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ MODE 2: 자음 고정, 모음 변화 ══════════ -->
+  <section id="panel-m2" class="mode-panel" style="display:none;">
+    <div id="m2StepPick">
+      <div class="mode-instructions">
+        1️⃣ 고정할 자음을 클릭해서 골라보세요! (가갸거겨고교구규...)
+        <span class="en">Click a consonant to fix it in place first.</span>
+      </div>
+      <div class="picker-label consonant-label">🔴 자음 고르기 · Click a consonant</div>
+      <div class="jchip-row" id="m2ConsonantPickRow"></div>
+    </div>
+
+    <div id="m2StepDrag" style="display:none;">
+      <div class="mode-instructions">
+        2️⃣ <strong id="m2FixedConsonantLabel">ㄱ</strong> 자음이 고정됐어요! 이제 🔵 모음을 끌어다 놓아보세요.
+        <span class="en">The consonant is fixed — now drag a vowel into the box.</span>
+      </div>
+
+      <div class="syl-frame1">
+        <div class="sf-top layout-stack" id="m2Top">
+          <div class="sf-fixed consonant" id="m2FixedConsonantBlock">ㄱ<span class="pin-badge">📌</span></div>
+          <div class="sf-slot vowel" id="m2VowelSlot">?</div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-syllable" id="m2Syllable">?</div>
+        <div class="stage-rom" id="m2Rom"></div>
+        <button class="stage-listen-btn" onclick="speakStage('m2')">🔊 Listen</button>
+      </div>
+
+      <div class="picker-label vowel-label">🔵 모음 끌어오기 · Drag a vowel</div>
+      <div class="jchip-row" id="m2VowelPalette"></div>
+
+      <div class="chant-controls">
+        <button class="ghost-btn" onclick="resetM2()">↺ 다른 자음 고르기 · Pick different consonant</button>
+        <button class="chant-btn" id="m2ChantBtn" onclick="toggleChant('m2')">▶️ 자동으로 듣기 · Auto-play all</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ MODE 3: 받침 놀이 ══════════ -->
+  <section id="panel-m3" class="mode-panel" style="display:none;">
+    <div class="mode-instructions">
+      🔴 자음, 🔵 모음, 🟢 받침을 순서대로 상자에 끌어다 놓아서 글자를 만들어보세요! 받침을 바꿔가며 소리가 어떻게 달라지는지 들어보세요.
+      <span class="en">Drag a consonant, vowel, and batchim into the boxes to build a syllable and hear it change.</span>
+    </div>
+
+    <div class="syl-frame3">
+      <div class="sf-top layout-stack" id="m3Top">
+        <div class="sf-slot consonant" id="m3ConsonantSlot">?</div>
+        <div class="sf-slot vowel" id="m3VowelSlot">?</div>
+      </div>
+      <div class="sf-bottom">
+        <div class="sf-slot batchim" id="m3BatchimSlot">?</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-syllable" id="m3Syllable">?</div>
+      <div class="stage-rom" id="m3Rom"></div>
+      <button class="stage-listen-btn" onclick="speakStage('m3')">🔊 Listen</button>
+    </div>
+
+    <div class="picker-label consonant-label">🔴 자음</div>
+    <div class="jchip-row" id="m3ConsonantPalette"></div>
+    <div class="picker-label vowel-label">🔵 모음</div>
+    <div class="jchip-row" id="m3VowelPalette"></div>
+    <div class="picker-label batchim-label">🟢 받침</div>
+    <div class="jchip-row" id="m3BatchimPalette"></div>
+
+    <div class="compare-row">
+      <div class="compare-card">
+        <div class="compare-label">받침 없이</div>
+        <div class="compare-syl" id="m3BaseSyl">?</div>
+      </div>
+      <span class="compare-arrow">→</span>
+      <div class="compare-card">
+        <div class="compare-label">받침 있게</div>
+        <div class="compare-syl" id="m3FullSyl">?</div>
+      </div>
+    </div>
+
+    <div class="chant-controls">
+      <button class="ghost-btn" onclick="resetM3()">↺ 전체 초기화 · Reset all</button>
+    </div>
+  </section>
+
+  <!-- ══════════ MODE 4: 듣고 만들기 ══════════ -->
+  <section id="panel-m4" class="mode-panel" style="display:none;">
+    <div class="mode-instructions">
+      🔊 먼저 소리를 듣고, 자음·모음(·받침)을 골라서 같은 글자를 직접 만들어보세요!
+      <span class="en">Listen first, then build the matching syllable by tapping the pieces.</span>
+    </div>
+
+    <div class="m4-diff-toggle">
+      <button class="m4-diff-pill active" id="m4DiffCV" onclick="setMode4Difficulty(false)">CV (받침 없음)</button>
+      <button class="m4-diff-pill" id="m4DiffCVC" onclick="setMode4Difficulty(true)">CVC (받침 포함)</button>
+    </div>
+
+    <div class="m4-stage" id="m4Stage">
+      <div class="m4-placeholder" id="m4Placeholder">❓</div>
+    </div>
+    <div class="m4-listen-row">
+      <button class="stage-listen-btn" onclick="speak(state.m4.targetChar)">🔊 소리 듣기 · Listen</button>
+      <button class="ghost-btn" onclick="newDictationRound()">🔄 새 문제 · New</button>
+    </div>
+
+    <div class="m4-slots">
+      <div class="m4-slot" id="m4SlotInitial">_</div>
+      <div class="m4-slot" id="m4SlotMedial">_</div>
+      <div class="m4-slot" id="m4SlotFinal">·</div>
+    </div>
+
+    <div class="picker-label consonant-label">🔴 자음</div>
+    <div class="jchip-row" id="m4ConsonantRow"></div>
+    <div class="picker-label vowel-label">🔵 모음</div>
+    <div class="jchip-row" id="m4VowelRow"></div>
+    <div id="m4BatchimSection" style="display:none;">
+      <div class="picker-label batchim-label">🟢 받침</div>
+      <div class="jchip-row" id="m4BatchimRow"></div>
+    </div>
+
+    <div class="m4-result" id="m4Result"></div>
+    <div class="m4-actions">
+      <button class="m4-check-btn" onclick="checkMode4()">✓ 확인하기 · Check</button>
+      <button class="ghost-btn m4-hint-btn" id="m4HintBtn" onclick="showMode4Hint()">💡 힌트 · Hint</button>
+    </div>
+  </section>
+
+  <!-- ══════════ MODE 5: 이중모음 합치기 ══════════ -->
+  <section id="panel-m5" class="mode-panel" style="display:none;">
+    <div class="mode-instructions">
+      두 모음이 만나면 새로운 소리가 돼요! 첫 번째 모음, 두 번째 모음을 차례로 골라서 합쳐보세요. (오+아=와)
+      <span class="en">Two vowels blend into a new sound! Pick the first, then the second, and watch them merge.</span>
+    </div>
+
+    <div class="picker-label vowel-label">1️⃣ 첫 번째 모음 · First vowel</div>
+    <div class="jchip-row" id="m5FirstRow"></div>
+
+    <div id="m5SecondWrap" style="display:none;">
+      <div class="picker-label vowel-label">2️⃣ 두 번째 모음 · Second vowel</div>
+      <div class="jchip-row" id="m5SecondRow"></div>
+    </div>
+
+    <div class="merge-stage" id="m5MergeStage">
+      <div class="merge-tile" id="m5Tile1">오</div>
+      <span class="merge-op">+</span>
+      <div class="merge-tile" id="m5Tile2">아</div>
+      <span class="merge-op">=</span>
+      <div class="merge-tile result" id="m5TileResult">?</div>
+    </div>
+
+    <div class="dip-examples" id="m5Examples">
+      <div class="dip-examples-title">📚 이런 단어에 쓰여요 · Words with this sound</div>
+      <div class="dip-examples-grid" id="m5ExamplesGrid"></div>
+    </div>
+
+    <div class="m5-carrier-wrap" id="m5CarrierWrap">
+      <div class="picker-label consonant-label">🔴 자음을 붙여서 진짜 글자 만들기 · Add a consonant</div>
+      <div class="jchip-row" id="m5CarrierRow"></div>
+      <div class="stage">
+        <div class="stage-syllable" id="m5cSyllable">?</div>
+        <div class="stage-rom" id="m5cRom"></div>
+      </div>
+    </div>
+
+    <div class="chant-controls">
+      <button class="ghost-btn" onclick="resetMode5()">🔄 다시 고르기 · Reset</button>
+    </div>
+
+    <div class="dip-divider">─── 🔤 모양이 닮은 모음도 있어요 · Look-alike vowels ───</div>
+    <div class="mode-instructions">
+      ㅐ, ㅔ, ㅒ, ㅖ는 옛날에는 두 모음을 합쳐서 만든 글자였어요. 하지만 오늘날에는 각각 하나의 독립된 소리예요 — 아+이를 빨리 말하는 것과는 달라요!
+      <span class="en">These letters were historically formed from two vowels, but today each is its own single, steady sound.</span>
+    </div>
+    <div class="jchip-row" id="m5AeRow"></div>
+    <div class="merge-stage" id="m5AeStage">
+      <div class="merge-tile" id="m5AeTile1">아</div>
+      <span class="merge-op">+</span>
+      <div class="merge-tile" id="m5AeTile2">이</div>
+      <span class="merge-op">=</span>
+      <div class="merge-tile result" id="m5AeTileResult">?</div>
+    </div>
+    <div class="ae-note" id="m5AeNote"></div>
+  </section>
+
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+"use strict";
+
+// ══════════════════════════════════════════════════════════════
+// HANGUL DATA (shared with Hannah's other tools)
+// ══════════════════════════════════════════════════════════════
+const INITIALS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const MEDIALS  = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const FINALS   = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+const ROM_INITIAL = {'ㄱ':'g','ㄲ':'kk','ㄴ':'n','ㄷ':'d','ㄸ':'tt','ㄹ':'r','ㅁ':'m','ㅂ':'b','ㅃ':'pp','ㅅ':'s','ㅆ':'ss','ㅇ':'','ㅈ':'j','ㅉ':'jj','ㅊ':'ch','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+const ROM_MEDIAL  = {'ㅏ':'a','ㅐ':'ae','ㅑ':'ya','ㅒ':'yae','ㅓ':'eo','ㅔ':'e','ㅕ':'yeo','ㅖ':'ye','ㅗ':'o','ㅘ':'wa','ㅙ':'wae','ㅚ':'oe','ㅛ':'yo','ㅜ':'u','ㅝ':'wo','ㅞ':'we','ㅟ':'wi','ㅠ':'yu','ㅡ':'eu','ㅢ':'ui','ㅣ':'i'};
+const ROM_FINAL   = {'':'','ㄱ':'k','ㄲ':'k','ㄴ':'n','ㄷ':'t','ㄹ':'l','ㅁ':'m','ㅂ':'p','ㅅ':'t','ㅆ':'t','ㅇ':'ng','ㅈ':'t','ㅊ':'t','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h'};
+
+function composeSyllable(syl){
+  if(!syl.initial || !syl.medial) return null;
+  const iIdx = INITIALS.indexOf(syl.initial);
+  const mIdx = MEDIALS.indexOf(syl.medial);
+  const fIdx = syl.final ? FINALS.indexOf(syl.final) : 0;
+  if(iIdx < 0 || mIdx < 0 || fIdx < 0) return null;
+  return String.fromCharCode(0xAC00 + iIdx*588 + mIdx*28 + fIdx);
+}
+function romanizeSyllable(syl){
+  if(!syl.initial || !syl.medial) return '';
+  let r = (ROM_INITIAL[syl.initial]||'') + (ROM_MEDIAL[syl.medial]||'');
+  if(syl.final) r += (ROM_FINAL[syl.final]||'');
+  return r;
+}
+function voweledSyllable(v){ return composeSyllable({initial:'ㅇ', medial:v, final:''}); }
+
+// practice sets — matches Hannah's current curriculum (14 basic consonants, 10 basic vowels)
+const BASIC_CONSONANTS = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const BASIC_VOWELS     = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ'];
+const BATCHIM_SET       = ['','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅇ']; // '' = 받침 없음, plus 7 representative finals
+
+const DIPHTHONG_MAP = {
+  'ㅗ': { partners: ['ㅏ','ㅐ','ㅣ'], results: {'ㅏ':'ㅘ','ㅐ':'ㅙ','ㅣ':'ㅚ'} },
+  'ㅜ': { partners: ['ㅓ','ㅔ','ㅣ'], results: {'ㅓ':'ㅝ','ㅔ':'ㅞ','ㅣ':'ㅟ'} },
+  'ㅡ': { partners: ['ㅣ'],           results: {'ㅣ':'ㅢ'} }
+};
+const DIPHTHONG_EXAMPLES = {
+  'ㅘ': [{kor:'사과', em:'🍎'}, {kor:'화분', em:'🪴'}],
+  'ㅙ': [{kor:'돼지', em:'🐷'}, {kor:'왜',   em:'❓'}],
+  'ㅚ': [{kor:'회',   em:'🍣'}, {kor:'외투', em:'🧥'}],
+  'ㅝ': [{kor:'더워', em:'🥵'}, {kor:'원',   em:'⭕'}],
+  'ㅞ': [{kor:'스웨터', em:'🧥'}, {kor:'웨이터', em:'🤵'}],
+  'ㅟ': [{kor:'귀',   em:'👂'}, {kor:'바위', em:'🪨'}],
+  'ㅢ': [{kor:'의자', em:'🪑'}, {kor:'의사', em:'👨‍⚕️'}]
+};
+
+// ══════════════════════════════════════════════════════════════
+// TTS
+// ══════════════════════════════════════════════════════════════
+let cachedKoreanVoice = null;
+function pickKoreanVoice(){
+  if(cachedKoreanVoice) return cachedKoreanVoice;
+  if(!('speechSynthesis' in window)) return null;
+  const voices = speechSynthesis.getVoices();
+  const ko = voices.filter(v => v.lang && v.lang.startsWith('ko'));
+  if(!ko.length) return null;
+  const score = (v) => {
+    const n = (v.name||'').toLowerCase(); let s = 0;
+    if(/google/.test(n)) s += 100;
+    if(/female|여|woman|sunhi|선희|yuna|유나|heami/.test(n)) s += 50;
+    if(/neural|natural|premium|enhanced|wavenet/.test(n)) s += 40;
+    if(/microsoft/.test(n)) s += 30;
+    if(!v.localService) s += 25;
+    return s;
+  };
+  cachedKoreanVoice = [...ko].sort((a,b)=>score(b)-score(a))[0];
+  return cachedKoreanVoice;
+}
+if('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = () => { cachedKoreanVoice = null; pickKoreanVoice(); };
+  speechSynthesis.getVoices();
+}
+function speak(text){
+  if(!text) return;
+  if(!('speechSynthesis' in window)){
+    showToast('이 기기는 음성 재생을 지원하지 않아요. Speech not supported here.', '🔇', true);
+    return;
+  }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = text.length <= 2 ? 0.55 : 0.7;
+  const v = pickKoreanVoice(); if(v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+function speakStage(prefix){
+  const el = document.getElementById(prefix+'Syllable');
+  if(el && el.textContent && el.textContent !== '?') speak(el.textContent);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SOUND EFFECTS (Web Audio API — no external files)
+// ══════════════════════════════════════════════════════════════
+let audioCtx = null;
+function getCtx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function tone(freq, start, dur, type, gain){
+  const ctx = getCtx(); const osc = ctx.createOscillator(); const g = ctx.createGain();
+  osc.type = type||'sine'; osc.frequency.value = freq; g.gain.value = 0;
+  osc.connect(g); g.connect(ctx.destination);
+  const t0 = ctx.currentTime + start;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain||0.2, t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+function playSuccessSound(){ [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f, i*0.11, 0.28, 'triangle', 0.16)); }
+function playErrorSound(){ [300,220].forEach((f,i)=>tone(f, i*0.14, 0.3, 'sawtooth', 0.13)); }
+
+// ══════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════
+function showToast(message, icon, isWarn){
+  icon = icon || '✓';
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = '<span class="toast-icon'+(isWarn?' warn':'')+'">'+icon+'</span>'+
+                     '<span class="toast-body">'+message+'</span>'+
+                     '<button class="toast-close">×</button>';
+  toast.querySelector('.toast-close').onclick = () => {
+    toast.style.animation = 'toastOut .3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  };
+  container.appendChild(toast);
+  setTimeout(() => { if(toast.parentNode) toast.remove(); }, 6000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SPARKLES
+// ══════════════════════════════════════════════════════════════
+function burstSparkles(targetId){
+  const target = document.getElementById(targetId);
+  if(!target) return;
+  const chars = ['✨','⭐','🌟','💫'];
+  for(let i=0;i<6;i++){
+    const s = document.createElement('span');
+    s.className = 'sparkle-particle';
+    s.textContent = chars[Math.floor(Math.random()*chars.length)];
+    const dx = (Math.random()-0.5)*180, dy = -80-Math.random()*80;
+    s.style.setProperty('--dx', dx+'px');
+    s.style.setProperty('--dy', dy+'px');
+    s.style.left = '50%'; s.style.top = '50%';
+    target.appendChild(s);
+    setTimeout(() => s.remove(), 1000);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SHARED CHIP ROW RENDERER
+// ══════════════════════════════════════════════════════════════
+function renderChipRow(containerId, items, type, activeValue, onClick){
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map(it => {
+    const isNone = (it === '');
+    const activeCls = (it === activeValue) ? ' active' : '';
+    const noneCls = isNone ? ' none' : '';
+    const label = isNone ? '없음' : it;
+    return '<div class="jchip '+type+activeCls+noneCls+'">'+label+'</div>';
+  }).join('');
+  Array.from(el.children).forEach((child, idx) => {
+    child.onclick = () => onClick(items[idx]);
+  });
+}
+function updateStage(prefix, syl){
+  const charEl = document.getElementById(prefix+'Syllable');
+  const romEl = document.getElementById(prefix+'Rom');
+  const composed = composeSyllable(syl);
+  if(composed){
+    charEl.textContent = composed;
+    if(romEl) romEl.textContent = '[ ' + romanizeSyllable(syl) + ' ]';
+  } else {
+    charEl.textContent = '?';
+    if(romEl) romEl.textContent = '';
+  }
+  charEl.classList.remove('pop'); void charEl.offsetWidth; charEl.classList.add('pop');
+  return composed;
+}
+
+// ══════════════════════════════════════════════════════════════
+// GENERIC DRAG-AND-DROP (mouse HTML5 DnD + custom touch dragging)
+// ══════════════════════════════════════════════════════════════
+const dragState = { jamo: null, type: null, sourceEl: null, touchStartPos: null, touchMoved: false, touchClone: null };
+
+function renderDraggableRow(containerId, items, type){
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map(it => '<div class="jchip '+type+' draggable">'+it+'</div>').join('');
+  Array.from(el.children).forEach((child, idx) => attachDraggable(child, items[idx], type));
+}
+function attachDraggable(el, jamo, type){
+  el.setAttribute('draggable', 'true');
+  el.dataset.jamo = jamo;
+  el.dataset.type = type;
+  el.addEventListener('dragstart', (e) => {
+    dragState.jamo = jamo; dragState.type = type;
+    e.dataTransfer.setData('text/plain', jamo);
+    e.dataTransfer.effectAllowed = 'copy';
+    el.classList.add('dragging');
+  });
+  el.addEventListener('dragend', () => el.classList.remove('dragging'));
+  el.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    dragState.touchStartPos = { x: t.clientX, y: t.clientY };
+    dragState.touchMoved = false;
+    dragState.jamo = jamo; dragState.type = type;
+    dragState.sourceEl = el;
+  }, { passive: false });
+}
+document.addEventListener('touchmove', (e) => {
+  if(!dragState.touchStartPos || !dragState.sourceEl) return;
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - dragState.touchStartPos.x);
+  const dy = Math.abs(t.clientY - dragState.touchStartPos.y);
+  if(!dragState.touchMoved && (dx > 8 || dy > 8)){
+    dragState.touchMoved = true;
+    dragState.touchClone = dragState.sourceEl.cloneNode(true);
+    dragState.touchClone.style.position = 'fixed';
+    dragState.touchClone.style.pointerEvents = 'none';
+    dragState.touchClone.style.zIndex = 9999;
+    dragState.touchClone.style.opacity = '0.85';
+    document.body.appendChild(dragState.touchClone);
+  }
+  if(dragState.touchMoved){
+    e.preventDefault();
+    dragState.touchClone.style.left = (t.clientX - 24) + 'px';
+    dragState.touchClone.style.top = (t.clientY - 24) + 'px';
+  }
+}, { passive: false });
+document.addEventListener('touchend', (e) => {
+  if(!dragState.sourceEl) return;
+  if(dragState.touchMoved){
+    const t = e.changedTouches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const zone = el ? el.closest('[data-dropzone]') : null;
+    if(zone && zone._dropHandler) zone._dropHandler(dragState.jamo, dragState.type);
+    if(dragState.touchClone) dragState.touchClone.remove();
+    dragState.touchClone = null;
+  }
+  dragState.sourceEl = null; dragState.touchStartPos = null; dragState.touchMoved = false;
+});
+function attachDropZone(el, expectedType, onDrop){
+  el.setAttribute('data-dropzone', '1');
+  const handle = (jamo, type) => {
+    if(type !== expectedType){
+      showToast('여기에는 다른 종류를 놓을 수 없어요! · That does not go here.', '!', true);
+      return;
+    }
+    onDrop(jamo);
+  };
+  el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', (e) => { if(e.target === el) el.classList.remove('drag-over'); });
+  el.addEventListener('drop', (e) => {
+    e.preventDefault(); el.classList.remove('drag-over');
+    if(dragState.jamo) handle(dragState.jamo, dragState.type);
+    dragState.jamo = null;
+  });
+  el._dropHandler = handle;
+}
+function vowelLayoutType(v){
+  const HORIZONTAL_VOWELS = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];
+  return HORIZONTAL_VOWELS.includes(v) ? 'stack' : 'side';
+}
+function setFrameLayout(topElId, layout){
+  const top = document.getElementById(topElId);
+  const newClass = 'sf-top layout-' + layout;
+  if(top.className !== newClass){
+    top.className = newClass;
+    top.classList.add('reflow-flash');
+    setTimeout(() => top.classList.remove('reflow-flash'), 400);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+const state = {
+  m1: { vowel: null, consonant: null, chanting: false, chantTimer: null },
+  m2: { consonant: null, vowel: null, chanting: false, chantTimer: null },
+  m3: { consonant: null, vowel: null, batchim: null },
+  m4: { target: null, targetChar: '', build: {initial:null, medial:null, final:null}, withBatchim: false, misses: 0 },
+  m5: { first: null, second: null, merged: null }
+};
+
+// ══════════════════════════════════════════════════════════════
+// MODE TABS
+// ══════════════════════════════════════════════════════════════
+const MODES = ['m1','m2','m3','m4','m5'];
+function switchMode(id){
+  MODES.forEach(m => {
+    document.getElementById('panel-'+m).style.display = (m===id) ? 'block' : 'none';
+    document.getElementById('tab-'+m).classList.toggle('active', m===id);
+  });
+  stopChant('m1'); stopChant('m2');
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODE 1: 모음 고정, 자음 변화 (click to fix vowel, drag consonant on)
+// ══════════════════════════════════════════════════════════════
+function selectM1FixVowel(v){
+  state.m1.vowel = v;
+  state.m1.consonant = null;
+  document.getElementById('m1StepPick').style.display = 'none';
+  document.getElementById('m1StepDrag').style.display = 'block';
+  document.getElementById('m1FixedVowelLabel').textContent = v;
+  document.getElementById('m1FixedVowelBlock').innerHTML = v + '<span class="pin-badge">📌</span>';
+  document.getElementById('m1Top').className = 'sf-top layout-' + vowelLayoutType(v);
+  const slot = document.getElementById('m1ConsonantSlot');
+  slot.textContent = '?'; slot.className = 'sf-slot consonant';
+  refreshMode1(false);
+}
+function resetM1(){
+  stopChant('m1');
+  state.m1 = { vowel: null, consonant: null, chanting: false, chantTimer: null };
+  document.getElementById('m1StepPick').style.display = 'block';
+  document.getElementById('m1StepDrag').style.display = 'none';
+}
+function onM1ConsonantDrop(jamo){
+  state.m1.consonant = jamo;
+  const slot = document.getElementById('m1ConsonantSlot');
+  slot.textContent = jamo; slot.className = 'sf-slot consonant filled';
+  refreshMode1(true);
+}
+function clearM1Consonant(){
+  if(!state.m1.consonant) return;
+  state.m1.consonant = null;
+  const slot = document.getElementById('m1ConsonantSlot');
+  slot.textContent = '?'; slot.className = 'sf-slot consonant';
+  refreshMode1(false);
+}
+function refreshMode1(doSpeak){
+  const syl = { initial: state.m1.consonant, medial: state.m1.vowel, final: '' };
+  const composed = updateStage('m1', syl);
+  if(doSpeak && composed) speak(composed);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODE 2: 자음 고정, 모음 변화 (click to fix consonant, drag vowel on)
+// ══════════════════════════════════════════════════════════════
+function selectM2FixConsonant(c){
+  state.m2.consonant = c;
+  state.m2.vowel = null;
+  document.getElementById('m2StepPick').style.display = 'none';
+  document.getElementById('m2StepDrag').style.display = 'block';
+  document.getElementById('m2FixedConsonantLabel').textContent = c;
+  document.getElementById('m2FixedConsonantBlock').innerHTML = c + '<span class="pin-badge">📌</span>';
+  document.getElementById('m2Top').className = 'sf-top layout-stack';
+  const slot = document.getElementById('m2VowelSlot');
+  slot.textContent = '?'; slot.className = 'sf-slot vowel';
+  refreshMode2(false);
+}
+function resetM2(){
+  stopChant('m2');
+  state.m2 = { consonant: null, vowel: null, chanting: false, chantTimer: null };
+  document.getElementById('m2StepPick').style.display = 'block';
+  document.getElementById('m2StepDrag').style.display = 'none';
+}
+function onM2VowelDrop(jamo){
+  state.m2.vowel = jamo;
+  const slot = document.getElementById('m2VowelSlot');
+  slot.textContent = jamo; slot.className = 'sf-slot vowel filled';
+  setFrameLayout('m2Top', vowelLayoutType(jamo));
+  refreshMode2(true);
+}
+function clearM2Vowel(){
+  if(!state.m2.vowel) return;
+  state.m2.vowel = null;
+  const slot = document.getElementById('m2VowelSlot');
+  slot.textContent = '?'; slot.className = 'sf-slot vowel';
+  setFrameLayout('m2Top', 'stack');
+  refreshMode2(false);
+}
+function refreshMode2(doSpeak){
+  const syl = { initial: state.m2.consonant, medial: state.m2.vowel, final: '' };
+  const composed = updateStage('m2', syl);
+  if(doSpeak && composed) speak(composed);
+}
+
+// ══════════════════════════════════════════════════════════════
+// AUTO-PLAY CHANT (shared by mode 1 & 2) — steps through the drop handlers
+// ══════════════════════════════════════════════════════════════
+function toggleChant(prefix){
+  const st = state[prefix];
+  if(prefix === 'm1' && !state.m1.vowel) return;
+  if(prefix === 'm2' && !state.m2.consonant) return;
+  if(st.chanting){ stopChant(prefix); return; }
+  st.chanting = true;
+  const btn = document.getElementById(prefix+'ChantBtn');
+  if(btn) btn.textContent = '⏸ 멈추기 · Stop';
+  const items = (prefix === 'm1') ? BASIC_CONSONANTS : BASIC_VOWELS;
+  let i = 0;
+  function step(){
+    if(!st.chanting || i >= items.length){ stopChant(prefix); return; }
+    if(prefix === 'm1') onM1ConsonantDrop(items[i]);
+    else onM2VowelDrop(items[i]);
+    i++;
+    st.chantTimer = setTimeout(step, 950);
+  }
+  step();
+}
+function stopChant(prefix){
+  const st = state[prefix];
+  st.chanting = false;
+  clearTimeout(st.chantTimer);
+  const btn = document.getElementById(prefix+'ChantBtn');
+  if(btn) btn.textContent = '▶️ 처음부터 듣기 · Play all';
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODE 3: 받침 놀이 (pure drag-drop, adaptive 3-slot layout)
+// ══════════════════════════════════════════════════════════════
+function onM3ConsonantDrop(jamo){
+  state.m3.consonant = jamo;
+  const slot = document.getElementById('m3ConsonantSlot');
+  slot.textContent = jamo; slot.className = 'sf-slot consonant filled';
+  refreshMode3(true);
+}
+function onM3VowelDrop(jamo){
+  state.m3.vowel = jamo;
+  const slot = document.getElementById('m3VowelSlot');
+  slot.textContent = jamo; slot.className = 'sf-slot vowel filled';
+  setFrameLayout('m3Top', vowelLayoutType(jamo));
+  refreshMode3(true);
+}
+function onM3BatchimDrop(jamo){
+  if(!state.m3.consonant || !state.m3.vowel){
+    showToast('먼저 자음과 모음을 채워주세요! · Fill the consonant and vowel first.', '!', true);
+    return;
+  }
+  state.m3.batchim = jamo;
+  const slot = document.getElementById('m3BatchimSlot');
+  slot.textContent = jamo; slot.className = 'sf-slot batchim filled';
+  refreshMode3(true);
+}
+function clearM3Slot(type){
+  if(type === 'consonant'){
+    if(!state.m3.consonant) return;
+    state.m3.consonant = null; state.m3.batchim = null;
+    const s = document.getElementById('m3ConsonantSlot'); s.textContent = '?'; s.className = 'sf-slot consonant';
+    const bs = document.getElementById('m3BatchimSlot'); bs.textContent = '?'; bs.className = 'sf-slot batchim';
+  } else if(type === 'vowel'){
+    if(!state.m3.vowel) return;
+    state.m3.vowel = null; state.m3.batchim = null;
+    const s = document.getElementById('m3VowelSlot'); s.textContent = '?'; s.className = 'sf-slot vowel';
+    const bs = document.getElementById('m3BatchimSlot'); bs.textContent = '?'; bs.className = 'sf-slot batchim';
+    setFrameLayout('m3Top', 'stack');
+  } else if(type === 'batchim'){
+    if(!state.m3.batchim) return;
+    state.m3.batchim = null;
+    const s = document.getElementById('m3BatchimSlot'); s.textContent = '?'; s.className = 'sf-slot batchim';
+  }
+  refreshMode3(false);
+}
+function resetM3(){
+  state.m3 = { consonant: null, vowel: null, batchim: null };
+  const c = document.getElementById('m3ConsonantSlot'); c.textContent = '?'; c.className = 'sf-slot consonant';
+  const v = document.getElementById('m3VowelSlot'); v.textContent = '?'; v.className = 'sf-slot vowel';
+  const b = document.getElementById('m3BatchimSlot'); b.textContent = '?'; b.className = 'sf-slot batchim';
+  setFrameLayout('m3Top', 'stack');
+  refreshMode3(false);
+}
+function refreshMode3(doSpeak){
+  const syl = { initial: state.m3.consonant, medial: state.m3.vowel, final: state.m3.batchim || '' };
+  const composed = updateStage('m3', syl);
+  const baseChar = (state.m3.consonant && state.m3.vowel)
+    ? composeSyllable({ initial: state.m3.consonant, medial: state.m3.vowel, final: '' })
+    : null;
+  document.getElementById('m3BaseSyl').textContent = baseChar || '?';
+  document.getElementById('m3FullSyl').textContent = composed || baseChar || '?';
+  if(doSpeak && composed) speak(composed);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODE 4: 듣고 만들기 (Listen & Build)
+// ══════════════════════════════════════════════════════════════
+function setMode4Difficulty(withBatchim){
+  state.m4.withBatchim = withBatchim;
+  document.getElementById('m4DiffCV').classList.toggle('active', !withBatchim);
+  document.getElementById('m4DiffCVC').classList.toggle('active', withBatchim);
+  document.getElementById('m4BatchimSection').style.display = withBatchim ? 'block' : 'none';
+  newDictationRound();
+}
+function newDictationRound(){
+  const st = state.m4;
+  st.misses = 0;
+  const c = BASIC_CONSONANTS[Math.floor(Math.random()*BASIC_CONSONANTS.length)];
+  const v = BASIC_VOWELS[Math.floor(Math.random()*BASIC_VOWELS.length)];
+  let f = '';
+  if(st.withBatchim){
+    const opts = BATCHIM_SET.filter(b => b !== '');
+    f = opts[Math.floor(Math.random()*opts.length)];
+  }
+  st.target = { initial: c, medial: v, final: f };
+  st.targetChar = composeSyllable(st.target);
+  st.build = { initial: null, medial: null, final: null };
+  document.getElementById('m4Placeholder').textContent = '❓';
+  document.getElementById('m4Result').textContent = '';
+  document.getElementById('m4Result').className = 'm4-result';
+  document.getElementById('m4HintBtn').style.display = 'none';
+  renderMode4Build();
+  setTimeout(() => speak(st.targetChar), 300);
+}
+function pickM4Initial(c){ state.m4.build.initial = c; renderMode4Build(); }
+function pickM4Medial(v){ state.m4.build.medial = v; renderMode4Build(); }
+function pickM4Final(b){ state.m4.build.final = b; renderMode4Build(); }
+function renderMode4Build(){
+  const b = state.m4.build;
+  const slotI = document.getElementById('m4SlotInitial');
+  const slotM = document.getElementById('m4SlotMedial');
+  const slotF = document.getElementById('m4SlotFinal');
+  slotI.textContent = b.initial || '_';
+  slotI.className = 'm4-slot' + (b.initial ? ' filled consonant' : '');
+  slotM.textContent = b.medial || '_';
+  slotM.className = 'm4-slot' + (b.medial ? ' filled vowel' : '');
+  slotF.textContent = b.final || (state.m4.withBatchim ? '_' : '·');
+  slotF.className = 'm4-slot' + (b.final ? ' filled batchim' : '');
+  renderChipRow('m4ConsonantRow', BASIC_CONSONANTS, 'consonant', b.initial, pickM4Initial);
+  renderChipRow('m4VowelRow', BASIC_VOWELS, 'vowel', b.medial, pickM4Medial);
+  if(state.m4.withBatchim){
+    renderChipRow('m4BatchimRow', BATCHIM_SET, 'batchim', b.final, pickM4Final);
+  }
+}
+function checkMode4(){
+  const st = state.m4;
+  if(!st.build.initial || !st.build.medial){
+    showToast('자음과 모음을 먼저 골라주세요! · Pick a consonant and vowel first.', '!', true);
+    return;
+  }
+  const attempt = composeSyllable({ initial: st.build.initial, medial: st.build.medial, final: st.build.final || '' });
+  const resultEl = document.getElementById('m4Result');
+  if(attempt === st.targetChar){
+    resultEl.textContent = '🎉 정답이에요! Correct! ' + attempt;
+    resultEl.className = 'm4-result success';
+    playSuccessSound();
+    document.getElementById('m4Placeholder').textContent = attempt;
+    burstSparkles('m4Stage');
+    speak(attempt);
+    setTimeout(newDictationRound, 1900);
+  } else {
+    st.misses++;
+    playErrorSound();
+    resultEl.textContent = (attempt||'?') + ' — 아쉬워요, 다시 들어볼까요? Try again!';
+    resultEl.className = 'm4-result retry';
+    document.getElementById('m4HintBtn').style.display = (st.misses >= 2) ? 'inline-block' : 'none';
+  }
+}
+function showMode4Hint(){
+  document.getElementById('m4Placeholder').textContent = state.m4.targetChar;
+  showToast('정답: ' + state.m4.targetChar, '💡');
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODE 5: 이중모음 합치기 (Diphthong Blend)
+// ══════════════════════════════════════════════════════════════
+function renderM5FirstPicker(){
+  const el = document.getElementById('m5FirstRow');
+  const items = Object.keys(DIPHTHONG_MAP);
+  el.innerHTML = items.map(v => {
+    const disp = voweledSyllable(v);
+    const activeCls = (state.m5.first === v) ? ' active' : '';
+    return '<div class="jchip vowel dip-chip'+activeCls+'" data-v="'+v+'">'+
+             '<span class="dip-big">'+disp+'</span><span class="dip-small">'+v+'</span></div>';
+  }).join('');
+  Array.from(el.children).forEach(ch => { ch.onclick = () => selectM5First(ch.dataset.v); });
+}
+function selectM5First(v){
+  state.m5.first = v; state.m5.second = null; state.m5.merged = null;
+  renderM5FirstPicker();
+  renderM5SecondPicker();
+  document.getElementById('m5MergeStage').style.display = 'none';
+  document.getElementById('m5Examples').style.display = 'none';
+  document.getElementById('m5CarrierWrap').style.display = 'none';
+  speak(voweledSyllable(v));
+}
+function renderM5SecondPicker(){
+  const wrap = document.getElementById('m5SecondWrap');
+  if(!state.m5.first){ wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const el = document.getElementById('m5SecondRow');
+  const partners = DIPHTHONG_MAP[state.m5.first].partners;
+  el.innerHTML = partners.map(v => {
+    const disp = voweledSyllable(v);
+    const activeCls = (state.m5.second === v) ? ' active' : '';
+    return '<div class="jchip vowel dip-chip'+activeCls+'" data-v="'+v+'">'+
+             '<span class="dip-big">'+disp+'</span><span class="dip-small">'+v+'</span></div>';
+  }).join('');
+  Array.from(el.children).forEach(ch => { ch.onclick = () => selectM5Second(ch.dataset.v); });
+}
+function selectM5Second(v){
+  state.m5.second = v;
+  renderM5SecondPicker();
+  const merged = DIPHTHONG_MAP[state.m5.first].results[v];
+  state.m5.merged = merged;
+  playMergeAnimation(state.m5.first, v, merged);
+}
+function playMergeAnimation(v1, v2, merged){
+  const stage = document.getElementById('m5MergeStage');
+  stage.style.display = 'flex';
+  document.getElementById('m5Tile1').textContent = voweledSyllable(v1);
+  document.getElementById('m5Tile2').textContent = voweledSyllable(v2);
+  const resultTile = document.getElementById('m5TileResult');
+  resultTile.textContent = '?';
+  resultTile.classList.remove('revealed');
+  speak(voweledSyllable(v1));
+  setTimeout(() => speak(voweledSyllable(v2)), 750);
+  setTimeout(() => {
+    resultTile.textContent = voweledSyllable(merged);
+    resultTile.classList.add('revealed');
+    playSuccessSound();
+    speak(voweledSyllable(merged));
+    burstSparkles('m5MergeStage');
+    renderM5Examples(merged);
+    renderM5CarrierRow();
+  }, 1600);
+}
+function renderM5Examples(merged){
+  const wrap = document.getElementById('m5Examples');
+  const list = DIPHTHONG_EXAMPLES[merged] || [];
+  wrap.style.display = list.length ? 'block' : 'none';
+  const grid = document.getElementById('m5ExamplesGrid');
+  grid.innerHTML = list.map(ex =>
+    '<div class="dip-example-card" data-word="'+ex.kor+'">'+
+      '<span class="em">'+ex.em+'</span><span class="wd">'+ex.kor+'</span></div>'
+  ).join('');
+  Array.from(grid.children).forEach(card => {
+    card.onclick = () => speak(card.dataset.word);
+  });
+}
+function renderM5CarrierRow(){
+  document.getElementById('m5CarrierWrap').style.display = 'block';
+  renderChipRow('m5CarrierRow', BASIC_CONSONANTS, 'consonant', null, selectM5Carrier);
+}
+function selectM5Carrier(c){
+  const syl = { initial: c, medial: state.m5.merged, final: '' };
+  const composed = updateStage('m5c', syl);
+  if(composed) speak(composed);
+}
+function resetMode5(){
+  state.m5 = { first: null, second: null, merged: null };
+  renderM5FirstPicker();
+  document.getElementById('m5SecondWrap').style.display = 'none';
+  document.getElementById('m5MergeStage').style.display = 'none';
+  document.getElementById('m5Examples').style.display = 'none';
+  document.getElementById('m5CarrierWrap').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODE 5 BONUS: 모양이 닮은 모음 (ㅐㅔㅒㅖ look-alike vowels)
+// Historically formed from two vowels, but pronounced as one single
+// steady sound today — kept visually separate from the true-diphthong
+// blend above so the "merge" animation is not read as an audible glide.
+// ══════════════════════════════════════════════════════════════
+const AE_FAMILY = { 'ㅏ':'ㅐ', 'ㅓ':'ㅔ', 'ㅑ':'ㅒ', 'ㅕ':'ㅖ' };
+function renderM5AeRow(){
+  const el = document.getElementById('m5AeRow');
+  const items = Object.keys(AE_FAMILY);
+  el.innerHTML = items.map(v => {
+    const disp = voweledSyllable(v);
+    return '<div class="jchip vowel dip-chip" data-v="'+v+'">'+
+             '<span class="dip-big">'+disp+'</span><span class="dip-small">'+v+'</span></div>';
+  }).join('');
+  Array.from(el.children).forEach(ch => { ch.onclick = () => playAeMerge(ch.dataset.v); });
+}
+function playAeMerge(v){
+  const result = AE_FAMILY[v];
+  const stage = document.getElementById('m5AeStage');
+  stage.style.display = 'flex';
+  document.getElementById('m5AeTile1').textContent = voweledSyllable(v);
+  document.getElementById('m5AeTile2').textContent = voweledSyllable('ㅣ');
+  const resultTile = document.getElementById('m5AeTileResult');
+  resultTile.textContent = '?';
+  resultTile.classList.remove('revealed');
+  speak(voweledSyllable(v));
+  setTimeout(() => speak(voweledSyllable('ㅣ')), 700);
+  setTimeout(() => {
+    resultTile.textContent = voweledSyllable(result);
+    resultTile.classList.add('revealed');
+    speak(voweledSyllable(result));
+    const note = document.getElementById('m5AeNote');
+    note.style.display = 'block';
+    note.textContent = '옛날엔 ' + voweledSyllable(v) + ' + ' + voweledSyllable('ㅣ') +
+      ' 두 소리였지만, 지금은 ' + voweledSyllable(result) + ' 하나의 소리예요!';
+  }, 1500);
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+renderChipRow('m1VowelPickRow', BASIC_VOWELS, 'vowel', null, selectM1FixVowel);
+renderDraggableRow('m1ConsonantPalette', BASIC_CONSONANTS, 'consonant');
+attachDropZone(document.getElementById('m1ConsonantSlot'), 'consonant', onM1ConsonantDrop);
+document.getElementById('m1ConsonantSlot').addEventListener('click', clearM1Consonant);
+
+renderChipRow('m2ConsonantPickRow', BASIC_CONSONANTS, 'consonant', null, selectM2FixConsonant);
+renderDraggableRow('m2VowelPalette', BASIC_VOWELS, 'vowel');
+attachDropZone(document.getElementById('m2VowelSlot'), 'vowel', onM2VowelDrop);
+document.getElementById('m2VowelSlot').addEventListener('click', clearM2Vowel);
+
+renderDraggableRow('m3ConsonantPalette', BASIC_CONSONANTS, 'consonant');
+renderDraggableRow('m3VowelPalette', BASIC_VOWELS, 'vowel');
+renderDraggableRow('m3BatchimPalette', BATCHIM_SET.filter(b => b !== ''), 'batchim');
+attachDropZone(document.getElementById('m3ConsonantSlot'), 'consonant', onM3ConsonantDrop);
+attachDropZone(document.getElementById('m3VowelSlot'), 'vowel', onM3VowelDrop);
+attachDropZone(document.getElementById('m3BatchimSlot'), 'batchim', onM3BatchimDrop);
+document.getElementById('m3ConsonantSlot').addEventListener('click', () => clearM3Slot('consonant'));
+document.getElementById('m3VowelSlot').addEventListener('click', () => clearM3Slot('vowel'));
+document.getElementById('m3BatchimSlot').addEventListener('click', () => clearM3Slot('batchim'));
+refreshMode3(false);
+
+newDictationRound();
+
+renderM5FirstPicker();
+renderM5AeRow();
+</script>
+</body>
+</html>
