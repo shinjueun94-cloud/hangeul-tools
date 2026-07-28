@@ -321,31 +321,66 @@ body {
   border-radius: 2px;
 }
 
-/* ─── LEVEL 3: JAMOS ─── */
-.level-jamos {
+/* ─── LEVEL 3: JAMOS (Structural Layout) ─── */
+/* Wraps an initial+medial (and optional final) jamo cluster.
+   Layout mirrors actual Korean syllable structure. */
+.syllable-jamo-frame {
   display: flex;
-  justify-content: center;
-  gap: 22px;
-  flex-wrap: wrap;
-}
-.jamo-group {
-  display: flex;
-  gap: 8px;
-  padding: 10px 12px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
   background: rgba(0, 0, 0, 0.03);
   border-radius: 14px;
   border: 2px dashed #DDD;
   animation: fadeInUp 0.4s ease;
+  width: fit-content;
 }
-.jamo-block {
+
+/* Top region holds initial consonant + medial vowel */
+.sj-top {
+  display: flex;
+  gap: 6px;
+}
+
+/* When the medial is a VERTICAL vowel (ㅏ, ㅓ, ㅣ ...), 
+   the consonant and vowel sit side-by-side, both tall */
+.syllable-jamo-frame.layout-side .sj-top {
+  flex-direction: row;
+}
+.syllable-jamo-frame.layout-side .sj-top .jamo-block {
   width: 60px;
-  height: 70px;
+  height: 110px;
+}
+
+/* When the medial is a HORIZONTAL vowel (ㅗ, ㅜ, ㅡ ...),
+   the consonant stacks on top, the vowel sits beneath, both wide */
+.syllable-jamo-frame.layout-stack .sj-top {
+  flex-direction: column;
+}
+.syllable-jamo-frame.layout-stack .sj-top .jamo-block {
+  width: 126px;
+  height: 52px;
+}
+
+/* Bottom region holds the 받침 (final consonant), full-width */
+.sj-bottom {
+  display: flex;
+}
+.sj-bottom .jamo-block {
+  flex: 1;
+  height: 56px;
+  width: auto;
+}
+
+/* The jamo block size from main level (small) is overridden by frame-specific sizes above.
+   Keep base properties (color, stud dots, font, etc.) shared. */
+.jamo-block {
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Malgun Gothic', sans-serif;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   color: white;
   cursor: pointer;
@@ -369,8 +404,9 @@ body {
 .jamo-block::before { left: 30%; transform: translateX(-50%); }
 .jamo-block::after { right: 30%; transform: translateX(50%); }
 .jamo-block:hover {
-  transform: translateY(-4px) scale(1.06);
+  transform: translateY(-3px) scale(1.04);
   box-shadow: 0 8px 14px rgba(0,0,0,0.28);
+  z-index: 2;
 }
 
 /* ─── EMPTY STATE ─── */
@@ -1232,15 +1268,37 @@ function renderTree() {
   }
 }
 
-// Render the jamos for a single syllable (called inline within renderTree)
+// Render the jamos for a single syllable with proper structural layout
+// Mirrors how letters actually sit inside the syllable block:
+// - Vertical vowels (ㅏ, ㅓ, ㅣ, etc.) sit BESIDE the consonant
+// - Horizontal vowels (ㅗ, ㅜ, ㅡ, etc.) sit BELOW the consonant
+// - 받침 (final) spans the full width at the bottom
 function renderSyllableJamos(syl, idx) {
+  const VERTICAL_VOWELS = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅣ'];
+  const HORIZONTAL_VOWELS = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];
+  // Complex vowels (ㅘ ㅙ ㅚ ㅝ ㅞ ㅟ ㅢ) treated as side-by-side for simplicity
+  const isHorizontal = HORIZONTAL_VOWELS.includes(syl.medial);
+  const hasFinal = !!syl.final;
+
+  const layoutClass = isHorizontal ? 'layout-stack' : 'layout-side';
+  const finalClass = hasFinal ? 'has-final' : 'no-final';
+
   let html = `<div class="jamo-connector"></div>`;
-  html += `<div class="jamo-group">`;
+  html += `<div class="syllable-jamo-frame ${layoutClass} ${finalClass}">`;
+
+  // Top region holds the initial consonant + medial vowel
+  html += `<div class="sj-top">`;
   html += `<div class="jamo-block consonant" data-jamo="${syl.initial}" data-type="consonant">${syl.initial}</div>`;
   html += `<div class="jamo-block vowel" data-jamo="${syl.medial}" data-type="vowel">${syl.medial}</div>`;
-  if (syl.final) {
+  html += `</div>`;
+
+  // Bottom region holds the 받침 (final consonant), full width
+  if (hasFinal) {
+    html += `<div class="sj-bottom">`;
     html += `<div class="jamo-block batchim" data-jamo="${syl.final}" data-type="batchim">${syl.final}</div>`;
+    html += `</div>`;
   }
+
   html += `</div>`;
   return html;
 }
