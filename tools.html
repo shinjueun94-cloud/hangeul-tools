@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hangeul Learning Tools · 한글 학습 도구</title>
+<meta name="description" content="Seven browser tools for teaching Korean letters to a bilingual child, built and used in real lessons by Jueun Shin.">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #FFF0F6 0%, #F8F0FF 50%, #F0F8FF 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #2D2D2D;
+  -webkit-font-smoothing: antialiased;
+}
+.kor { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+a { color: inherit; text-decoration: none; }
+.container { max-width: 900px; margin: 0 auto; }
+
+/* ─── HEADER ─── */
+.header {
+  background: linear-gradient(135deg, #C77DFF 0%, #FF6B6B 100%);
+  border-radius: 22px;
+  padding: 40px 32px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 8px 26px rgba(199, 125, 255, 0.3);
+  margin-bottom: 28px;
+}
+.header .eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+.header h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.01em; }
+.header h1 .kor { font-size: 18px; font-weight: 600; opacity: 0.9; display: block; margin-top: 4px; }
+.header p { font-size: 15px; opacity: 0.95; max-width: 46ch; margin: 10px auto 0; line-height: 1.6; }
+
+/* ─── SECTION LABEL ─── */
+.section-label {
+  display: flex; align-items: center; gap: 12px;
+  margin: 30px 0 14px;
+  font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: #9A8FB0;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: #E8D0FF; }
+.section-label.tutor { color: #C08A3E; margin-top: 40px; }
+.section-label.tutor::after { background: #F3DDB0; }
+
+/* ─── TRAIL ─── */
+.trail { display: flex; flex-direction: column; gap: 14px; }
+.stone { position: relative; }
+.badge {
+  position: absolute; top: 50%; left: -14px; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%;
+  background: white; border: 2.5px solid #C77DFF; color: #C77DFF;
+  font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 8px rgba(199,125,255,0.25);
+  z-index: 2;
+}
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 18px 20px 18px 34px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.07);
+  display: flex; align-items: center; gap: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.card:hover, .card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+.card:focus-visible { outline: 3px solid #C77DFF; outline-offset: 2px; }
+
+.icon {
+  flex: none; width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+  color: white;
+}
+.card-body { min-width: 0; }
+.card-title { font-size: 16px; font-weight: 800; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.card-title .kor { font-size: 12.5px; font-weight: 600; color: #9A93A8; }
+.card-desc { font-size: 13.5px; color: #6B6478; line-height: 1.5; margin-top: 3px; }
+.play {
+  flex: none; font-size: 11.5px; font-weight: 700; color: white;
+  padding: 7px 13px; border-radius: 999px; white-space: nowrap;
+}
+
+/* per-tool accent colors, echoing each game's own palette */
+.t1 .icon, .t1 .play { background: linear-gradient(135deg,#C77DFF,#B47EFF); }
+.t2 .icon, .t2 .play { background: linear-gradient(135deg,#FF6B9D,#FF8FA3); }
+.t3 .icon, .t3 .play { background: linear-gradient(135deg,#4D96FF,#6BCFFF); }
+.t4 .icon, .t4 .play { background: linear-gradient(135deg,#6BCB77,#4ECDC4); }
+.t5 .icon, .t5 .play { background: linear-gradient(135deg,#FFD93D,#FFA500); }
+.t6 .icon, .t6 .play { background: linear-gradient(135deg,#FF6B6B,#FF8E53); }
+.t7 .icon, .t7 .play { background: linear-gradient(135deg,#94A3B8,#64748B); }
+
+/* ─── TUTOR CARD (sound quiz) ─── */
+.tutor-card { padding-left: 20px; }
+.tutor-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; color: #C08A3E;
+  background: #FDF3E1; padding: 4px 10px; border-radius: 999px;
+  margin-top: 6px;
+}
+
+footer {
+  text-align: center; padding: 34px 12px 10px;
+  color: #9A93A8; font-size: 12.5px; line-height: 1.7;
+}
+footer a { text-decoration: underline; text-underline-offset: 2px; }
+
+@media (max-width: 480px) {
+  .header { padding: 30px 20px; }
+  .header h1 { font-size: 25px; }
+  .card { flex-wrap: wrap; padding: 16px 16px 16px 30px; }
+  .play { margin-left: 68px; }
+}
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="eyebrow">7 browser tools · no install</div>
+    <h1>Hangeul Learning Tools<span class="kor">한글 학습 도구</span></h1>
+    <p>Built and used in real lessons with my own bilingual student — pick a tool below to try it yourself.</p>
+  </div>
+
+  <div class="section-label">Start here</div>
+  <div class="trail">
+
+    <a class="stone" href="word-tree.html">
+      <span class="badge">1</span>
+      <div class="card t1">
+        <div class="icon">🌳</div>
+        <div class="card-body">
+          <p class="card-title">Word Tree <span class="kor">단어 나무</span></p>
+          <p class="card-desc">Type or select a word and watch it branch — into syllables, then into individual letters, each one expandable.</p>
+        </div>
+        <span class="play">Open ▸</span>
+      </div>
+    </a>
+
+    <a class="stone" href="word-explorer.html">
+      <span class="badge">2</span>
+      <div class="card t2">
+        <div class="icon">🔍</div>
+        <div class="card-body">
+          <p class="card-title">Word Explorer <span class="kor">한글 단어 탐험</span></p>
+          <p class="card-desc">The reverse of Word Tree — rebuild a familiar word from shuffled syllable blocks, one at a time.</p>
+        </div>
+        <span class="play">Open ▸</span>
+      </div>
+    </a>
+
+    <a class="stone" href="letter-lab.html">
+      <span class="badge">3</span>
+      <div class="card t3">
+        <div class="icon">🔤</div>
+        <div class="card-body">
+          <p class="card-title">Letter Lab</p>
+          <p class="card-desc">One letter, six stages — spot it, hear it, meet it, build a syllable with it, grow that into words, then read them back.</p>
+        </div>
+        <span class="play">Open ▸</span>
+      </div>
+    </a>
+
+    <a class="stone" href="lego-blocks.html">
+      <span class="badge">4</span>
+      <div class="card t6">
+        <div class="icon">🧱</div>
+        <div class="card-body">
+          <p class="card-title">Korean LEGO Blocks <span class="kor">한글 블록 빌더</span></p>
+          <p class="card-desc">Drag consonants and vowels into a syllable frame — it enforces the real rules, and explains why.</p>
+        </div>
+        <span class="play">Open ▸</span>
+      </div>
+    </a>
+
+    <a class="stone" href="dialogue.html">
+      <span class="badge">5</span>
+      <div class="card t4">
+        <div class="icon">💬</div>
+        <div class="card-body">
+          <p class="card-title">Let's Talk <span class="kor">대화 연습</span></p>
+          <p class="card-desc">Situational conversation practice — read along with hints, or answer cold. Where the letters end up.</p>
+        </div>
+        <span class="play">Open ▸</span>
+      </div>
+    </a>
+
+    <a class="stone" href="sound-playground.html">
+      <span class="badge">6</span>
+      <div class="card t5">
+        <div class="icon">🎵</div>
+        <div class="card-body">
+          <p class="card-title">Sound Playground <span class="kor">사운드 놀이터</span></p>
+          <p class="card-desc">Hold one vowel steady and swap consonants through it — 가·나·다·라, back to back.</p>
+        </div>
+        <span class="play">Open ▸</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label tutor">🧑‍🏫 Tutor-led</div>
+  <div class="trail">
+    <a class="stone" href="sound-quiz.html">
+      <div class="card tutor-card t7">
+        <div class="icon">🔊</div>
+        <div class="card-body">
+          <p class="card-title">Sound Quiz <span class="kor">한글 소리 퀴즈</span></p>
+          <p class="card-desc">The tutor types a word and hides a syllable; the child listens and picks the missing piece.</p>
+          <span class="tutor-tag">⌨️ Needs a Korean-typing tutor to run</span>
+        </div>
+        <span class="play">Open ▸</span>
+      </div>
+    </a>
+  </div>
+
+  <footer>
+    Built by Jueun Shin, product manager · Made for my own lessons, not as a commercial product.<br>
+    <a href="https://www.linkedin.com/in/jueunshin09/">LinkedIn</a> · <a href="mailto:shinjueun94@gmail.com">shinjueun94@gmail.com</a> · <a href="index.html">Read the design story</a>
+  </footer>
+
+</div>
+</body>
+</html>
