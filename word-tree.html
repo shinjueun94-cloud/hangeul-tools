@@ -777,7 +777,7 @@ body {
 const PRESET_WORDS = [
   {kor:'엄마',   emoji:'👩', meaning:'mum'},
   {kor:'아빠',   emoji:'👨', meaning:'dad'},
-  {kor:'한나',   emoji:'✨', meaning:'Hannah'},
+  {kor:'유나',   emoji:'✨', meaning:'Yuna'},
   {kor:'밥',     emoji:'🍚', meaning:'rice'},
   {kor:'김',     emoji:'🌿', meaning:'seaweed'},
   {kor:'우유',   emoji:'🥛', meaning:'milk'},
@@ -850,7 +850,7 @@ const JAMO_INFO = {
     {kor:'포도', emoji:'🍇', en:'grape'},  {kor:'파인애플', emoji:'🍍', en:'pineapple'},
   ]},
   'ㅎ': {name:'히읗', nameEn:'hieut', eng:'h', examples:[
-    {kor:'한나', emoji:'✨', en:'Hannah'}, {kor:'해', emoji:'☀️', en:'sun'},
+    {kor:'하마', emoji:'🦛', en:'hippo'}, {kor:'해', emoji:'☀️', en:'sun'},
     {kor:'호랑이', emoji:'🐯', en:'tiger'}, {kor:'하늘', emoji:'☁️', en:'sky'},
   ]},
   'ㄲ': {name:'쌍기역', nameEn:'ssang-giyeok', eng:'kk (strong g)', examples:[
@@ -1142,6 +1142,20 @@ function pickWord(kor) {
   setTimeout(() => speakText(w.kor), 200);
 }
 
+// Called when a word card inside the jamo modal (📚 Words with ㅎ, etc.) is
+// clicked anywhere except its own Listen button. Adds that word to the
+// canvas exactly as if it had been typed/selected from the picker.
+function pickExampleWord(kor, emoji, meaning) {
+  const allWords = [...PRESET_WORDS, ...userWords];
+  if (!allWords.some(w => w.kor === kor)) {
+    userWords.push({kor, emoji, meaning});
+    try { sessionStorage.setItem('treeUserWords', JSON.stringify(userWords)); } catch (e) {}
+    renderPicker();
+  }
+  closeModal();
+  pickWord(kor);
+}
+
 function resetTree() {
   currentWord = null;
   stage = 'word';
@@ -1374,11 +1388,11 @@ function openJamoModal(jamo, type) {
         // Highlight the jamo in the example word
         const highlighted = highlightJamoInWord(ex.kor, jamo);
         return `
-          <div class="example-card">
+          <div class="example-card" onclick="pickExampleWord('${escapeHtml(ex.kor)}', '${escapeHtml(ex.emoji)}', '${escapeHtml(ex.en)}')">
             <span class="example-card-emoji">${ex.emoji}</span>
             <div class="example-card-kor">${highlighted}</div>
             <div class="example-card-en">${ex.en}</div>
-            <button class="example-card-listen" onclick="speakText('${escapeHtml(ex.kor)}')">🔊 Listen</button>
+            <button class="example-card-listen" onclick="event.stopPropagation();speakText('${escapeHtml(ex.kor)}')">🔊 Listen</button>
           </div>
         `;
       }).join('')}

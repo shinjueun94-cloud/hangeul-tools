@@ -582,12 +582,12 @@ const SCENARIOS = [
     subtitle: 'Chat with 너굴 (Tom Nook) and 여울 (Isabelle)!',
     turns: [
       { role:'npc',  name:'너굴', avatar:'🦝', ko:'안녕! 나는 너굴이야.', rom:'an-nyeong! na-neun neo-gu-ri-ya.', en:"Hi! I'm Tom Nook." },
-      { role:'user', ko:'안녕! 나는 한나야.', rom:'an-nyeong! na-neun han-na-ya.', en:"Hi! I'm Hannah.",
+      { role:'user', ko:'안녕! 나는 유나야.', rom:'an-nyeong! na-neun yu-na-ya.', en:"Hi! I'm Yuna.",
         alternatives:[
           {ko:'안녕히 계세요.', rom:'an-nyeong-hi gye-se-yo.', en:'Goodbye (formal).'},
           {ko:'배고파!', rom:'bae-go-pa!', en:"I'm hungry!"},
         ] },
-      { role:'npc',  name:'너굴', avatar:'🦝', ko:'만나서 반가워, 한나!', rom:'man-na-seo ban-ga-wo, han-na!', en:'Nice to meet you, Hannah!' },
+      { role:'npc',  name:'너굴', avatar:'🦝', ko:'만나서 반가워, 유나!', rom:'man-na-seo ban-ga-wo, yu-na!', en:'Nice to meet you, Yuna!' },
       { role:'user', ko:'나도 반가워!', rom:'na-do ban-ga-wo!', en:'Nice to meet you too!',
         alternatives:[
           {ko:'싫어!', rom:'si-reo!', en:"I don't like it!"},
@@ -610,7 +610,7 @@ const SCENARIOS = [
     emoji: '🎂',
     subtitle: 'Celebrate a birthday with friends!',
     turns: [
-      { role:'npc',  name:'엄마', avatar:'👩', ko:'한나야, 생일 축하해!', rom:'han-na-ya, saeng-il chuk-ha-hae!', en:'Hannah, happy birthday!' },
+      { role:'npc',  name:'엄마', avatar:'👩', ko:'유나야, 생일 축하해!', rom:'yu-na-ya, saeng-il chuk-ha-hae!', en:'Yuna, happy birthday!' },
       { role:'user', ko:'고마워, 엄마!', rom:'go-ma-wo, eom-ma!', en:'Thank you, mum!',
         alternatives:[
           {ko:'싫어!', rom:'si-reo!', en:"I don't like it!"},
@@ -646,7 +646,7 @@ const SCENARIOS = [
           {ko:'아니요.', rom:'a-ni-yo.', en:'No.'},
         ] },
       { role:'npc',  name:'친구', avatar:'👧', ko:'이름이 뭐야?', rom:'i-reum-i mwo-ya?', en:"What's your name?" },
-      { role:'user', ko:'나는 한나야. 너는?', rom:'na-neun han-na-ya. neo-neun?', en:"I'm Hannah. You?",
+      { role:'user', ko:'나는 유나야. 너는?', rom:'na-neun yu-na-ya. neo-neun?', en:"I'm Yuna. You?",
         alternatives:[
           {ko:'배고파.', rom:'bae-go-pa.', en:"I'm hungry."},
           {ko:'싫어.', rom:'si-reo.', en:"I don't like it."},
@@ -697,7 +697,7 @@ const SCENARIOS = [
     emoji: '🏠',
     subtitle: 'Morning greetings and asking mum & dad for things!',
     turns: [
-      { role:'npc',  name:'엄마', avatar:'👩', ko:'한나야, 일어나!', rom:'han-na-ya, i-reo-na!', en:'Hannah, wake up!' },
+      { role:'npc',  name:'엄마', avatar:'👩', ko:'유나야, 일어나!', rom:'yu-na-ya, i-reo-na!', en:'Yuna, wake up!' },
       { role:'user', ko:'네, 엄마!', rom:'ne, eom-ma!', en:'Yes, mum!',
         alternatives:[
           {ko:'싫어!', rom:'si-reo!', en:"I don't want to!"},
@@ -914,7 +914,7 @@ function appendUserMessage(turn) {
   msg.innerHTML = `
     <div class="message-avatar">👧</div>
     <div class="message-bubble">
-      <div class="name">You  한나</div>
+      <div class="name">You  유나</div>
       <div class="text-ko">${escapeHtml(turn.ko)}</div>
       <div class="actions">
         <button class="msg-btn" onclick="speakText('${escapeAttr(turn.ko)}')">🔊 Listen</button>
@@ -1093,7 +1093,7 @@ function showCompletion() {
   chat.innerHTML = `
     <div class="completion-view">
       <div class="completion-emoji">🎉</div>
-      <div class="completion-title">Well done, Hannah!</div>
+      <div class="completion-title">Well done, Yuna!</div>
       <div class="completion-subtitle">You finished the "${currentScenario.title}" conversation!</div>
       <div class="completion-stars">${stars}</div>
       <div style="font-size:12px;color:#888;margin-bottom:22px;">

@@ -313,7 +313,7 @@ const JAMO_INFO = {
     {kor:'김',emoji:'🌿',en:'seaweed'},{kor:'김밥',emoji:'🍙',en:'kimbap'}]},
   'ㄴ':{name:'니은', nameEn:'nieun', eng:'n', examples:[
     {kor:'눈',emoji:'❄️',en:'eye / snow'},{kor:'나비',emoji:'🦋',en:'butterfly'},{kor:'너구리',emoji:'🦝',en:'raccoon'},
-    {kor:'노래',emoji:'🎵',en:'song'},{kor:'한나',emoji:'✨',en:'Hannah!'}]},
+    {kor:'노래',emoji:'🎵',en:'song'},{kor:'누나',emoji:'👧',en:'older sister'}]},
   'ㄷ':{name:'디귿', nameEn:'digeut', eng:'d / t', examples:[
     {kor:'달',emoji:'🌙',en:'moon'},{kor:'다리',emoji:'🦵',en:'leg'},{kor:'돼지',emoji:'🐷',en:'pig'},
     {kor:'도넛',emoji:'🍩',en:'donut'},{kor:'도토리',emoji:'🌰',en:'acorn (AC bells!)'}]},
@@ -348,7 +348,7 @@ const JAMO_INFO = {
     {kor:'피자',emoji:'🍕',en:'pizza'},{kor:'팥',emoji:'🫘',en:'red bean'},{kor:'포도',emoji:'🍇',en:'grape'},
     {kor:'파인애플',emoji:'🍍',en:'pineapple'},{kor:'피아노',emoji:'🎹',en:'piano'}]},
   'ㅎ':{name:'히읗', nameEn:'hieut', eng:'h', examples:[
-    {kor:'한나',emoji:'✨',en:'Hannah!'},{kor:'해',emoji:'☀️',en:'sun'},{kor:'호랑이',emoji:'🐯',en:'tiger'},
+    {kor:'하마',emoji:'🦛',en:'hippo'},{kor:'해',emoji:'☀️',en:'sun'},{kor:'호랑이',emoji:'🐯',en:'tiger'},
     {kor:'하늘',emoji:'☁️',en:'sky'},{kor:'호박',emoji:'🎃',en:'pumpkin'}]},
   'ㄲ':{name:'쌍기역', nameEn:'ssang-giyeok', eng:'kk (strong g)', examples:[
     {kor:'꽃',emoji:'🌸',en:'flower'},{kor:'꿀',emoji:'🍯',en:'honey'},{kor:'꿈',emoji:'💭',en:'dream'},
@@ -1101,7 +1101,7 @@ function renderCelebrate(letterId){
   return topBar() +
     '<div class="celebrate"><div class="big">Great job!</div>' +
     '<h2 style="margin:10px 0 4px;">You learned <span class="kor">' + letterId + '</span> today!</h2>' +
-    '<p style="color:var(--yellow); font-style:italic;">대단해, 한나! You found ' + info.name + ' in real words.</p>' +
+    '<p style="color:var(--yellow); font-style:italic;">대단해, 유나! You found ' + info.name + ' in real words.</p>' +
     '<div class="chipsRow">' + info.examples.map(w => '<div class="wordChip">' + w.kor + '</div>').join("") + '</div>' +
     '<div style="margin-top:24px;"><button class="navBtn" onclick="goHome()">Pick another letter</button></div>' +
     '</div>';
