@@ -139,6 +139,55 @@
   .caveat{background:var(--card);border-left:3px solid var(--jung);padding:20px 22px;font-size:15px}
   .caveat p{margin:0} .caveat p + p{margin-top:10px}
 
+  /* ---- Trail-style tool cards (ported from tools.html) ----
+     Used only inside #tools, in place of the plain .tools grid,
+     so the tool list keeps its own colorful, game-like identity. */
+  .kor{font-family:var(--kr);}
+  .section-label{display:flex;align-items:center;gap:12px;margin:30px 0 14px;
+    font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-soft)}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--rule)}
+  .section-label.tutor{color:#C08A3E;margin-top:40px}
+  .section-label.tutor::after{background:#F3DDB0}
+  .trail{display:flex;flex-direction:column;gap:14px}
+  .stone{position:relative;text-decoration:none;display:block}
+  .badge{position:absolute;top:50%;left:-14px;transform:translateY(-50%);
+    width:30px;height:30px;border-radius:50%;background:#fff;border:2.5px solid #C77DFF;
+    color:#C77DFF;font-family:var(--mono);font-weight:800;font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 8px rgba(199,125,255,.25);z-index:2}
+  .trailcard{background:#fff;border-radius:18px;padding:18px 20px 18px 34px;
+    box-shadow:0 3px 14px rgba(0,0,0,.07);display:flex;align-items:center;gap:16px;
+    transition:transform .15s ease,box-shadow .15s ease}
+  .trailcard:hover,.trailcard:focus-visible{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.12)}
+  .trailcard:focus-visible{outline:3px solid #C77DFF;outline-offset:2px}
+  .trail-icon{flex:none;width:52px;height:52px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff}
+  .trail-body{min-width:0}
+  .trail-title{font-family:var(--body);font-size:16px;font-weight:800;
+    display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;color:var(--ink)}
+  .trail-title .kor{font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+  .trail-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin-top:3px}
+  .trail-play{flex:none;font-family:var(--mono);font-size:11.5px;font-weight:700;color:#fff;
+    padding:7px 13px;border-radius:999px;white-space:nowrap;min-width:74px;
+    text-align:center;margin-left:auto}
+  .tr1 .trail-icon,.tr1 .trail-play{background:linear-gradient(135deg,#C77DFF,#B47EFF)}
+  .tr2 .trail-icon,.tr2 .trail-play{background:linear-gradient(135deg,#FF6B9D,#FF8FA3)}
+  .tr3 .trail-icon,.tr3 .trail-play{background:linear-gradient(135deg,#4D96FF,#6BCFFF)}
+  .tr4 .trail-icon,.tr4 .trail-play{background:linear-gradient(135deg,#6BCB77,#4ECDC4)}
+  .tr5 .trail-icon,.tr5 .trail-play{background:linear-gradient(135deg,#FFD93D,#FFA500)}
+  .tr6 .trail-icon,.tr6 .trail-play{background:linear-gradient(135deg,#FF6B6B,#FF8E53)}
+  .tr7 .trail-icon,.tr7 .trail-play{background:linear-gradient(135deg,#94A3B8,#64748B)}
+  .tutor-trailcard{padding-left:20px}
+  .tutor-tag{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);
+    font-size:11px;font-weight:700;color:#C08A3E;background:#FDF3E1;
+    padding:4px 10px;border-radius:999px;margin-top:6px}
+  @media (max-width:480px){
+    .trailcard{flex-wrap:wrap;padding:16px 16px 16px 30px}
+    .trail-play{margin-left:68px}
+  }
+  @media (prefers-reduced-motion:reduce){ .trailcard{transition:none} }
+
   footer{border-top:1px solid var(--rule);padding:44px 0 68px;font-size:15px;color:var(--ink-soft)}
   footer a{text-decoration:none;border-bottom:1px solid var(--rule);color:var(--ink)}
   footer a:hover{border-bottom-color:var(--ink)}
@@ -234,56 +283,95 @@
     <p class="eyebrow">The seven</p>
     <h2>Each one opens in a browser tab. Nothing to install.</h2>
 
-    <div class="tools">
-      <a class="tool flagship" href="letter-lab.html">
-        <span class="tag"><i class="dot d-cho"></i><i class="dot d-jung"></i><i class="dot d-jong"></i> Start here · full lesson</span>
-        <h3>Hangeul Letter Lab</h3>
-        <p>The most complete of the seven. One letter taken through six stages: spot it, hear it, meet it, build a syllable with it, grow that syllable into words, then read the words back. It's the whole arc of one lesson in a single screen, and building it is what made the other six make sense as separate drills.</p>
-        <span class="open">Open Letter Lab →</span>
+    <div class="section-label">Start here</div>
+    <div class="trail">
+
+      <a class="stone" href="word-tree.html">
+        <span class="badge">1</span>
+        <div class="trailcard tr1">
+          <div class="trail-icon">🌳</div>
+          <div class="trail-body">
+            <p class="trail-title">Word Tree <span class="kor">단어 나무</span></p>
+            <p class="trail-desc">Type or select a word. Watch it branch into syllables, then into individual letters, each one expandable.</p>
+          </div>
+          <span class="trail-play">Open ▸</span>
+        </div>
       </a>
+
+      <a class="stone" href="word-explorer.html">
+        <span class="badge">2</span>
+        <div class="trailcard tr2">
+          <div class="trail-icon">🔍</div>
+          <div class="trail-body">
+            <p class="trail-title">Word Explorer <span class="kor">한글 단어 탐험</span></p>
+            <p class="trail-desc">The reverse of Word Tree. Rebuild a familiar word from shuffled syllable blocks, one at a time.</p>
+          </div>
+          <span class="trail-play">Open ▸</span>
+        </div>
+      </a>
+
+      <a class="stone" href="letter-lab.html">
+        <span class="badge">3</span>
+        <div class="trailcard tr3">
+          <div class="trail-icon">🔤</div>
+          <div class="trail-body">
+            <p class="trail-title">Letter Lab</p>
+            <p class="trail-desc">One letter, six stages: spot it, hear it, meet it, build a syllable with it, grow that into words, then read them back.</p>
+          </div>
+          <span class="trail-play">Open ▸</span>
+        </div>
+      </a>
+
+      <a class="stone" href="lego-blocks.html">
+        <span class="badge">4</span>
+        <div class="trailcard tr6">
+          <div class="trail-icon">🧱</div>
+          <div class="trail-body">
+            <p class="trail-title">Korean LEGO Blocks <span class="kor">한글 블록 빌더</span></p>
+            <p class="trail-desc">Drag consonants and vowels into a syllable frame. It enforces the real rules, and explains why.</p>
+          </div>
+          <span class="trail-play">Open ▸</span>
+        </div>
+      </a>
+
+      <a class="stone" href="dialogue.html">
+        <span class="badge">5</span>
+        <div class="trailcard tr4">
+          <div class="trail-icon">💬</div>
+          <div class="trail-body">
+            <p class="trail-title">Let's Talk <span class="kor">대화 연습</span></p>
+            <p class="trail-desc">Situational conversation practice: read along with hints, or answer cold. This is where the letters finally get used.</p>
+          </div>
+          <span class="trail-play">Open ▸</span>
+        </div>
+      </a>
+
+      <a class="stone" href="sound-playground.html">
+        <span class="badge">6</span>
+        <div class="trailcard tr5">
+          <div class="trail-icon">🎵</div>
+          <div class="trail-body">
+            <p class="trail-title">Sound Playground <span class="kor">사운드 놀이터</span></p>
+            <p class="trail-desc">Hold one vowel steady and swap consonants through it. Hear 가·나·다·라 back to back.</p>
+          </div>
+          <span class="trail-play">Open ▸</span>
+        </div>
+      </a>
+
     </div>
 
-    <p class="grouplabel">Word first: the direction I moved to</p>
-    <div class="tools">
-      <a class="tool" href="word-tree.html">
-        <span class="tag"><i class="dot d-jong"></i> Take it apart</span>
-        <h3>Word Tree</h3>
-        <p>Type any word and it branches: word → syllables → individual letters, each one expandable. Built for the moment a child asks why this one sounds different.</p>
-        <span class="open">Open →</span>
-      </a>
-      <a class="tool" href="word-explorer.html">
-        <span class="tag"><i class="dot d-jong"></i> Put it back</span>
-        <h3>Word Explorer <span class="ko">한글 단어 탐험</span></h3>
-        <p>The reverse of Word Tree. A familiar word is broken into shuffled blocks and rebuilt one syllable at a time. The final-consonant slot only appears where the word actually has one, so she isn't left guessing at the shape.</p>
-        <span class="open">Open →</span>
-      </a>
-      <a class="tool" href="sound-quiz.html">
-        <span class="tag"><i class="dot d-jung"></i> Listening</span>
-        <h3>Sound Quiz <span class="ko">한글 소리 퀴즈</span></h3>
-        <p>I type a word and choose which syllables to hide; she hears it and picks the missing piece. Choosing what to hide is the lesson plan, so that control stays with the teacher.</p>
-        <span class="open">Open →</span>
-      </a>
-      <a class="tool" href="dialogue.html">
-        <span class="tag"><i class="dot d-cho"></i> Speaking</span>
-        <h3>Let's Talk <span class="ko">대화 연습</span></h3>
-        <p>Situational conversation practice with two modes: read along with hints, or answer cold. The one tool here that isn't about letters. It's where the letters end up.</p>
-        <span class="open">Open →</span>
-      </a>
-    </div>
-
-    <p class="grouplabel">Letters first: where I started</p>
-    <div class="tools">
-      <a class="tool" href="sound-playground.html">
-        <span class="tag"><i class="dot d-cho"></i> Listening</span>
-        <h3>Sound Playground <span class="ko">가나다 사운드 놀이터</span></h3>
-        <p>Hold one vowel steady and swap consonants through it. Hearing 가·나·다·라 back to back makes the pattern audible rather than theoretical.</p>
-        <span class="open">Open →</span>
-      </a>
-      <a class="tool" href="lego-blocks.html">
-        <span class="tag"><i class="dot d-jung"></i> Building</span>
-        <h3>Korean LEGO Blocks <span class="ko">한글 블록 빌더</span></h3>
-        <p>The builder I made first. Drag consonants and vowels into a syllable frame; it enforces the real rules, so ㄸ, ㅃ and ㅉ can't sit in the final slot and it says why rather than just refusing. Good once she knows some letters, useless before that.</p>
-        <span class="open">Open →</span>
+    <div class="section-label tutor">🧑‍🏫 Tutor-led</div>
+    <div class="trail">
+      <a class="stone" href="sound-quiz.html">
+        <div class="trailcard tutor-trailcard tr7">
+          <div class="trail-icon">🔊</div>
+          <div class="trail-body">
+            <p class="trail-title">Sound Quiz <span class="kor">한글 소리 퀴즈</span></p>
+            <p class="trail-desc">The tutor types a word and hides a syllable; the child listens and picks the missing piece.</p>
+            <span class="tutor-tag">⌨️ Needs a Korean-typing tutor to run</span>
+          </div>
+          <span class="trail-play">Open ▸</span>
+        </div>
       </a>
     </div>
   </section>
@@ -313,8 +401,6 @@
     <div class="flinks">
       <a href="https://www.linkedin.com/in/jueunshin09/">LinkedIn</a>
       <a href="mailto:shinjueun94@gmail.com">shinjueun94@gmail.com</a>
-      <a href="letter-lab.html">Start with Letter Lab</a>
-      <a href="tools.html">→ Try the tools</a>
     </div>
   </div>
 </footer>
