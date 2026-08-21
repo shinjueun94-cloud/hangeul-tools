@@ -149,6 +149,40 @@
   .jamoSlot.target{outline:3px solid var(--gold); outline-offset:-3px;}
   .starTag{position:absolute; top:2px; right:2px; font-size:0.8rem; line-height:1;}
 
+  /* Jamo detail modal — ported directly from the standalone Word Tree
+     tool (word-tree.html) so "tap a letter" looks and reads identically
+     in both places. Example-card click-to-canvas is intentionally NOT
+     wired here (Letter Lab has no canvas); only Listen stays live. */
+  .modal-jamo{display:flex; gap:22px; align-items:center; padding-bottom:18px; border-bottom:2px solid #F0F0F0; margin-bottom:18px;}
+  .modal-big-jamo{width:110px; height:110px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-family:'Malgun Gothic',sans-serif; font-size:70px; font-weight:700; color:#fff; flex-shrink:0; position:relative; box-shadow:0 6px 16px rgba(0,0,0,.2);}
+  .modal-big-jamo.consonant{background:var(--red);}
+  .modal-big-jamo.vowel{background:var(--blue);}
+  .modal-big-jamo.batchim{background:var(--green);}
+  .modal-big-jamo::before, .modal-big-jamo::after{content:''; position:absolute; top:10px; width:18px; height:18px; border-radius:50%; background:rgba(255,255,255,.5);}
+  .modal-big-jamo::before{left:30%; transform:translateX(-50%);}
+  .modal-big-jamo::after{right:30%; transform:translateX(50%);}
+  .modal-jamo-info{flex:1;}
+  .modal-jamo-type{display:inline-block; background:#F0F0F0; color:#666; padding:3px 10px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;}
+  .modal-jamo-type.consonant{background:#FFE5E5; color:#CC3333;}
+  .modal-jamo-type.vowel{background:#E5EEFF; color:#2B5FB8;}
+  .modal-jamo-type.batchim{background:#E5F5E5; color:#2D8033;}
+  .modal-jamo-name{font-size:26px; font-weight:700; color:#2D2D2D; font-family:'Malgun Gothic',sans-serif; margin-bottom:2px;}
+  .modal-jamo-name-en{font-size:15px; font-style:italic; color:#888; margin-bottom:10px;}
+  .modal-jamo-sound{display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#FFD93D 0%, #FFA500 100%); padding:8px 14px; border-radius:12px; font-weight:700; font-size:15px; color:#2D2D2D;}
+  .modal-jamo-sound .english-letter{font-size:20px; background:#fff; padding:2px 10px; border-radius:8px; margin-right:2px;}
+  .modal-section-label{font-size:12px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px;}
+  .modal-examples{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px;}
+  .example-card{background:linear-gradient(135deg,#FFF8FF 0%, #FFFFFF 100%); border:2px solid #E8D0FF; border-radius:12px; padding:12px 8px; text-align:center; cursor:default; transition:all .15s ease;}
+  .example-card-emoji{font-size:30px; display:block; margin-bottom:4px;}
+  .example-card-kor{font-family:'Malgun Gothic',sans-serif; font-size:18px; font-weight:700; color:#2D2D2D; margin-bottom:2px;}
+  .example-card-kor .highlight{color:var(--red); background:#FFF0F0; border-radius:3px; padding:0 2px;}
+  .example-card-kor .highlight.vowel{color:var(--blue); background:#F0F6FF;}
+  .example-card-kor .highlight.batchim{color:#2D8033; background:#E5F5E5;}
+  .example-card-en{font-size:11px; color:#888; font-style:italic; margin-bottom:4px;}
+  .example-card-listen{background:linear-gradient(135deg,#C77DFF 0%, #FF6B6B 100%); color:#fff; border:none; padding:3px 9px; border-radius:10px; font-size:10px; font-weight:700; cursor:pointer; font-family:inherit;}
+  .modal-close{position:absolute; top:14px; right:14px; width:36px; height:36px; border:none; background:#F0F0F0; border-radius:50%; font-size:22px; cursor:pointer; color:#888; display:flex; align-items:center; justify-content:center; font-family:inherit; transition:all .15s;}
+  .modal-close:hover{background:var(--red); color:#fff;}
+
   .buildStage{display:flex; align-items:center; justify-content:center; gap:18px; margin:20px 0; flex-wrap:wrap;}
   .composedReadout{text-align:center; min-width:140px;}
   .composedReadout .syl{font-size:3.2rem; font-weight:800; color:var(--ink); font-family:'Malgun Gothic',sans-serif; min-height:60px;}
@@ -186,6 +220,29 @@
   .sylCard{background:linear-gradient(135deg,#FFFDE0 0%, #FFF8C0 100%); border:3px solid var(--yellow); border-radius:16px; padding:10px 16px; text-align:center; cursor:pointer; min-width:100px;}
   .sylCard .kor{font-family:'Malgun Gothic',sans-serif; font-size:1.8rem; font-weight:800;}
   .sylJamoConnector{width:2px; height:14px; background:var(--yellow); margin:0 auto;}
+
+  /* Word Tree step — jamo breakdown, ported from the standalone Word Tree
+     tool so both places look and behave identically. Fixed pixel sizes
+     per layout (not JS-computed) so it never squashes or misaligns. */
+  .wt-jamo-connector{width:3px; height:22px; background:#FFA500; border-radius:2px; margin:0 auto;}
+  .wt-jamo-frame{display:flex; flex-direction:column; gap:6px; padding:10px; background:rgba(0,0,0,.03); border-radius:14px; border:2px dashed #ddd; width:fit-content; margin:0 auto; animation:fadeInUp .4s ease;}
+  .wt-sj-top{display:flex; gap:6px;}
+  .wt-jamo-frame.layout-side .wt-sj-top{flex-direction:row;}
+  .wt-jamo-frame.layout-side .wt-sj-top .wt-jamo-block{width:60px; height:110px;}
+  .wt-jamo-frame.layout-stack .wt-sj-top{flex-direction:column;}
+  .wt-jamo-frame.layout-stack .wt-sj-top .wt-jamo-block{width:126px; height:52px;}
+  .wt-sj-bottom{display:flex;}
+  .wt-sj-bottom .wt-jamo-block{flex:1; height:56px; width:auto;}
+  .wt-jamo-block{border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Malgun Gothic',sans-serif; font-size:30px; font-weight:700; color:#fff; cursor:pointer; transition:all .15s ease; position:relative; box-shadow:0 4px 8px rgba(0,0,0,.2);}
+  .wt-jamo-block.consonant{background:var(--red);}
+  .wt-jamo-block.vowel{background:var(--blue);}
+  .wt-jamo-block.batchim{background:var(--green);}
+  .wt-jamo-block::before, .wt-jamo-block::after{content:''; position:absolute; top:5px; width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.5); pointer-events:none;}
+  .wt-jamo-block::before{left:30%; transform:translateX(-50%);}
+  .wt-jamo-block::after{right:30%; transform:translateX(50%);}
+  .wt-jamo-block:hover{transform:translateY(-3px) scale(1.04); box-shadow:0 8px 14px rgba(0,0,0,.28); z-index:2;}
+  .wt-jamo-block.target{outline:3px solid var(--gold); outline-offset:-3px;}
+  .wt-star-tag{position:absolute; top:2px; right:4px; font-size:0.8rem; line-height:1;}
 
   .matchWrap{display:flex; gap:24px; justify-content:center; flex-wrap:wrap;}
   .matchCol{display:flex; flex-direction:column; gap:9px;}
@@ -659,23 +716,55 @@ function renderJamoInfoModal(){
   if(!state.jamoInfoOpen || !state.jamoInfoChar) return '';
   const jamo = state.jamoInfoChar;
   const info = JAMO_INFO[jamo];
-  const isC = INITIALS.includes(jamo);
-  const color = isC ? 'var(--red)' : (MEDIALS.includes(jamo) ? 'var(--blue)' : 'var(--green)');
   if(!info){
-    return '<div class="modalOverlay show" onclick="closeJamoInfoIfBackdrop(event)"><div class="customizeModal" style="max-width:360px; text-align:center;">' +
-      '<div class="letterBig kor" style="font-size:3.5rem; font-weight:800; color:var(--green);">' + jamo + '</div>' +
-      '<p style="color:var(--muted); margin-top:10px;">Part of a compound batchim (받침) cluster — a combo of two final consonants.</p>' +
-      '<div style="text-align:center; margin-top:10px;"><button class="modalCloseBtn" onclick="closeJamoInfo()">Close</button></div>' +
+    return '<div class="modalOverlay show" onclick="closeJamoInfoIfBackdrop(event)"><div class="customizeModal" style="max-width:360px; text-align:center; position:relative;">' +
+      '<button class="modal-close" onclick="closeJamoInfo()">\u00d7</button>' +
+      '<div class="letterBig kor" style="font-size:3.5rem; font-weight:800; color:var(--green); margin-top:10px;">' + jamo + '</div>' +
+      '<p style="color:var(--muted); margin-top:10px;">Part of a compound batchim (\ubc1b\uce68) cluster \u2014 a combo of two final consonants.</p>' +
       '</div></div>';
   }
-  const exWords = info.examples.slice(0,3).map(w => '<span style="display:inline-block;margin:3px 6px;">' + w.emoji + ' <span class="kor">' + w.kor + '</span></span>').join('');
-  return '<div class="modalOverlay show" onclick="closeJamoInfoIfBackdrop(event)"><div class="customizeModal" style="max-width:380px; text-align:center;">' +
-    '<div class="letterBig kor" style="font-size:3.5rem; font-weight:800; color:' + color + ';">' + jamo + '</div>' +
-    '<div style="color:var(--muted); margin-top:4px;">' + info.name + ' &middot; ' + info.nameEn + '</div>' +
-    '<div style="color:var(--purple); font-weight:700; margin-top:8px;">' + info.eng + '</div>' +
-    '<div style="margin-top:14px; font-size:0.85rem;">' + exWords + '</div>' +
-    '<div style="text-align:center; margin-top:16px;"><button class="modalCloseBtn" onclick="closeJamoInfo()">Close</button></div>' +
+  const type = INITIALS.includes(jamo) ? 'consonant' : (MEDIALS.includes(jamo) ? 'vowel' : 'batchim');
+  const typeLabel = type === 'consonant' ? 'Consonant \uc790\uc74c' : (type === 'vowel' ? 'Vowel \ubaa8\uc74c' : 'Ending \ubc1b\uce68');
+
+  const examplesHTML = info.examples.map(ex => {
+    const highlighted = highlightJamoInWord(ex.kor, jamo);
+    return '' +
+      '<div class="example-card">' +
+        '<span class="example-card-emoji">' + ex.emoji + '</span>' +
+        '<div class="example-card-kor">' + highlighted + '</div>' +
+        '<div class="example-card-en">' + ex.en + '</div>' +
+        '<button class="example-card-listen" onclick="speakWord(\'' + ex.kor + '\')">\ud83d\udd0a Listen</button>' +
+      '</div>';
+  }).join('');
+
+  return '<div class="modalOverlay show" onclick="closeJamoInfoIfBackdrop(event)"><div class="customizeModal" style="max-width:640px; position:relative;">' +
+    '<button class="modal-close" onclick="closeJamoInfo()">\u00d7</button>' +
+    '<div class="modal-jamo">' +
+      '<div class="modal-big-jamo ' + type + '">' + jamo + '</div>' +
+      '<div class="modal-jamo-info">' +
+        '<div class="modal-jamo-type ' + type + '">' + typeLabel + '</div>' +
+        '<div class="modal-jamo-name">' + info.name + '</div>' +
+        '<div class="modal-jamo-name-en">' + info.nameEn + '</div>' +
+        '<div class="modal-jamo-sound">Sounds like <span class="english-letter">' + info.eng + '</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="modal-section-label">\ud83d\udcda Words with ' + jamo + '</div>' +
+    '<div class="modal-examples">' + examplesHTML + '</div>' +
     '</div></div>';
+}
+
+// Highlights the target jamo inside a word, matching the standalone
+// Word Tree tool's coloring (red = consonant, blue = vowel, green = batchim).
+function highlightJamoInWord(word, targetJamo){
+  const syls = decomposeWord(word);
+  return syls.map(syl => {
+    if(syl.initial === targetJamo || syl.medial === targetJamo || syl.final === targetJamo){
+      const cls = (INITIALS.includes(targetJamo) && syl.initial === targetJamo) ? 'highlight' :
+                  (MEDIALS.includes(targetJamo) ? 'highlight vowel' : 'highlight batchim');
+      return '<span class="' + cls + '">' + syl.char + '</span>';
+    }
+    return syl.char;
+  }).join('');
 }
 
 /* ============================================================
@@ -921,6 +1010,31 @@ function tryBuild(partnerChar){
 /* ============================================================
    STEP 5 — WORD TREE
    ============================================================ */
+// Renders one syllable's jamo breakdown using the same fixed-size,
+// CSS-driven layout as the standalone Word Tree tool (word-tree.html),
+// instead of jamoUnitHTML's JS-computed sizing (which is shared with
+// Step 4's drag-and-drop builder and sized for that purpose, not this one).
+function renderWordTreeJamos(syl, targetLetter){
+  const HORIZONTAL_VOWELS_WT = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];
+  const isHorizontal = HORIZONTAL_VOWELS_WT.includes(syl.medial);
+  const hasFinal = !!syl.final;
+  const layoutClass = isHorizontal ? 'layout-stack' : 'layout-side';
+
+  function block(jamo, type){
+    const isTarget = jamo === targetLetter;
+    return '<div class="wt-jamo-block ' + type + (isTarget ? ' target' : '') + '" onclick="event.stopPropagation();showJamoInfo(\'' + jamo + '\')">' +
+      jamo + (isTarget ? '<span class="wt-star-tag">\u2b50</span>' : '') + '</div>';
+  }
+
+  let html = '<div class="wt-jamo-connector"></div>';
+  html += '<div class="wt-jamo-frame ' + layoutClass + '">';
+  html += '<div class="wt-sj-top">' + block(syl.initial, 'consonant') + block(syl.medial, 'vowel') + '</div>';
+  if(hasFinal){
+    html += '<div class="wt-sj-bottom">' + block(syl.final, 'batchim') + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
 function renderStep5(letterId){
   const info = JAMO_INFO[letterId];
   const words = info.examples;
@@ -937,16 +1051,12 @@ function renderStep5(letterId){
     body += '<div class="breakRow"><button class="breakBtn" onclick="toggleTreeStage()">Break into ' + (syllables.length===1?'letters':'syllables') + '!</button></div>';
   } else {
     body += '<div class="breakRow"><button class="breakBtn collapse" onclick="toggleTreeStage()">Hide syllables</button></div>';
-    body += '<div class="connectorArea"><svg viewBox="0 0 1000 26" preserveAspectRatio="none">' +
-      syllables.map((_,i) => {
-        const x = (i+0.5) * (1000/syllables.length);
-        return '<line x1="500" y1="0" x2="' + x + '" y2="26" stroke="#C77DFF" stroke-width="3" stroke-linecap="round"/>';
-      }).join('') + '</svg></div>';
+    body += '<div class="connectorArea" id="sylConnectorArea"><svg viewBox="0 0 1000 26" preserveAspectRatio="none"></svg></div>';
     body += '<div class="sylRow">';
     syllables.forEach((syl, si) => {
       const expanded = state.tree.expandedSyl.has(si);
       body += '<div class="sylWrap"><div class="sylCard" onclick="toggleSylExpand(' + si + ')"><div class="kor">' + syl.char + '</div></div>' +
-        (expanded ? '<div class="sylJamoConnector"></div><div class="jamoGroupWrap">' + jamoUnitHTML(104, syl.initial, syl.medial, syl.final, letterId, null, true) + '</div>' : '') +
+        (expanded ? renderWordTreeJamos(syl, letterId) : '') +
         '</div>';
     });
     body += '</div>';
@@ -974,6 +1084,28 @@ function toggleTreeStage(){
   state.tree.stage = state.tree.stage === 'word' ? 'broken' : 'word';
   state.tree.expandedSyl = new Set();
   render();
+}
+// Word/syllable cards aren't fixed-width (they size to their own text),
+// and the row is centered with gaps rather than evenly split across the
+// full row width. A ratio-based SVG line (x = i/count * width) only lines
+// up by coincidence. This measures the *actual* rendered position of each
+// syllable card and draws the line straight to its real center instead.
+function alignSylConnectors(){
+  const area = document.getElementById('sylConnectorArea');
+  if(!area) return;
+  const svg = area.querySelector('svg');
+  const cards = document.querySelectorAll('.sylRow .sylCard');
+  if(!svg || !cards.length) return;
+  const areaRect = area.getBoundingClientRect();
+  const w = Math.max(1, Math.round(areaRect.width));
+  svg.setAttribute('viewBox', '0 0 ' + w + ' 26');
+  let lines = '';
+  cards.forEach(card => {
+    const r = card.getBoundingClientRect();
+    const x = (r.left + r.width / 2) - areaRect.left;
+    lines += '<line x1="' + (w/2) + '" y1="0" x2="' + x.toFixed(1) + '" y2="26" stroke="#C77DFF" stroke-width="3" stroke-linecap="round"/>';
+  });
+  svg.innerHTML = lines;
 }
 function toggleSylExpand(si){
   if(state.tree.expandedSyl.has(si)) state.tree.expandedSyl.delete(si);
@@ -1134,9 +1266,17 @@ function render(){
     default: html = renderCelebrate(letterId); break;
   }
   app.innerHTML = html + renderCustomizeModal() + renderJamoInfoModal();
+  if(state.screen === 'flow' && state.step === 5 && state.tree.stage === 'broken'){
+    requestAnimationFrame(alignSylConnectors);
+  }
 }
 render();
 loadOverridesFromStorage();
+window.addEventListener('resize', () => {
+  if(state.screen === 'flow' && state.step === 5 && state.tree.stage === 'broken'){
+    alignSylConnectors();
+  }
+});
 </script>
 </body>
 </html>
